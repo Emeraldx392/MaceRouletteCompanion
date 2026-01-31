@@ -1,3 +1,4 @@
+import net.fabricmc.loom.configuration.providers.minecraft.MinecraftSourceSets
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -24,12 +25,9 @@ java {
 }
 
 loom {
-    splitEnvironmentSourceSets()
-
     mods {
         register("macecompanion") {
             sourceSet("main")
-            sourceSet("client")
         }
     }
 }

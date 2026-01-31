@@ -15,24 +15,17 @@
   "environment": "client",
   "entrypoints": {
     "fabric-datagen": [
-      "moe.pxe.macecompanion.client.MaceCompanionDataGenerator"
-    ],
-    "client": [
-      "moe.pxe.macecompanion.client.MaceCompanionClient"
+      "moe.pxe.macecompanion.MaceCompanionDataGenerator"
     ],
     "main": [
       "moe.pxe.macecompanion.MaceCompanion"
     ],
     "modmenu": [
-      "moe.pxe.macecompanion.client.config.ModMenuIntegration"
+      "moe.pxe.macecompanion.config.ModMenuIntegration"
     ]
   },
   "mixins": [
-    "macecompanion.mixins.json",
-    {
-      "config": "macecompanion.client.mixins.json",
-      "environment": "client"
-    }
+    "macecompanion.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",

@@ -3,7 +3,9 @@
   "minVersion": "0.8",
   "package": "moe.pxe.macecompanion.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
+  "client": [
+    "SubtitlePacketMixin",
+    "TitlePacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

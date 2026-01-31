@@ -1,0 +1,199 @@
+package moe.pxe.macecompanion.enums
+
+import dev.isxander.yacl3.api.ConfigCategory
+import dev.isxander.yacl3.api.NameableEnum
+import dev.isxander.yacl3.api.Option
+import dev.isxander.yacl3.api.OptionDescription
+import dev.isxander.yacl3.api.YetAnotherConfigLib
+import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
+import dev.isxander.yacl3.config.v3.value
+import moe.pxe.macecompanion.client.StateManager
+import moe.pxe.macecompanion.client.config.Config
+import moe.pxe.macecompanion.client.config.controllers.ConfigurableEnum
+import moe.pxe.macecompanion.client.util.PlayerHead
+import moe.pxe.macecompanion.StateManager
+import moe.pxe.macecompanion.config.Config
+import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
+import moe.pxe.macecompanion.util.PlayerHead
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.Screen
+import net.minecraft.text.Style
+import net.minecraft.text.Text
+import net.minecraft.util.Colors
+import net.minecraft.util.StringIdentifiable
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
+
+enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
+    ROUND_NUMBER {
+        override fun render(
+            context: DrawContext,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.round == -1) return 0
+
+            val textRenderer = MinecraftClient.getInstance().textRenderer
+            val text = Text.translatable("mrc.roundhud.round", "${StateManager.round}").setStyle(StateManager.roundColor.withBold(true))
+            val width = textRenderer.getWidth(text)
+            var xPos = 0
+            if (rightAligned) xPos = -width
+            var yPos = yOffset/2f
+            if (bottomAligned) yPos = (-yOffset/2f) - 12
+            context.matrices.pushMatrix()
+            context.matrices.scale(2f)
+            context.matrices.translate(xPos.toFloat(), yPos)
+            context.drawTextWithShadow(textRenderer, text, 0, 0, -1)
+            context.matrices.popMatrix()
+            return 24
+        }
+    },
+
+    PLAYERS_ALIVE {
+        override fun render(
+            context: DrawContext,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.playersAlive == -1) return 0
+
+            val textRenderer = MinecraftClient.getInstance().textRenderer
+            val countText = Text.literal("${StateManager.playersAlive}").withColor(0xd5fcf5)
+            if (StateManager.playersTotal >= 0) countText.append(Text.literal("/${StateManager.playersTotal}").withColor(0xd0d0d0))
+            val text = Text.translatable("mrc.roundhud.alive", countText).setStyle(Style.EMPTY.withColor(Colors.WHITE))
+            val width = textRenderer.getWidth(text)
+            var xPos = 0
+            if (rightAligned) xPos = -width
+            var yPos = yOffset
+            if (bottomAligned) yPos = -yOffset - 12
+            context.drawTextWithShadow(textRenderer, text, xPos, yPos, -1)
+            return 12
+        }
+    },
+
+    ELIMINATIONS {
+        override fun render(
+            context: DrawContext,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.eliminations == -1) return 0
+
+            val textRenderer = MinecraftClient.getInstance().textRenderer
+            val text = Text.translatable("mrc.roundhud.eliminations", "${StateManager.eliminations}").withColor(0xa63efc)
+            val width = textRenderer.getWidth(text)
+            var xPos = 0
+            if (rightAligned) xPos = -width
+            var yPos = yOffset
+            if (bottomAligned) yPos = -yOffset - 12
+            context.drawTextWithShadow(textRenderer, text, xPos, yPos, -1)
+            return 12
+        }
+    },
+
+    PLAYTIME {
+        override fun render(
+            context: DrawContext,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            StateManager.playtime?.let {
+                val textRenderer = MinecraftClient.getInstance().textRenderer
+                val text = Text.translatable("mrc.roundhud.playtime", it.elapsedNow().toLong(DurationUnit.SECONDS).toDuration(DurationUnit.SECONDS).toString()).withColor(0x3efca1)
+                val width = textRenderer.getWidth(text)
+                var xPos = 0
+                if (rightAligned) xPos = -width
+                var yPos = yOffset
+                if (bottomAligned) yPos = -yOffset - 12
+                context.drawTextWithShadow(textRenderer, text, xPos, yPos, -1)
+                return 12
+            }
+            return 0
+        }
+    },
+
+    MODIFIERS {
+        override fun render(
+            context: DrawContext,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.modifiers.isEmpty()) return 0
+            val textRenderer = MinecraftClient.getInstance().textRenderer
+            var yPos = yOffset
+            if (bottomAligned) yPos = -yOffset - 12 - (StateManager.modifiers.size*20)
+
+            val headerText = Text.translatable("mrc.roundhud.modifiers").withColor(0xa63efc)
+            val headerWidth = textRenderer.getWidth(headerText)
+            var xPos = 0
+            if (rightAligned) xPos = -headerWidth
+            context.drawTextWithShadow(textRenderer, headerText, xPos, yPos, -1)
+            yPos += 12
+
+            StateManager.modifiers.forEach {
+                var xPos = 0
+                if (rightAligned) xPos = -16
+                context.drawItem(it.icon, xPos, yPos)
+                context.drawStackOverlay(textRenderer, it.icon, xPos, yPos)
+
+                val modifierText = it.translatable.withColor(0xfcfc54)
+                val modifierWidth = textRenderer.getWidth(modifierText)
+                xPos = 22
+                if (rightAligned) xPos = -22 - modifierWidth
+                context.drawTextWithShadow(textRenderer, modifierText, xPos, yPos+4, -1)
+
+                StateManager.modifierBoosters[it]?.let { playerList ->
+                    playerList.forEachIndexed { index, profile ->
+                        xPos = 28 + modifierWidth + (index*20)
+                        if (rightAligned) xPos = -44 - modifierWidth - (index*20)
+                        if (index >= Config.boosterListMax.value) {
+                            context.drawTextWithShadow(textRenderer, Text.literal("+${playerList.size - Config.boosterListMax.value}").withColor(0xa63efc), xPos, yPos+4, -1)
+                            return@let
+                        }
+                        context.drawItem(PlayerHead.fromProfile(profile), xPos, yPos)
+                    }
+                }
+
+                yPos += 20
+            }
+
+            return 12+(StateManager.modifiers.size*20)
+        }
+
+        override fun generateConfig(parent: Screen): Screen? {
+            return YetAnotherConfigLib.createBuilder()
+                .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+                .category(ConfigCategory.createBuilder()
+                    .name(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+                    .option(Option.createBuilder<Int>()
+                        .name(Text.translatable("mrc.config.modifiersConfig.option.boosterListMax"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.boosterListMax.description")))
+                        .binding(Config.boosterListMax.asBinding())
+                        .controller {
+                            IntegerSliderControllerBuilder.create(it)
+                                .range(0, 15)
+                                .step(1)
+                        }
+                        .build())
+                    .build())
+                .save(Config::saveToFile)
+                .build()
+                .generateScreen(parent)
+        }
+    };
+
+    abstract fun render(context: DrawContext, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int
+    override fun generateConfig(parent: Screen): Screen? = null
+    override fun asString(): String = name
+    override fun getDisplayName(): Text = Text.translatable("mrc.hudelement.${name.lowercase()}")
+
+    companion object {
+        val CODEC = StringIdentifiable.createCodec(::values)
+    }
+}
