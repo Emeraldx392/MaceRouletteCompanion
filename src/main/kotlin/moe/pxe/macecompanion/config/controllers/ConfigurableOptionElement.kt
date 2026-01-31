@@ -1,7 +1,6 @@
 package moe.pxe.macecompanion.config.controllers
 
 import dev.isxander.yacl3.api.Option
-import dev.isxander.yacl3.api.utils.Dimension
 import dev.isxander.yacl3.gui.AbstractWidget
 import dev.isxander.yacl3.gui.TooltipButtonWidget
 import dev.isxander.yacl3.gui.YACLScreen

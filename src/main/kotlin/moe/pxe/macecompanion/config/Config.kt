@@ -28,7 +28,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
 
     val hudElements by register<List<HudElements>>(listOf(
         HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.ELIMINATIONS,
-        HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.Companion.CODEC.listOf())
+        HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
 
     // Misc. Config
     val useFlint by register<Boolean>(true, BOOL)

@@ -112,7 +112,7 @@ object ConfigMenu {
                                     .append(Text.literal(match.value).setStyle(Style.EMPTY.withColor(0xFFCE2D)))
                                 lastIdx = match.range.last + 1
                             }
-                            return@valueFormatter text.append(str.substring(matches.lastOrNull()?.let { it.range.last + 1 } ?: 0))
+                            text.append(str.substring(matches.lastOrNull()?.let { it.range.last + 1 } ?: 0))
                         }
                     }
                     .initial("")

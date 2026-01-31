@@ -132,7 +132,7 @@ object StateManager {
         )
 
         // Subtitle Listener
-        SubtitleCallback.Companion.EVENT.register(
+        SubtitleCallback.EVENT.register(
             object : SubtitleCallback {
                 override fun onSubtitle(packet: SubtitleS2CPacket): ActionResult {
                     if (!OnMaceRoulette.onMace) return ActionResult.PASS
