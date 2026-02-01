@@ -55,6 +55,7 @@ class ConfigurableOptionElement : AbstractWidget, ParentElement {
         }
 
         updateButtonStates()
+
     }
 
     val configureButton: TooltipButtonWidget
@@ -64,7 +65,9 @@ class ConfigurableOptionElement : AbstractWidget, ParentElement {
     }
 
     override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        return super<ParentElement>.mouseClicked(click, doubled)
+        val returnValue = super<ParentElement>.mouseClicked(click, doubled)
+        updateButtonStates()
+        return returnValue
     }
 
     override fun mouseReleased(click: Click): Boolean {
@@ -88,7 +91,9 @@ class ConfigurableOptionElement : AbstractWidget, ParentElement {
     }
 
     override fun keyPressed(input: KeyInput?): Boolean {
-        return super<ParentElement>.keyPressed(input)
+        val returnValue = super<ParentElement>.keyPressed(input)
+        updateButtonStates()
+        return returnValue
     }
 
     override fun keyReleased(input: KeyInput?): Boolean {
@@ -113,8 +118,6 @@ class ConfigurableOptionElement : AbstractWidget, ParentElement {
         mouseY: Int,
         deltaTicks: Float
     ) {
-        updateButtonStates()
-
         configureButton.x = dimension.xLimit() - 20
         configureButton.y = dimension.y()
 //        entryWidget.dimension = entryWidget.dimension.withY(dimension.y())
