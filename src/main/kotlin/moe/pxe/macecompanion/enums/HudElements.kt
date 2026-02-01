@@ -7,10 +7,6 @@ import dev.isxander.yacl3.api.OptionDescription
 import dev.isxander.yacl3.api.YetAnotherConfigLib
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
 import dev.isxander.yacl3.config.v3.value
-import moe.pxe.macecompanion.client.StateManager
-import moe.pxe.macecompanion.client.config.Config
-import moe.pxe.macecompanion.client.config.controllers.ConfigurableEnum
-import moe.pxe.macecompanion.client.util.PlayerHead
 import moe.pxe.macecompanion.StateManager
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
