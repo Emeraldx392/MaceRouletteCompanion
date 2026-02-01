@@ -1,6 +1,7 @@
 package moe.pxe.macecompanion.config
 
 import dev.isxander.yacl3.api.*
+import dev.isxander.yacl3.api.controller.ColorControllerBuilder
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder
 import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder
 import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
+import java.awt.Color
 
 object ConfigMenu {
     fun generateScreen(parent: Screen): Screen? {
@@ -140,42 +142,68 @@ object ConfigMenu {
                 .build())
             .category(ConfigCategory.createBuilder()
                 .name(Text.translatable("mrc.config.category.roundhud"))
+                .option(Option.createBuilder<Boolean>()
+                    .name(Text.translatable("mrc.config.category.roundhud.option.displayHud"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.option.displayHud.description")))
+                    .binding(Config.displayHud.asBinding())
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
                 .group(OptionGroup.createBuilder()
-                    .name(Text.translatable("mrc.config.category.roundhud.group.hudoptions"))
-                    .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudoptions.description")))
-                    .option(Option.createBuilder<Boolean>()
-                        .name(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.displayHud"))
-                        .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.displayHud.description")))
-                        .binding(Config.displayHud.asBinding())
-                        .controller(TickBoxControllerBuilder::create)
-                        .build())
+                    .name(Text.translatable("mrc.config.category.roundhud.group.hudtransforms"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudtransforms.description")))
                     .option(Option.createBuilder<HudLocation>()
-                        .name(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.hudLocation"))
-                        .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.hudLocation.description")))
+                        .name(Text.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudLocation"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudLocation.description")))
                         .binding(Config.hudLocation.asBinding())
                         .controller { EnumControllerBuilder.create(it).enumClass(HudLocation::class.java) }
                         .build())
                     .option(Option.createBuilder<Int>()
-                        .name(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.hudXMargin"))
-                        .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.hudXMargin.description")))
+                        .name(Text.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudXMargin"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudXMargin.description")))
                         .binding(Config.hudXMargin.asBinding())
                         .controller({ IntegerFieldControllerBuilder.create(it).formatValue { Text.of("$it pixels") } })
                         .build())
                     .option(Option.createBuilder<Int>()
-                        .name(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.hudYMargin"))
-                        .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.hudYMargin.description")))
+                        .name(Text.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudYMargin"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudYMargin.description")))
                         .binding(Config.hudYMargin.asBinding())
                         .controller({ IntegerFieldControllerBuilder.create(it).formatValue { Text.of("$it pixels") } })
                         .build())
                     .option(Option.createBuilder<Float>()
-                        .name(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.hudScale"))
-                        .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudoptions.option.hudScale.description")))
+                        .name(Text.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudScale"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudScale.description")))
                         .binding(Config.hudScale.asBinding())
                         .controller { FloatSliderControllerBuilder.create(it)
                             .formatValue { Text.of("${it * 100}%") }
                             .range(0.05f, 3f)
                             .step(0.05f)
                         }
+                        .build())
+                    .build())
+                .group(OptionGroup.createBuilder()
+                    .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.description")))
+                    .also {
+                        val accentColor = Option.createBuilder<Color>()
+                            .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.accentColor"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.accentColor.description")))
+                            .binding(Config.accentColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        val useAccentColor = Option.createBuilder<Boolean>()
+                            .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.useAccentColor"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.useAccentColor.description")))
+                            .binding(Config.useAccentColor.asBinding())
+                            .controller(TickBoxControllerBuilder::create)
+                            .build()
+                        accentColor.setAvailable(useAccentColor.pendingValue())
+                        useAccentColor.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) accentColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) accentColor.setAvailable(option.pendingValue())
+                        }
+                        it.option(useAccentColor)
+                        it.option(accentColor)
+                    }
                         .build())
                     .build())
                 .group(ListOption.createBuilder<HudElements>()

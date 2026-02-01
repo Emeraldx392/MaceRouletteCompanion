@@ -36,7 +36,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             if (StateManager.round == -1) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
-            val text = Text.translatable("mrc.roundhud.round", "${StateManager.round}").setStyle(StateManager.roundColor.withBold(true))
+            val text = Text.translatable("mrc.roundhud.round", "${StateManager.round}")
+                .setStyle(Config.getAccentStyle(StateManager.roundColor).withBold(true))
             val width = textRenderer.getWidth(text)
             var xPos = 0
             if (rightAligned) xPos = -width
@@ -61,7 +62,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             if (StateManager.playersAlive == -1) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
-            val countText = Text.literal("${StateManager.playersAlive}").withColor(0xd5fcf5)
+            val countText = Text.literal("${StateManager.playersAlive}").setStyle(Config.getAccentStyle(0xd5fcf5))
             if (StateManager.playersTotal >= 0) countText.append(Text.literal("/${StateManager.playersTotal}").withColor(0xd0d0d0))
             val text = Text.translatable("mrc.roundhud.alive", countText).setStyle(Style.EMPTY.withColor(Colors.WHITE))
             val width = textRenderer.getWidth(text)
@@ -84,7 +85,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             if (StateManager.eliminations == -1) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
-            val text = Text.translatable("mrc.roundhud.eliminations", "${StateManager.eliminations}").withColor(0xa63efc)
+            val text = Text.translatable("mrc.roundhud.eliminations", "${StateManager.eliminations}")
+                .setStyle(Config.getAccentStyle(0xa63efc))
             val width = textRenderer.getWidth(text)
             var xPos = 0
             if (rightAligned) xPos = -width
@@ -104,7 +106,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
         ): Int {
             StateManager.playtime?.let {
                 val textRenderer = MinecraftClient.getInstance().textRenderer
-                val text = Text.translatable("mrc.roundhud.playtime", it.elapsedNow().toLong(DurationUnit.SECONDS).toDuration(DurationUnit.SECONDS).toString()).withColor(0x3efca1)
+                val text = Text.translatable("mrc.roundhud.playtime", it.elapsedNow().toLong(DurationUnit.SECONDS).toDuration(DurationUnit.SECONDS).toString())
+                    .setStyle(Config.getAccentStyle(0x3efca1))
                 val width = textRenderer.getWidth(text)
                 var xPos = 0
                 if (rightAligned) xPos = -width
@@ -129,7 +132,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12 - (StateManager.modifiers.size*20)
 
-            val headerText = Text.translatable("mrc.roundhud.modifiers").withColor(0xa63efc)
+            val headerText = Text.translatable("mrc.roundhud.modifiers")
+                .setStyle(Config.getAccentStyle(0xa63efc))
             val headerWidth = textRenderer.getWidth(headerText)
             var xPos = 0
             if (rightAligned) xPos = -headerWidth
@@ -142,7 +146,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                 context.drawItem(it.icon, xPos, yPos)
                 context.drawStackOverlay(textRenderer, it.icon, xPos, yPos)
 
-                val modifierText = it.translatable.withColor(0xfcfc54)
+                val modifierText = it.translatable.copy().setStyle(Config.getAccentStyle(0xfcfc54))
                 val modifierWidth = textRenderer.getWidth(modifierText)
                 xPos = 22
                 if (rightAligned) xPos = -22 - modifierWidth
@@ -154,6 +158,10 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                         if (rightAligned) xPos = -44 - modifierWidth - (index*20)
                         if (index >= Config.boosterListMax.value) {
                             context.drawTextWithShadow(textRenderer, Text.literal("+${playerList.size - Config.boosterListMax.value}").withColor(0xa63efc), xPos, yPos+4, -1)
+                            val boosterText = Text.literal("+${playerList.size - Config.boosterListMax.value}")
+                                .setStyle(Config.getAccentStyle(0xa63efc))
+                            context.drawTextWithShadow(textRenderer, boosterText,
+                                xPos, yPos+4, -1)
                             return@let
                         }
                         context.drawItem(PlayerHead.fromProfile(profile), xPos, yPos)
