@@ -204,7 +204,6 @@ object ConfigMenu {
                         it.option(useAccentColor)
                         it.option(accentColor)
                     }
-                        .build())
                     .build())
                 .group(ListOption.createBuilder<HudElements>()
                     .name(Text.translatable("mrc.config.category.roundhud.group.hudElements"))
@@ -230,7 +229,7 @@ object ConfigMenu {
                     it.option(ButtonOption.createBuilder()
                         .name(Text.translatable("mrc.config.category.miscellaneous.option.downloadFlint"))
                         .description(OptionDescription.of(Text.translatable("mrc.config.category.miscellaneous.option.useFlint.description")))
-                        .action { screen, option ->
+                        .action { screen, _ ->
                             ConfirmLinkScreen.open(screen, "https://modrinth.com/mod/flint")
                         }
                         .build())
