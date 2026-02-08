@@ -17,6 +17,7 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.Colors
+import net.minecraft.util.Formatting
 import net.minecraft.util.StringIdentifiable
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -142,7 +143,9 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                 context.drawItem(it.icon, xPos, yPos)
                 context.drawStackOverlay(textRenderer, it.icon, xPos, yPos)
 
-                val modifierText = it.translatable.copy().setStyle(Config.getAccentStyle(0xfcfc54))
+                val modifierText = it.translatable.copy().setStyle(Config.getAccentStyle(it.translatable.style)).also { text ->
+                    if (StateManager.eternalModifier == it) text.append(Text.literal(" ∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10068202)))
+                }
                 val modifierWidth = textRenderer.getWidth(modifierText)
                 xPos = 22
                 if (rightAligned) xPos = -22 - modifierWidth

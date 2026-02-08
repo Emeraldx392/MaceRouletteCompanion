@@ -17,21 +17,34 @@ import kotlin.time.TimeSource
 
 object StateManager {
     var gameOngoing = false
+        private set
     var round = -1
+        private set
     var roundColor = Style.EMPTY.withColor(0x9ef6fc)
+        private set
     var playersAlive = -1
+        private set
     var playersTotal = -1
+        private set
     var eliminations = -1
+        private set
     var eliminated = true
+        private set
     var playtime: TimeMark? = null
+        private set
     var modifiers = mutableListOf<Modifiers>()
+        private set
     var modifierBoosters = mutableMapOf<Modifiers, MutableList<GameProfile>>()
+        private set
+    var eternalModifier: Modifiers? = null
+        private set
 
     private val chatRoundNumberRegex = """ +Round (\d+) +""".toRegex()
 
     private val chatModifierHeaderRegex = """⏵ .*ᴍᴏᴅɪꜰɪᴇʀ:""".toRegex()
     private val chatModifierItemRegex = """  ◇ (.+)""".toRegex()
     private val chatModifierBoostedRegex = """  ◇ (.+) \(☁ Boosted by (.+)\)""".toRegex()
+    private val chatModifierIsEternalRegex = """(.+) \(Eternal\)""".toRegex()
 
     private val chatEliminationRegex = """⏵ .+ was eliminated by .+! \((\d+) remain\)""".toRegex()
     private val chatEarlyLeaveRegex = """⏵ .+ left while alive! \((\d+) remain\)""".toRegex()
@@ -91,25 +104,42 @@ object StateManager {
                 AutoGG.sendGGMessage()
             }
             // Modifier Entry
-            if (checkForModifiers) (chatModifierBoostedRegex.matchEntire(message.string) ?: chatModifierItemRegex.matchEntire(message.string))?.also {
-                var enum = Modifiers.UNKNOWN
-                it.groups[1]?.let { modifier ->
-                    enum = Modifiers.entries.find { enum -> enum.matchName == modifier.value } ?: Modifiers.UNKNOWN
-                    modifiers.add(enum)
-                    modifierBoosters[enum] = mutableListOf()
+            if (checkForModifiers) {
+                val modBoostedMatch = chatModifierBoostedRegex.matchEntire(message.string)
+                val modMatch = chatModifierItemRegex.matchEntire(message.string)
+                var modifier = Modifiers.UNKNOWN
+
+                (modBoostedMatch ?: modMatch)?.also {
+                    it.groupValues[1].let {
+                        var modName = it
+                        var isEternal = false
+                        chatModifierIsEternalRegex.matchEntire(it)?.let {
+                            modName = it.groupValues[1]
+                            isEternal = true
+                        }
+                        modifier = Modifiers.entries.find { enum -> enum.matchName == modName } ?: Modifiers.UNKNOWN
+                        if (isEternal) {
+                            eternalModifier = modifier
+                            modifiers.add(0, modifier)
+                        } else modifiers.add(modifier)
+                        modifierBoosters[modifier] = mutableListOf()
+                    }
+                } ?: run {
+                    checkForModifiers = false
                 }
 
-                if (it.groups.size >= 3) it.groups[2]?.let { playerList ->
-                    val playerNames = playerList.value.split(", ")
-                    val networkHandler = MinecraftClient.getInstance().networkHandler ?: return@let
-                    for (player in playerNames) {
-                        val profile = networkHandler.getPlayerListEntry(player)?.profile ?: continue
-                        modifierBoosters[enum]?.add(profile)
+                if (modifier != Modifiers.UNKNOWN) modBoostedMatch?.let {
+                    it.groupValues[2].let { playerList ->
+                        val playerNames = playerList.split(", ")
+                        val networkHandler = MinecraftClient.getInstance().networkHandler ?: return@let
+                        for (player in playerNames) {
+                            val profile = networkHandler.getPlayerListEntry(player)?.profile ?: continue
+                            modifierBoosters[modifier]?.add(profile)
+                        }
                     }
                 }
-            } ?: run {
-                checkForModifiers = false
             }
+
             // Modifier Header
             chatModifierHeaderRegex.matchEntire(message.string)?.let { checkForModifiers = true }
 
