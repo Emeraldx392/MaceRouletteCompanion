@@ -247,6 +247,7 @@ enum class Modifiers {
         override val icon = Items.MACE.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "glitched_mace"))
         }
+        override val translatable = Text.translatable("mrc.modifier.${name.lowercase()}").formatted(Formatting.RED, Formatting.BOLD)
     },
 
     MYSTERY {
