@@ -3,13 +3,9 @@ package moe.pxe.macecompanion.enums
 import com.mojang.authlib.properties.Property
 import moe.pxe.macecompanion.MaceCompanion
 import moe.pxe.macecompanion.util.PlayerHead
-import net.minecraft.client.data.ItemModels
-import net.minecraft.client.render.item.model.ItemModel
 import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.CustomModelDataComponent
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
-import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
@@ -258,6 +254,6 @@ enum class Modifiers {
 
 
     abstract val matchName: String
-    open val translatable = Text.translatable("mrc.modifier.${name.lowercase()}")
+    open val translatable = Text.translatable("mrc.modifier.${name.lowercase()}").withColor(0xfcfc54)
     abstract val icon: ItemStack
 }

@@ -158,7 +158,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                         if (index >= Config.boosterListMax.value) {
                             context.drawTextWithShadow(textRenderer, Text.literal("+${playerList.size - Config.boosterListMax.value}").withColor(0xa63efc), xPos, yPos+4, -1)
                             val boosterText = Text.literal("+${playerList.size - Config.boosterListMax.value}")
-                                .setStyle(Config.getAccentStyle(0xa63efc))
+                                .setStyle(Config.getAccentStyle(0xb0b2fc))
                             context.drawTextWithShadow(textRenderer, boosterText,
                                 xPos, yPos+4, -1)
                             return@let

@@ -77,6 +77,6 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     }
 
     fun getAccentStyle(defaultColor: Style) : Style {
-        return getAccentStyle().let { if (!useAccentColor.value) it.withColor(defaultColor.color) else it }
+        return defaultColor.let { if (useAccentColor.value) it.withColor(accentColor.value.rgb and 0x00ffffff) else it }
     }
 }
