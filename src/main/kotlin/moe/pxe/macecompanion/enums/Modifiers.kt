@@ -1,7 +1,10 @@
 package moe.pxe.macecompanion.enums
 
 import com.mojang.authlib.properties.Property
+import moe.pxe.macecompanion.MaceCompanion
 import moe.pxe.macecompanion.util.PlayerHead
+import net.minecraft.client.data.ItemModels
+import net.minecraft.client.render.item.model.ItemModel
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.component.type.CustomModelDataComponent
 import net.minecraft.item.ItemStack
@@ -9,6 +12,7 @@ import net.minecraft.item.Items
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
+import net.minecraft.util.Identifier
 
 enum class Modifiers {
     DOUBLE {
@@ -37,6 +41,14 @@ enum class Modifiers {
 
     SLOW_TIME {
         override val matchName = "Slow Time"
+        override val icon = Items.CLOCK.defaultStack.apply {
+            set(DataComponentTypes.DAMAGE, 9)
+            set(DataComponentTypes.MAX_DAMAGE, 10)
+        }
+    },
+
+    FAST_TIME {
+        override val matchName = "Fast Time"
         override val icon = Items.CLOCK.defaultStack.apply {
             set(DataComponentTypes.DAMAGE, 1)
             set(DataComponentTypes.MAX_DAMAGE, 100)
@@ -188,14 +200,6 @@ enum class Modifiers {
         override val icon = Items.COPPER_SPEAR.defaultStack
     },
 
-    FAST_TIME {
-        override val matchName = "Fast Time"
-        override val icon = Items.CLOCK.defaultStack.apply {
-            set(DataComponentTypes.DAMAGE, 9)
-            set(DataComponentTypes.MAX_DAMAGE, 10)
-        }
-    },
-
     RODS {
         override val matchName = "Fishing Rods"
         override val icon = Items.FISHING_ROD.defaultStack
@@ -241,7 +245,7 @@ enum class Modifiers {
     UNKNOWN {
         override val matchName = "\uE024"
         override val icon = Items.MACE.defaultStack.apply {
-            set(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelDataComponent(listOf(138f), null, null, null))
+            set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "glitched_mace"))
         }
     },
 
