@@ -2,9 +2,13 @@ package moe.pxe.macecompanion.enums
 
 import com.mojang.authlib.properties.Property
 import moe.pxe.macecompanion.util.PlayerHead
+import net.minecraft.component.DataComponentTypes
+import net.minecraft.component.type.CustomModelDataComponent
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
+import net.minecraft.text.MutableText
 import net.minecraft.text.Text
+import net.minecraft.util.Formatting
 
 enum class Modifiers {
     DOUBLE {
@@ -33,7 +37,10 @@ enum class Modifiers {
 
     SLOW_TIME {
         override val matchName = "Slow Time"
-        override val icon = Items.CLOCK.defaultStack
+        override val icon = Items.CLOCK.defaultStack.apply {
+            set(DataComponentTypes.DAMAGE, 1)
+            set(DataComponentTypes.MAX_DAMAGE, 100)
+        }
     },
 
     MISS_EQUALS_DIE {
@@ -181,6 +188,19 @@ enum class Modifiers {
         override val icon = Items.COPPER_SPEAR.defaultStack
     },
 
+    FAST_TIME {
+        override val matchName = "Fast Time"
+        override val icon = Items.CLOCK.defaultStack.apply {
+            set(DataComponentTypes.DAMAGE, 9)
+            set(DataComponentTypes.MAX_DAMAGE, 10)
+        }
+    },
+
+    RODS {
+        override val matchName = "Fishing Rods"
+        override val icon = Items.FISHING_ROD.defaultStack
+    },
+
     SNOWBALL {
         override val matchName = "Snowball Fight"
         override val icon = Items.POWDER_SNOW_BUCKET.defaultStack
@@ -219,12 +239,20 @@ enum class Modifiers {
     },
 
     UNKNOWN {
+        override val matchName = "\uE024"
+        override val icon = Items.MACE.defaultStack.apply {
+            set(DataComponentTypes.CUSTOM_MODEL_DATA, CustomModelDataComponent(listOf(138f), null, null, null))
+        }
+    },
+
+    MYSTERY {
         override val matchName = "???"
-        override val icon = Items.AIR.defaultStack
+        override val icon = Items.LIGHT_GRAY_CANDLE.defaultStack
+        override val translatable = Text.translatable("mrc.modifier.${name.lowercase()}").withColor(0xcfb3fc).formatted(Formatting.ITALIC)
     };
 
 
     abstract val matchName: String
-    val translatable = Text.translatable("mrc.modifier.${name.lowercase()}")
+    open val translatable = Text.translatable("mrc.modifier.${name.lowercase()}")
     abstract val icon: ItemStack
 }

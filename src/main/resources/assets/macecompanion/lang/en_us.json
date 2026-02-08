@@ -125,7 +125,11 @@
     "mrc.modifier.no_jumping": "No Jumping",
     "mrc.modifier.snowball": "Snowball Fight",
     "mrc.modifier.stacks": "Player Stacks",
-    "mrc.modifier.unknown": "???",
+    "mrc.modifier.lunge": "Lunge",
+    "mrc.modifier.fast_time": "Fast Time",
+    "mrc.modifier.rods": "Fishing Rods",
+    "mrc.modifier.unknown": "Unknown Modifier",
+    "mrc.modifier.mystery": "???",
 
     "mrc.hudlocation.top_left": "Top Left",
     "mrc.hudlocation.top_right": "Top Right",
