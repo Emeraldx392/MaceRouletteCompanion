@@ -201,6 +201,11 @@ enum class Modifiers {
         override val icon = Items.FISHING_ROD.defaultStack
     },
 
+    MAGNETIC {
+        override val matchName = "Magnetic Charges"
+        override val icon: ItemStack = Items.IRON_NAUTILUS_ARMOR.defaultStack
+    },
+
     SNOWBALL {
         override val matchName = "Snowball Fight"
         override val icon = Items.POWDER_SNOW_BUCKET.defaultStack
