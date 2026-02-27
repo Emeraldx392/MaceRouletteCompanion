@@ -6,6 +6,7 @@ import dev.isxander.yacl3.api.Option
 import dev.isxander.yacl3.api.OptionDescription
 import dev.isxander.yacl3.api.YetAnotherConfigLib
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
+import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.StateManager
 import moe.pxe.macecompanion.config.Config
@@ -209,9 +210,9 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
             val text = Text.translatable("mrc.roundhud.mace_chance_text",
-                Text.literal("%.2f%%".format(StateManager.maceChance))
-                    .setStyle(Config.getAccentStyle(textColors[floor(StateManager.maceChance / 7.69).toInt()])))
-                .setStyle(Config.getAccentStyle(0x79fc00))
+                Text.literal("%.2f%%".format(StateManager.maceChance)).also {
+                    if (Config.chanceUseColor.value) it.setStyle(Config.getAccentStyle(textColors[floor(StateManager.maceChance / 7.69).toInt()]))
+                }).setStyle(Config.getAccentStyle(0x79fc00))
 
             val width = textRenderer.getWidth(text)
             var xPos = 0
@@ -221,6 +222,20 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             context.drawTextWithShadow(textRenderer, text, xPos, yPos, -1)
             return 12
         }
+
+        override fun generateConfig(parent: Screen) = YetAnotherConfigLib.createBuilder()
+            .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+            .category(ConfigCategory.createBuilder()
+                .name(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+                .option(Option.createBuilder<Boolean>()
+                    .name(Text.translatable("mrc.config.modifiersConfig.option.boosterListMax"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.boosterListMax.description")))
+                    .binding(Config.chanceUseColor.asBinding())
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+                .build())
+            .build()
+            .generateScreen(parent)
     };
 
     abstract fun render(context: DrawContext, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int

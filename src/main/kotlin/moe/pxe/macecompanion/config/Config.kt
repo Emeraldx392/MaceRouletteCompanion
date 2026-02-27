@@ -68,6 +68,8 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     // NESTED CONFIG ===========================================================
     val boosterListMax by register<Int>(5, INT)
 
+    val chanceUseColor by register<Boolean>(true, BOOL)
+
     fun getAccentStyle(): Style {
         return Style.EMPTY.withColor(accentColor.value.rgb and 0x00ffffff)
     }
