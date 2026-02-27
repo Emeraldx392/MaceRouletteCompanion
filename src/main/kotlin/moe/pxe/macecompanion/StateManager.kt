@@ -74,6 +74,7 @@ object StateManager {
         gameOngoing = true
         modifiers = mutableListOf()
         modifierBoosters = mutableMapOf()
+        maceChance = 100f/playersAlive
 //        MaceCompanion.LOGGER.info("Round: $round - Alive:$playersAlive/$playersTotal")
     }
     fun resetState() {
@@ -112,7 +113,6 @@ object StateManager {
                 val modBoostedMatch = chatModifierBoostedRegex.matchEntire(message.string)
                 val modMatch = chatModifierItemRegex.matchEntire(message.string)
                 var modifier = Modifiers.UNKNOWN
-                maceChance = 100f/playersAlive
 
                 (modBoostedMatch ?: modMatch)?.also {
                     it.groupValues[1].let {
@@ -129,18 +129,16 @@ object StateManager {
                         } else modifiers.add(modifier)
                         modifierBoosters[modifier] = mutableListOf()
                     }
+                    when (modifier) {
+                        Modifiers.VICTIM -> maceChance = (100f * (playersAlive - 1)) / playersAlive
+                        Modifiers.DOUBLE -> maceChance = 200f / playersAlive
+                        Modifiers.TRIPLE -> maceChance = 300f / playersAlive
+                        else -> {}
+                    }
                 } ?: run {
                     checkForModifiers = false
                 }
-                if(modifiers.contains(Modifiers.VICTIM)) {
-                    maceChance = (100f*(playersAlive - 1))/playersAlive
-                }else if(modifiers.contains(Modifiers.DOUBLE)) {
-                    maceChance = 200f/playersAlive
-                }else if(modifiers.contains(Modifiers.TRIPLE)) {
-                    maceChance = 300f/playersAlive
-                }else{
-                    maceChance = 100f/playersAlive
-                }
+
                 if (modifier != Modifiers.UNKNOWN) modBoostedMatch?.let {
                     it.groupValues[2].let { playerList ->
                         val playerNames = playerList.split(", ")
