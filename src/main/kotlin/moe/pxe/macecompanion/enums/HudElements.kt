@@ -209,9 +209,9 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
             val text = Text.translatable("mrc.roundhud.mace_chance_text",
-                Text.literal("%.2f".format(StateManager.maceChance))
+                Text.literal("%.2f%%".format(StateManager.maceChance))
                     .setStyle(Config.getAccentStyle(textColors[floor(StateManager.maceChance / 7.69).toInt()])))
-                .setStyle(Config.getAccentStyle(0xa63efc))
+                .setStyle(Config.getAccentStyle(0x79fc00))
 
             val width = textRenderer.getWidth(text)
             var xPos = 0
