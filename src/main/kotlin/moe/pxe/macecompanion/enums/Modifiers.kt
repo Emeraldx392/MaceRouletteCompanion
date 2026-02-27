@@ -4,6 +4,8 @@ import com.mojang.authlib.properties.Property
 import moe.pxe.macecompanion.MaceCompanion
 import moe.pxe.macecompanion.util.PlayerHead
 import net.minecraft.component.DataComponentTypes
+import net.minecraft.component.type.ItemEnchantmentsComponent
+import net.minecraft.enchantment.Enchantments
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.text.Text
@@ -66,8 +68,8 @@ enum class Modifiers {
         override val icon = Items.ELYTRA.defaultStack
     },
 
-    WIND_CHARGE {
-        override val matchName = "Wind Charge Storm"
+    WIND_STORM {
+        override val matchName = "Wind Storm"
         override val icon = Items.WIND_CHARGE.defaultStack
     },
 
@@ -177,7 +179,7 @@ enum class Modifiers {
     },
 
     EXPLOSIVE {
-        override val matchName = "Explosive Charges"
+        override val matchName = "Explosive Burst"
         override val icon = Items.TNT_MINECART.defaultStack
     },
 
@@ -202,7 +204,7 @@ enum class Modifiers {
     },
 
     MAGNETIC {
-        override val matchName = "Magnetic Charges"
+        override val matchName = "Magnetic Burst"
         override val icon: ItemStack = Items.IRON_NAUTILUS_ARMOR.defaultStack
     },
 
@@ -241,6 +243,11 @@ enum class Modifiers {
     STICKY {
         override val matchName = "Sticky Floor"
         override val icon = Items.HONEY_BLOCK.defaultStack
+    },
+
+    LEVITATION {
+        override val matchName = "Levitation Burst"
+        override val icon = Items.ALLAY_SPAWN_EGG.defaultStack
     },
 
     UNKNOWN {

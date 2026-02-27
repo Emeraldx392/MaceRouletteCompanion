@@ -28,6 +28,8 @@ object StateManager {
         private set
     var eliminations = -1
         private set
+    var maceChance = -1f
+        private set
     var eliminated = true
         private set
     var playtime: TimeMark? = null
@@ -49,7 +51,8 @@ object StateManager {
     private val chatEliminationRegex = """⏵ .+ was eliminated by .+! \((\d+) remain\)""".toRegex()
     private val chatEarlyLeaveRegex = """⏵ .+ left while alive! \((\d+) remain\)""".toRegex()
     private val chatBlowUpRegex = """⏵ .+ blew up! \((\d+) remain\)""".toRegex()
-    private val chatVoidEliminationRegex = """⏵ .+ fell off the map! \((\d+) remain\)""".toRegex()
+    private val chatVoidDeathRegex = """⏵ .+ fell into the void! \((\d+) remain\)""".toRegex()
+    private val chatVoidEliminationRegex = """⏵ .+ was thrown into the void by .+! \((\d+) remain\)""".toRegex()
     private val chatElimCounterRegex = """  ◇ \+\d+🪓, total (\d+)🪓""".toRegex()
 
     private val chatLeaderboardHeaderRegex = """ +‌*ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ:""".toRegex()
@@ -71,6 +74,7 @@ object StateManager {
         gameOngoing = true
         modifiers = mutableListOf()
         modifierBoosters = mutableMapOf()
+        maceChance = 100f/playersAlive
 //        MaceCompanion.LOGGER.info("Round: $round - Alive:$playersAlive/$playersTotal")
     }
     fun resetState() {
@@ -80,6 +84,7 @@ object StateManager {
         playersAlive = -1
         playersTotal = -1
         eliminations = -1
+        maceChance = -1f
         eliminated = true
         playtime = null
         modifiers = mutableListOf()
@@ -94,7 +99,7 @@ object StateManager {
             // Round Number Header
             chatRoundNumberRegex.matchEntire(message.string)?.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
             // Elimination Messages (slain by, left the game, blew up, fell off the map)
-            val eliminationMatch = chatEliminationRegex.matchEntire(message.string) ?: chatEarlyLeaveRegex.matchEntire(message.string) ?: chatBlowUpRegex.matchEntire(message.string) ?: chatVoidEliminationRegex.matchEntire(message.string)
+            val eliminationMatch = chatEliminationRegex.matchEntire(message.string) ?: chatEarlyLeaveRegex.matchEntire(message.string) ?: chatBlowUpRegex.matchEntire(message.string) ?: chatVoidDeathRegex.matchEntire(message.string) ?: chatVoidEliminationRegex.matchEntire(message.string)
             eliminationMatch?.groups[1]?.let { playersAlive = it.value.toIntOrNull() ?: -1 }
             // Elimination Counter
             chatElimCounterRegex.matchEntire(message.string)?.groups[1]?.let { eliminations = it.value.toIntOrNull() ?: 0 }
@@ -123,6 +128,12 @@ object StateManager {
                             modifiers.add(0, modifier)
                         } else modifiers.add(modifier)
                         modifierBoosters[modifier] = mutableListOf()
+                    }
+                    when (modifier) {
+                        Modifiers.VICTIM -> maceChance = (100f * (playersAlive - 1)) / playersAlive
+                        Modifiers.DOUBLE -> maceChance = 200f / playersAlive
+                        Modifiers.TRIPLE -> maceChance = 300f / playersAlive
+                        else -> {}
                     }
                 } ?: run {
                     checkForModifiers = false

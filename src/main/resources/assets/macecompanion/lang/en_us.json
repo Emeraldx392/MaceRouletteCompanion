@@ -84,6 +84,7 @@
     "mrc.roundhud.eliminations": "\uD83E\uDE93 %s ᴇʟɪᴍɪɴᴀᴛɪᴏɴs",
     "mrc.roundhud.playtime": "⌚ %s ᴇʟᴀᴘsᴇᴅ",
     "mrc.roundhud.modifiers": "ᴍᴏᴅɪꜰɪᴇʀs:",
+    "mrc.roundhud.mace_chance_text": "⚄ %s ᴍᴀᴄᴇ ᴄʜᴀɴᴄᴇ",
 
     "mrc.modifier.double": "Double Mace",
     "mrc.modifier.triple": "Triple Mace",
@@ -93,7 +94,7 @@
     "mrc.modifier.miss_equals_die": "Miss = Die",
     "mrc.modifier.shockwave": "Shockwave Mace",
     "mrc.modifier.elytra": "Elytra Launch",
-    "mrc.modifier.wind_charge": "Wind Charge Storm",
+    "mrc.modifier.wind_storm": "Wind Storm",
     "mrc.modifier.cobwebs": "Player Cobwebs",
     "mrc.modifier.blocks": "Player Blocks",
     "mrc.modifier.caged": "Caged",
@@ -121,14 +122,15 @@
     "mrc.modifier.pinata": "Piñata",
     "mrc.modifier.soul_floor": "Soul Floor",
     "mrc.modifier.pumpkin_curse": "Pumpkin Curse",
-    "mrc.modifier.explosive": "Explosive Charges",
+    "mrc.modifier.explosive": "Explosive Burst",
     "mrc.modifier.no_jumping": "No Jumping",
     "mrc.modifier.snowball": "Snowball Fight",
     "mrc.modifier.stacks": "Player Stacks",
     "mrc.modifier.lunge": "Lunge",
     "mrc.modifier.fast_time": "Fast Time",
     "mrc.modifier.rods": "Fishing Rods",
-    "mrc.modifier.magnetic": "Magnetic Charges",
+    "mrc.modifier.magnetic": "Magnetic Burst",
+    "mrc.modifier.levitation": "Levitation Burst",
     "mrc.modifier.unknown": "Unknown Modifier",
     "mrc.modifier.mystery": "???",
 
@@ -142,6 +144,7 @@
     "mrc.hudelement.eliminations": "Eliminations",
     "mrc.hudelement.playtime": "Game Duration",
     "mrc.hudelement.modifiers": "Modifiers",
+    "mrc.hudelement.mace_chance": "Mace Chance",
 
     "mrc.modmenu.authors_website": "Author's Website",
 

@@ -58,8 +58,8 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val accentColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
 
     val hudElements by register<List<HudElements>>(listOf(
-        HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.ELIMINATIONS,
-        HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
+        HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,
+        HudElements.ELIMINATIONS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
 
     // Misc. Config
     val useFlint by register<Boolean>(true, BOOL)
@@ -67,6 +67,8 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
 
     // NESTED CONFIG ===========================================================
     val boosterListMax by register<Int>(5, INT)
+
+    val chanceUseColor by register<Boolean>(true, BOOL)
 
     fun getAccentStyle(): Style {
         return Style.EMPTY.withColor(accentColor.value.rgb and 0x00ffffff)
