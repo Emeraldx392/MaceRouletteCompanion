@@ -58,8 +58,8 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val accentColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
 
     val hudElements by register<List<HudElements>>(listOf(
-        HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.ELIMINATIONS,
-        HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
+        HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,
+        HudElements.ELIMINATIONS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
 
     // Misc. Config
     val useFlint by register<Boolean>(true, BOOL)
