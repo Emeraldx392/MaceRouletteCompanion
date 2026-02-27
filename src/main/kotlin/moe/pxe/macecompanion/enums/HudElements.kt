@@ -197,6 +197,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
         }
     },
     MACE_CHANCE {
+        val textColors = arrayOf(0xff2c01, 0xff5500, 0xff8400, 0xffa503, 0xffd202, 0xfff400, 0xe6ff01, 0xc0ff03, 0x92ff00, 0x74ff02, 0x3cff01, 0x13ff00, 0x01ff00)
+
         override fun render(
             context: DrawContext,
             yOffset: Int,
@@ -206,15 +208,11 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             if (StateManager.maceChance == -1f) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
-            val maceChanceString = "%.2f".format(StateManager.maceChance)
-            val maceChanceTextColors = arrayOf(0xff2c01, 0xff5500, 0xff8400, 0xffa503, 0xffd202, 0xfff400, 0xe6ff01, 0xc0ff03, 0x92ff00, 0x74ff02, 0x3cff01, 0x13ff00, 0x01ff00)
-            val maceChanceTextColorIdx = floor(StateManager.maceChance / 7.69).toInt()
-            val maceChanceTextColor = maceChanceTextColors[maceChanceTextColorIdx]
-            val maceChanceTextPart = Text.translatable("mrc.roundhud.mace_chance","${maceChanceString}%")
-                .setStyle(Config.getAccentStyle(maceChanceTextColor))
-            val maceChanceText = Text.translatable("mrc.roundhud.mace_chance_text")
+            val text = Text.translatable("mrc.roundhud.mace_chance_text",
+                Text.literal("%.2f".format(StateManager.maceChance))
+                    .setStyle(Config.getAccentStyle(textColors[floor(StateManager.maceChance / 7.69).toInt()])))
                 .setStyle(Config.getAccentStyle(0xa63efc))
-            val text = maceChanceText.append(maceChanceTextPart)
+
             val width = textRenderer.getWidth(text)
             var xPos = 0
             if (rightAligned) xPos = -width
