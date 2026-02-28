@@ -9,7 +9,6 @@ import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.StateManager
-import moe.pxe.macecompanion.StateManager.maceChance
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
 import moe.pxe.macecompanion.util.PlayerHead
@@ -21,7 +20,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Formatting
 import net.minecraft.util.StringIdentifiable
-import kotlin.math.floor
+import kotlin.math.absoluteValue
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -206,13 +205,12 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (maceChance == -1f) return 0
-            if(Config.hideMaceChanceWhenEliminated.value && StateManager.eliminated) return 0
+            if (StateManager.maceChance == -1f) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
             val text = Text.translatable("mrc.roundhud.mace_chance_text",
                 Text.literal("%.2f%%".format(StateManager.maceChance)).also {
-                    if (Config.chanceUseColor.value) it.setStyle(Config.getAccentStyle(textColors[Math.abs(floor(maceChance / 7.7).toInt())]))
+                    if (Config.chanceUseColor.value) it.setStyle(Config.getAccentStyle(textColors[(StateManager.maceChance / 7.7).toInt().absoluteValue]))
                 }).setStyle(Config.getAccentStyle(0x79fc00))
 
             val width = textRenderer.getWidth(text)
@@ -232,12 +230,6 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                     .name(Text.translatable("mrc.config.modifiersConfig.option.chanceUseColor"))
                     .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.chanceUseColor.description")))
                     .binding(Config.chanceUseColor.asBinding())
-                    .controller(TickBoxControllerBuilder::create)
-                    .build())
-                .option(Option.createBuilder<Boolean>()
-                    .name(Text.translatable("mrc.config.modifiersConfig.option.hideMaceChanceWhenEliminated"))
-                    .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.hideMaceChanceWhenEliminated.description")))
-                    .binding(Config.hideMaceChanceWhenEliminated.asBinding())
                     .controller(TickBoxControllerBuilder::create)
                     .build())
                 .build())
