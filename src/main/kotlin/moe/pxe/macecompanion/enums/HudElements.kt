@@ -20,7 +20,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Formatting
 import net.minecraft.util.StringIdentifiable
-import kotlin.math.floor
+import kotlin.math.absoluteValue
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -210,7 +210,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             val textRenderer = MinecraftClient.getInstance().textRenderer
             val text = Text.translatable("mrc.roundhud.mace_chance_text",
                 Text.literal("%.2f%%".format(StateManager.maceChance)).also {
-                    if (Config.chanceUseColor.value) it.setStyle(Config.getAccentStyle(textColors[floor(StateManager.maceChance / 7.69).toInt()]))
+                    if (Config.chanceUseColor.value) it.setStyle(Config.getAccentStyle(textColors[(StateManager.maceChance / 7.7).toInt().absoluteValue]))
                 }).setStyle(Config.getAccentStyle(0x79fc00))
 
             val width = textRenderer.getWidth(text)
@@ -227,8 +227,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             .category(ConfigCategory.createBuilder()
                 .name(Text.translatable("mrc.hudelement.${name.lowercase()}"))
                 .option(Option.createBuilder<Boolean>()
-                    .name(Text.translatable("mrc.config.modifiersConfig.option.boosterListMax"))
-                    .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.boosterListMax.description")))
+                    .name(Text.translatable("mrc.config.modifiersConfig.option.chanceUseColor"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.chanceUseColor.description")))
                     .binding(Config.chanceUseColor.asBinding())
                     .controller(TickBoxControllerBuilder::create)
                     .build())
