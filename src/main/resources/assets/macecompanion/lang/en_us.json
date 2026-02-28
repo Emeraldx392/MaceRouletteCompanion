@@ -82,6 +82,9 @@
     "mrc.config.modifiersConfig.option.chanceUseColor": "Use different percentage colors",
     "mrc.config.modifiersConfig.option.chanceUseColor.description": "The percentage color changes based on the value, from red to green.",
 
+    "mrc.config.modifiersConfig.option.hideMaceChanceWhenEliminated": "Hide when eliminated",
+    "mrc.config.modifiersConfig.option.hideMaceChanceWhenEliminated.description": "Hides the mace chance after being eliminated.",
+
     "mrc.roundhud.round": "ʀᴏᴜɴᴅ %s",
     "mrc.roundhud.alive": "%s ᴀʟɪᴠᴇ",
     "mrc.roundhud.eliminations": "\uD83E\uDE93 %s ᴇʟɪᴍɪɴᴀᴛɪᴏɴs",

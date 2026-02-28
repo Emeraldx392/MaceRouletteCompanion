@@ -1,6 +1,8 @@
 package moe.pxe.macecompanion
 
 import com.mojang.authlib.GameProfile
+import dev.isxander.yacl3.config.v3.value
+import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.enums.Modifiers
 import moe.pxe.macecompanion.util.SubtitleCallback
 import moe.pxe.macecompanion.util.TitleCallback
@@ -68,6 +70,7 @@ object StateManager {
             playersTotal = playersAlive
             playtime = TimeSource.Monotonic.markNow()
             eliminations = 0
+            eliminated = false
             AutoGL.sendGlMessage()
         }
         round = number
