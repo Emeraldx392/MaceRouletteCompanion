@@ -210,9 +210,11 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             if(Config.hideMaceChanceWhenEliminated.value && StateManager.eliminated) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
+            var maceChanceColorIdx = (StateManager.maceChance / 7.7).toInt().absoluteValue
+            if (maceChanceColorIdx > 12) maceChanceColorIdx = 12
             val text = Text.translatable("mrc.roundhud.mace_chance_text",
                 Text.literal("%.2f%%".format(StateManager.maceChance)).also {
-                    if (Config.chanceUseColor.value) it.setStyle(Config.getAccentStyle(textColors[(StateManager.maceChance / 7.7).toInt().absoluteValue]))
+                    if (Config.chanceUseColor.value) it.setStyle(Config.getAccentStyle(textColors[maceChanceColorIdx]))
                 }).setStyle(Config.getAccentStyle(0x79fc00))
 
             val width = textRenderer.getWidth(text)
