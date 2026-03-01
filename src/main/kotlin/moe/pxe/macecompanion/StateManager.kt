@@ -68,6 +68,7 @@ object StateManager {
             playersTotal = playersAlive
             playtime = TimeSource.Monotonic.markNow()
             eliminations = 0
+            eliminated = false
             AutoGL.sendGlMessage()
         }
         round = number

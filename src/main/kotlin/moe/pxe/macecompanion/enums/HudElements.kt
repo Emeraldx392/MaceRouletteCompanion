@@ -205,7 +205,9 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
+
             if (StateManager.maceChance == -1f) return 0
+            if(Config.hideMaceChanceWhenEliminated.value && StateManager.eliminated) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
             val text = Text.translatable("mrc.roundhud.mace_chance_text",
@@ -230,6 +232,12 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                     .name(Text.translatable("mrc.config.modifiersConfig.option.chanceUseColor"))
                     .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.chanceUseColor.description")))
                     .binding(Config.chanceUseColor.asBinding())
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+                .option(Option.createBuilder<Boolean>()
+                    .name(Text.translatable("mrc.config.modifiersConfig.option.hideMaceChanceWhenEliminated"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.hideMaceChanceWhenEliminated.description")))
+                    .binding(Config.hideMaceChanceWhenEliminated.asBinding())
                     .controller(TickBoxControllerBuilder::create)
                     .build())
                 .build())
