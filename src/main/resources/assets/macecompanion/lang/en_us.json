@@ -79,6 +79,9 @@
     "mrc.config.modifiersConfig.option.boosterListMax": "Maximum Boosters Shown",
     "mrc.config.modifiersConfig.option.boosterListMax.description": "The maximum amount of modifier boosters to show. Any overflow will be shown as \"+n\" at the end of the list.",
 
+    "mrc.config.modifiersConfig.option.use2dHeads": "Use 2d Heads",
+    "mrc.config.modifiersConfig.option.use2dHeads.description": "Use 2d heads instead of 3d",
+
     "mrc.config.modifiersConfig.option.chanceUseColor": "Use different percentage colors",
     "mrc.config.modifiersConfig.option.chanceUseColor.description": "The percentage color changes based on the value, from red to green.",
 

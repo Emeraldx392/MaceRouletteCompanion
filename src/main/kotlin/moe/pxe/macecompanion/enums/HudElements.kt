@@ -144,16 +144,48 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                 if (rightAligned) xPos = -16
                 context.drawItem(it.icon, xPos, yPos)
                 context.drawStackOverlay(textRenderer, it.icon, xPos, yPos)
-
                 val modifierText = it.translatable.copy().setStyle(Config.getAccentStyle(it.translatable.style)).also { text ->
                     if (StateManager.eternalModifier == it) text.append(Text.literal(" ∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10068202)))
                 }
-                val modifierWidth = textRenderer.getWidth(modifierText)
+                var headText2d = Text.empty()
+                if (Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
+                    var index = 0
+                    for(profile in playerList) {
+                        if(Config.hudLocation.value.rightAligned){
+                            headText2d.append(PlayerHead.player2dHeadTextComponent(profile.name)).setStyle(Style.EMPTY.withColor(Formatting.WHITE))
+                                .append(Text.literal(" "))
+                        }else{
+                            headText2d.append(Text.literal(" "))
+                                .append(PlayerHead.player2dHeadTextComponent(profile.name))
+                        }
+                        if(index + 1  >= Config.boosterListMax.value){
+                            val boosterBonus = Text.literal("+${playerList.size - Config.boosterListMax.value}").withColor(0xa63efc)
+                            if(Config.hudLocation.value.rightAligned){
+                                headText2d = boosterBonus
+                                    .append(Text.literal(" "))
+                                    .append(headText2d)
+                            } else {
+                                headText2d
+                                    .append(Text.literal(" "))
+                                    .append(boosterBonus)
+                            }
+                            break
+                        }
+                        index++
+                    }
+                }
+                var finalText = Text.empty()
+                if(Config.hudLocation.value.rightAligned){
+                    finalText = headText2d.append(modifierText)
+                }else{
+                    finalText = modifierText.append(headText2d)
+                }
+                val modifierWidth = textRenderer.getWidth(finalText)
                 xPos = 22
                 if (rightAligned) xPos = -22 - modifierWidth
-                context.drawTextWithShadow(textRenderer, modifierText, xPos, yPos+4, -1)
+                context.drawTextWithShadow(textRenderer, finalText, xPos, yPos+4, -1)
 
-                StateManager.modifierBoosters[it]?.let { playerList ->
+                if (!Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
                     playerList.forEachIndexed { index, profile ->
                         xPos = 28 + modifierWidth + (index*20)
                         if (rightAligned) xPos = -44 - modifierWidth - (index*20)
@@ -189,6 +221,12 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                                 .range(0, 15)
                                 .step(1)
                         }
+                        .build())
+                    .option(Option.createBuilder<Boolean>()
+                        .name(Text.translatable("mrc.config.modifiersConfig.option.use2dHeads"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.use2dHeads.description")))
+                        .binding(Config.use2dHeads.asBinding())
+                        .controller(TickBoxControllerBuilder::create)
                         .build())
                     .build())
                 .save(Config::saveToFile)
