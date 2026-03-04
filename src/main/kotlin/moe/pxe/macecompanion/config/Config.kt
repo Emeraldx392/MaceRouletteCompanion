@@ -61,6 +61,8 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
         HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,
         HudElements.ELIMINATIONS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
 
+    val showNewEventToasts by register<Boolean>(true, BOOL)
+
     // Misc. Config
     val useFlint by register<Boolean>(true, BOOL)
     val plotIds by register<List<String>>(listOf("mace", "maceroulette", "statless", "14000004"), STRING.listOf())

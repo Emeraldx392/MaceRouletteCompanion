@@ -68,6 +68,10 @@
     "mrc.config.category.roundhud.group.hudElements": "Elements",
     "mrc.config.category.roundhud.group.hudElements.description": "The list of elements to render in the HUD, from top to bottom. If an element cannot be rendered, it'll be skipped.",
 
+    "mrc.config.category.toasts": "Toasts",
+    "mrc.config.category.toasts.option.showNewEventToasts": "Show New Event Toasts",
+    "mrc.config.category.toasts.option.showNewEventToasts.description": "A toast that shows when a new event started.",
+
     "mrc.config.category.miscellaneous": "Miscellaneous",
     "mrc.config.category.miscellaneous.option.useFlint": "Use Flint",
     "mrc.config.category.miscellaneous.option.useFlint.description": "Flint is a library that makes developing mods for DiamondFire much easier. Installing it allows Mace Roulette Companion to tell when you're on Mace Roulette and when you're not.",

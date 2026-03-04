@@ -1,6 +1,9 @@
 package moe.pxe.macecompanion
 
 import com.mojang.authlib.GameProfile
+import dev.isxander.yacl3.config.v3.value
+import moe.pxe.macecompanion.CustomToasts.sendNewEventToast
+import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.enums.Modifiers
 import moe.pxe.macecompanion.util.SubtitleCallback
 import moe.pxe.macecompanion.util.TitleCallback
@@ -10,7 +13,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket
+import net.minecraft.text.MutableText
 import net.minecraft.text.Style
+import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
@@ -31,6 +36,14 @@ object StateManager {
     var maceChance = -1f
         private set
     var eliminated = true
+        private set
+    var newEvent = false
+        private set
+    var newEventStarter = ""
+        private set
+    var newEventType = ""
+        private set
+    var newEventDuration = -1
         private set
     var playtime: TimeMark? = null
         private set
@@ -60,6 +73,10 @@ object StateManager {
     private val titleRoundNumberRegex = """ʀᴏᴜɴᴅ (\d+)""".toRegex()
     private val titlePlayersAliveRegex = """(\d+) ᴀʟɪᴠᴇ""".toRegex()
     private val titleEliminatedRegex = """☠☠☠""".toRegex()
+
+    private val newEventRegex = """⏵ New Event Started! \(by (.+)\)""".toRegex()
+    private val newEventTypeRegex = """  ⏵ Type: (.+)""".toRegex()
+    private val newEventDurationRegex = """  ⏵ Length: (\d+)h""".toRegex()
 
     private var checkForModifiers = false
 
@@ -109,6 +126,22 @@ object StateManager {
                 gameOngoing = false
                 AutoGG.sendGGMessage()
             }
+            newEventRegex.matchEntire(message.string)?.groups[1]?.let {
+                newEvent = true
+                newEventStarter = it.value
+            }
+            newEventTypeRegex.matchEntire(message.string)?.groups[1]?.let {
+                newEventType = it.value
+            }
+            newEventDurationRegex.matchEntire(message.string)?.groups[1]?.let {
+                newEventDuration = it.value.toInt()
+                if(newEvent){
+                    val text = Text.literal("${newEventType}: ${newEventDuration}h (by ${newEventStarter})")
+                    if(Config.showNewEventToasts.value) sendNewEventToast(text)
+                    newEvent = false
+                }
+            }
+
             // Modifier Entry
             if (checkForModifiers) {
                 val modBoostedMatch = chatModifierBoostedRegex.matchEntire(message.string)
