@@ -71,6 +71,8 @@
     "mrc.config.category.toasts": "Toasts",
     "mrc.config.category.toasts.option.showNewEventToasts": "Show New Event Toasts",
     "mrc.config.category.toasts.option.showNewEventToasts.description": "A toast that shows when a new event started.",
+    "mrc.config.category.toasts.option.showBountyToasts": "Show Bounty Toasts",
+    "mrc.config.category.toasts.option.showBountyToasts.description": "A toast that shows when a bounty has been placed on you, has increased, or when you're awarded with a bounty, or when you cash in your bounty.",
 
     "mrc.config.category.miscellaneous": "Miscellaneous",
     "mrc.config.category.miscellaneous.option.useFlint": "Use Flint",

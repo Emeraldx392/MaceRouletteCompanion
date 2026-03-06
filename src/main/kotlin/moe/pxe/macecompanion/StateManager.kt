@@ -1,9 +1,7 @@
 package moe.pxe.macecompanion
 
 import com.mojang.authlib.GameProfile
-import dev.isxander.yacl3.config.v3.value
-import moe.pxe.macecompanion.CustomToasts.sendNewEventToast
-import moe.pxe.macecompanion.config.Config
+import moe.pxe.macecompanion.MaceCompanion.Companion.LOGGER
 import moe.pxe.macecompanion.enums.Modifiers
 import moe.pxe.macecompanion.util.SubtitleCallback
 import moe.pxe.macecompanion.util.TitleCallback
@@ -13,14 +11,13 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket
-import net.minecraft.text.MutableText
 import net.minecraft.text.Style
-import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
 object StateManager {
+
     var gameOngoing = false
         private set
     var round = -1
@@ -77,6 +74,13 @@ object StateManager {
     private val newEventRegex = """⏵ New Event Started! \(by (.+)\)""".toRegex()
     private val newEventTypeRegex = """  ⏵ Type: (.+)""".toRegex()
     private val newEventDurationRegex = """  ⏵ Length: (\d+)h""".toRegex()
+    
+    private val placedBountyRegex = """⏵ (.+) placed a (\d+)⛂ bounty on (.+)!""".toRegex()
+    private val selfPlacedBountyRegex = """⏵ (.+) placed a (\d+)⛂ bounty on themself!""".toRegex()
+    private val raisedBountyRegex = """⏵ (.+) raised the bounty amount to (\d+)⛂ on (.+)!""".toRegex()
+    private val selfRaisedBountyRegex = """⏵ (.+) raised the bounty amount on themself to (\d+)⛂!""".toRegex()
+    private val rewardedBountyRegex = """⏵ (.+) was rewarded (\d+)⛂ for eliminating (.+)!""".toRegex()
+    private val cashedInBountyRegex = """⏵ (.+) cashed in their bounty of (\d+)⛂!""".toRegex()
 
     private var checkForModifiers = false
 
@@ -136,10 +140,48 @@ object StateManager {
             newEventDurationRegex.matchEntire(message.string)?.groups[1]?.let {
                 newEventDuration = it.value.toInt()
                 if(newEvent){
-                    val text = Text.literal("${newEventType}: ${newEventDuration}h (by ${newEventStarter})")
-                    if(Config.showNewEventToasts.value) sendNewEventToast(text)
+                    CustomToasts.sendNewEventToast(newEventType, newEventDuration, newEventStarter)
                     newEvent = false
                 }
+            }
+            placedBountyRegex.matchEntire(message.string)?.groups?.let {
+                val bountyPlacer = it[1]?.value.toString()
+                val bountyAmount = it[2]?.value?.toInt()
+                val bountyReceiver = it[3]?.value.toString()
+                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
+                if(bountyReceiver == username) CustomToasts.sendPlacedBountyToast(bountyAmount, bountyPlacer)
+            }
+            selfPlacedBountyRegex.matchEntire(message.string)?.groups?.let {
+                val bountyPlacer = it[1]?.value.toString()
+                val bountyAmount = it[2]?.value?.toInt()
+                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
+                if(bountyPlacer == username) CustomToasts.sendSelfPlacedBountyToast(bountyAmount)
+            }
+            raisedBountyRegex.matchEntire(message.string)?.groups?.let {
+                val bountyPlacer = it[1]?.value.toString()
+                val bountyAmount = it[2]?.value?.toInt()
+                val bountyReceiver = it[3]?.value.toString()
+                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
+                if(bountyReceiver == username) CustomToasts.sendRaisedBountyToast(bountyAmount, bountyPlacer)
+            }
+            selfRaisedBountyRegex.matchEntire(message.string)?.groups?.let {
+                val bountyPlacer = it[1]?.value.toString()
+                val bountyAmount = it[2]?.value?.toInt()
+                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
+                if(bountyPlacer == username) CustomToasts.sendSelfRaisedBountyToast(bountyAmount)
+            }
+            rewardedBountyRegex.matchEntire(message.string)?.groups?.let {
+                val bountyReceiver = it[1]?.value.toString()
+                val bountyAmount = it[2]?.value?.toInt()
+                val playerWithBounty = it[3]?.value.toString()
+                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
+                if(bountyReceiver == username) CustomToasts.sendRewardedBountyToast(bountyAmount, playerWithBounty)
+            }
+            cashedInBountyRegex.matchEntire(message.string)?.groups?.let {
+                val bountyReceiver = it[1]?.value.toString()
+                val bountyAmount = it[2]?.value?.toInt()
+                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
+                if(bountyReceiver == username) CustomToasts.sendCashedInBountyToast(bountyAmount)
             }
 
             // Modifier Entry
