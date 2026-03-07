@@ -245,6 +245,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
         ): Int {
 
             if (StateManager.maceChance == -1f) return 0
+            if (StateManager.maceChance == -100f) return 0
             if(Config.hideMaceChanceWhenEliminated.value && StateManager.eliminated) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
