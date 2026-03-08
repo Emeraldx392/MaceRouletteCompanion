@@ -20,6 +20,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Colors
 import net.minecraft.util.Formatting
 import net.minecraft.util.StringIdentifiable
+import net.minecraft.util.collection.ListOperation
 import kotlin.math.absoluteValue
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -144,8 +145,10 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                 if (rightAligned) xPos = -16
                 context.drawItem(it.icon, xPos, yPos)
                 context.drawStackOverlay(textRenderer, it.icon, xPos, yPos)
-                val modifierText = it.translatable.copy().setStyle(Config.getAccentStyle(it.translatable.style)).also { text ->
-                    if (StateManager.eternalModifier == it) text.append(Text.literal(" ∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10068202)))
+                var modifierText = it.translatable.copy().setStyle(Config.getAccentStyle(it.translatable.style))
+                if (StateManager.eternalModifier == it) {
+                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10068202)))
+                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("∞ ").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10068202)).append(modifierText)
                 }
                 var headText2d = Text.empty()
                 if (Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
