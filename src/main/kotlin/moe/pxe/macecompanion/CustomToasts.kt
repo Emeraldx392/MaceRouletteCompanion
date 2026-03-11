@@ -53,4 +53,8 @@ object CustomToasts {
         val description = Text.literal("You cashed in your ${bountyAmount}⛂ bounty")
         sendCustomToast(Text.literal("Bounty Cashed In!"), description)
     }
+    fun sendPlayerJoinedToast(player: String){
+        if(!Config.playerStrings.value.contains(player)) return
+        sendCustomToast(Text.literal("Player Joined!"), Text.literal("${player} joined the game!"))
+    }
 }

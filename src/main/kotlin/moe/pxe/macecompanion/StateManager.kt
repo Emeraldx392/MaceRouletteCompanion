@@ -1,7 +1,9 @@
 package moe.pxe.macecompanion
 
 import com.mojang.authlib.GameProfile
+import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.MaceCompanion.Companion.LOGGER
+import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.enums.Modifiers
 import moe.pxe.macecompanion.util.SubtitleCallback
 import moe.pxe.macecompanion.util.TitleCallback
@@ -50,6 +52,8 @@ object StateManager {
         private set
     var eternalModifier: Modifiers? = null
         private set
+
+    private val chatJoinRegex = """\+ (.+)""".toRegex()
 
     private val chatRoundNumberRegex = """ +Round (\d+) +""".toRegex()
 
@@ -129,6 +133,9 @@ object StateManager {
             chatLeaderboardHeaderRegex.matchEntire(message.string)?.let {
                 gameOngoing = false
                 AutoGG.sendGGMessage()
+            }
+            chatJoinRegex.matchEntire(message.string)?.groups[1]?.let {
+                if(Config.showPlayerJoinToasts.value) CustomToasts.sendPlayerJoinedToast(it.value)
             }
             newEventRegex.matchEntire(message.string)?.groups[1]?.let {
                 newEvent = true
