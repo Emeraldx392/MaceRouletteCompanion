@@ -102,6 +102,9 @@
     "mrc.config.modifiersConfig.option.use2dHeads": "Use 2d Heads",
     "mrc.config.modifiersConfig.option.use2dHeads.description": "Use 2d heads instead of 3d",
 
+    "mrc.config.modifiersConfig.option.showMysteryModifiers": "Reveal Mystery Modifiers",
+    "mrc.config.modifiersConfig.option.showMysteryModifiers.description": "Reveals the mystery modifiers",
+
     "mrc.config.modifiersConfig.option.chanceUseColor": "Use different percentage colors",
     "mrc.config.modifiersConfig.option.chanceUseColor.description": "The percentage color changes based on the value, from red to green.",
 
@@ -117,6 +120,7 @@
 
     "mrc.modifier.double": "Double Mace",
     "mrc.modifier.triple": "Triple Mace",
+    "mrc.modifier.quadruple": "Quadruple Mace",
     "mrc.modifier.tiny": "Tiny Mace",
     "mrc.modifier.big": "Big Mace",
     "mrc.modifier.slow_time": "Slow Time",
@@ -124,8 +128,8 @@
     "mrc.modifier.shockwave": "Shockwave Mace",
     "mrc.modifier.elytra": "Elytra Launch",
     "mrc.modifier.wind_storm": "Wind Storm",
-    "mrc.modifier.cobwebs": "Player Cobwebs",
-    "mrc.modifier.blocks": "Player Blocks",
+    "mrc.modifier.cobwebs": "Cobwebs",
+    "mrc.modifier.blocks": "Blocks",
     "mrc.modifier.caged": "Caged",
     "mrc.modifier.pillars": "Pillars",
     "mrc.modifier.sweeper": "Sweeper",
@@ -160,6 +164,11 @@
     "mrc.modifier.rods": "Fishing Rods",
     "mrc.modifier.magnetic": "Magnetic Burst",
     "mrc.modifier.levitation": "Levitation Burst",
+    "mrc.modifier.totem": "Steal the Totem",
+    "mrc.modifier.spikes": "Spikes",
+    "mrc.modifier.mirror": "Mirror",
+    "mrc.modifier.minefield": "Minefield",
+    "mrc.modifier.bouncy_charges": "Bouncy Charges",
     "mrc.modifier.unknown": "Unknown Modifier",
     "mrc.modifier.mystery": "???",
 

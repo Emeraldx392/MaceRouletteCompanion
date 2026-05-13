@@ -15,8 +15,10 @@ import moe.pxe.macecompanion.util.PlayerHead
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
+import net.minecraft.text.HoverEvent
 import net.minecraft.text.Style
 import net.minecraft.text.Text
+import net.minecraft.text.TextColor
 import net.minecraft.util.Colors
 import net.minecraft.util.Formatting
 import net.minecraft.util.StringIdentifiable
@@ -146,9 +148,23 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                 context.drawItem(it.icon, xPos, yPos)
                 context.drawStackOverlay(textRenderer, it.icon, xPos, yPos)
                 var modifierText = it.translatable.copy().setStyle(Config.getAccentStyle(it.translatable.style))
-                if (StateManager.eternalModifier == it) {
-                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10068202)))
-                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("∞ ").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10068202)).append(modifierText)
+                if (Config.showMysteryModifiers.value && StateManager.mysteryModifiers.contains(it)){
+                    modifierText.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xD2B5FF)))
+                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ???").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xD2B5FF))))
+                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("??? ").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xD2B5FF))).append(modifierText)
+                }
+                if (StateManager.eternalModifier == it && StateManager.chargedModifiers.contains(it)) {
+                    modifierText.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF)))
+                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ⚡").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF)))).append(Text.literal(" ∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549)))
+                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("∞ ").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549)).append(Text.literal("⚡ ").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF)).withShadowColor(-16777216)).append(modifierText))
+                }else if (StateManager.eternalModifier == it) {
+                    modifierText.setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549))
+                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549)))
+                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("∞ ").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549)).append(modifierText)
+                }else if (StateManager.chargedModifiers.contains(it)) {
+                    modifierText.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF)))
+                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ⚡").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF))))
+                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("⚡ ").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF))).append(modifierText)
                 }
                 var headText2d = Text.empty()
                 if (Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
@@ -229,6 +245,12 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                         .name(Text.translatable("mrc.config.modifiersConfig.option.use2dHeads"))
                         .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.use2dHeads.description")))
                         .binding(Config.use2dHeads.asBinding())
+                        .controller(TickBoxControllerBuilder::create)
+                        .build())
+                    .option(Option.createBuilder<Boolean>()
+                        .name(Text.translatable("mrc.config.modifiersConfig.option.showMysteryModifiers"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.showMysteryModifiers.description")))
+                        .binding(Config.showMysteryModifiers.asBinding())
                         .controller(TickBoxControllerBuilder::create)
                         .build())
                     .build())

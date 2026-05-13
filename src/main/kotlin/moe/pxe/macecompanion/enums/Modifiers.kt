@@ -27,6 +27,13 @@ enum class Modifiers {
         }
     },
 
+    QUADRUPLE {
+        override val matchName = "Quadruple Mace"
+        override val icon = Items.MACE.defaultStack.apply {
+            count = 4
+        }
+    },
+
     TINY {
         override val matchName = "Tiny Mace"
         override val icon = Items.STONE_BUTTON.defaultStack
@@ -74,12 +81,12 @@ enum class Modifiers {
     },
 
     COBWEBS {
-        override val matchName = "Player Cobwebs"
+        override val matchName = "Cobwebs"
         override val icon = Items.COBWEB.defaultStack
     },
 
     BLOCKS {
-        override val matchName = "Player Blocks"
+        override val matchName = "Blocks"
         override val icon = Items.CHERRY_PLANKS.defaultStack
     },
 
@@ -140,7 +147,7 @@ enum class Modifiers {
 
     PICKAXE {
         override val matchName = "Pickaxe"
-        override val icon = Items.NETHERITE_PICKAXE.defaultStack
+        override val icon = Items.STONE_PICKAXE.defaultStack
     },
 
     WIND_BURST {
@@ -223,11 +230,6 @@ enum class Modifiers {
         override val icon = Items.PUMPKIN.defaultStack
     },
 
-    MIRAGE {
-        override val matchName = "Mirage"
-        override val icon = Items.BREEZE_SPAWN_EGG.defaultStack
-    },
-
     ALL {
         override val matchName = "All Mace"
         override val icon = Items.MACE.defaultStack.apply {
@@ -248,6 +250,31 @@ enum class Modifiers {
     LEVITATION {
         override val matchName = "Levitation Burst"
         override val icon = Items.ALLAY_SPAWN_EGG.defaultStack
+    },
+
+    TOTEM {
+        override val matchName = "Steal the Totem"
+        override val icon = Items.TOTEM_OF_UNDYING.defaultStack
+    },
+
+    SPIKES {
+        override val matchName = "Spikes"
+        override val icon = Items.POINTED_DRIPSTONE.defaultStack
+    },
+
+    MIRROR {
+        override val matchName = "Mirror"
+        override val icon = Items.WHITE_BANNER.defaultStack
+    },
+
+    MINEFIELD {
+        override val matchName = "Minefield"
+        override val icon = Items.MANGROVE_PRESSURE_PLATE.defaultStack
+    },
+
+    BOUNCY_CHARGES {
+        override val matchName = "Bouncy Charges"
+        override val icon = Items.SLIME_BALL.defaultStack
     },
 
     UNKNOWN {

@@ -73,6 +73,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     // NESTED CONFIG ===========================================================
     val boosterListMax by register<Int>(5, INT)
     val use2dHeads by register<Boolean>(false, BOOL)
+    val showMysteryModifiers by register<Boolean>(false, BOOL)
 
     val chanceUseColor by register<Boolean>(true, BOOL)
     val hideMaceChanceWhenEliminated by register<Boolean>(false, BOOL)
