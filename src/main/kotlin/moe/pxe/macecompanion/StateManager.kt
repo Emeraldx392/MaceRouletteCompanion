@@ -114,7 +114,7 @@ object StateManager {
 
     private fun extractModifierNameFromMessage(message: Text): String? {
         Modifiers.entries.forEach { modifier ->
-            if (message.string.contains(modifier.matchName) && !message.string.contains("Modifier Charger")) {
+            if (message.string.contains(modifier.matchName) && !message.string.contains("Modifier Charger") && !message.string.contains("???")) {
                 var revealMysteryModifier = Config.showMysteryModifiers.value
                 if (messageContainsTexture(message, mysteryModifierTexture)) {
                     if(!revealMysteryModifier){
