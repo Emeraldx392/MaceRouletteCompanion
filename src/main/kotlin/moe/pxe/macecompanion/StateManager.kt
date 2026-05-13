@@ -100,8 +100,6 @@ object StateManager {
     private val rewardedBountyRegex = """⏵ (.+) was rewarded (\d+)⛂ for eliminating (.+)!""".toRegex()
     private val cashedInBountyRegex = """⏵ (.+) cashed in their bounty of (\d+)⛂!""".toRegex()
 
-    private val chargedModifierMessageRegex = """⏵ (.+) used a Modifier Charger on (.+)! ◇ It will be charged for its next (\d+) appearances!""".toRegex()
-
     private fun messageToJsonString(message: Text): String {
         return TextCodecs.CODEC
             .encodeStart(MinecraftClient.getInstance().world!!.registryManager.getOps(JsonOps.INSTANCE), message)
@@ -116,7 +114,7 @@ object StateManager {
 
     private fun extractModifierNameFromMessage(message: Text): String? {
         Modifiers.entries.forEach { modifier ->
-            if (message.string.contains(modifier.matchName) && chargedModifierMessageRegex.matchEntire(message.string) == null) {
+            if (message.string.contains(modifier.matchName) && !message.string.contains("Modifier Charger")) {
                 var revealMysteryModifier = Config.showMysteryModifiers.value
                 if (messageContainsTexture(message, mysteryModifierTexture)) {
                     if(!revealMysteryModifier){
