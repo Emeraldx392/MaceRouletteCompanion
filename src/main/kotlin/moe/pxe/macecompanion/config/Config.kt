@@ -62,6 +62,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
         HudElements.ELIMINATIONS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
     // Toasts
     val showNewEventToasts by register<Boolean>(true, BOOL)
+    val showModifierChargerToasts by register<Boolean>(true, BOOL)
     val showBountyToasts by register<Boolean>(true, BOOL)
     val showPlayerJoinToasts by register<Boolean>(true, BOOL)
     val playerStrings by register<List<String>>(listOf(""), STRING.listOf())

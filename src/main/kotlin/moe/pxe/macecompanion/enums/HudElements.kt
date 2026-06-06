@@ -155,8 +155,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                 }
                 if (StateManager.eternalModifier == it && StateManager.chargedModifiers.contains(it)) {
                     modifierText.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF)))
-                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ⚡").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF)))).append(Text.literal(" ∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549)))
-                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("∞ ").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549)).append(Text.literal("⚡ ").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF)).withShadowColor(-16777216)).append(modifierText))
+                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ⚡").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF)))).append(Text.literal("∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549)))
+                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549)).append(Text.literal("⚡ ").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x0786FF)).withShadowColor(-16777216)).append(modifierText))
                 }else if (StateManager.eternalModifier == it) {
                     modifierText.setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549))
                     if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ∞").setStyle(Style.EMPTY.withColor(Formatting.WHITE).withShadowColor(-10071549)))

@@ -72,6 +72,8 @@
 
     "mrc.config.category.toasts.group.game.option.showNewEventToasts": "Show New Event Toasts",
     "mrc.config.category.toasts.group.game.option.showNewEventToasts.description": "A toast that shows when a new event started.",
+    "mrc.config.category.toasts.group.game.option.showModifierChargerToasts": "Show Modifier Charger Toasts",
+    "mrc.config.category.toasts.group.game.option.showModifierChargerToasts.description": "A toast that shows when someone uses a modifier charger to charge a modifier.",
     "mrc.config.category.toasts.group.game.option.showBountyToasts": "Show Bounty Toasts",
     "mrc.config.category.toasts.group.game.option.showBountyToasts.description": "A toast that shows when a bounty has been placed on you, has increased, or when you're awarded with a bounty, or when you cash in your bounty.",
 

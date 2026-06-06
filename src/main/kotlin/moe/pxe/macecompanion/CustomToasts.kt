@@ -22,6 +22,12 @@ object CustomToasts {
         val description = Text.literal("${newEventType}: ${newEventDuration}h (by ${newEventStarter})")
         sendCustomToast(Text.literal("New Event Started!"), description)
     }
+    //Modifier charger toast
+    fun sendModifierChargerToast(modifier: String, queueLength: Int?, player: String) {
+        if (!Config.showModifierChargerToasts.value) return
+        val description = Text.literal("${modifier} will be charged for the next ${queueLength} appearances")
+        sendCustomToast(Text.literal("${player} Used a Modifier Charger!"), description)
+    }
     //Bounty toasts
     fun sendPlacedBountyToast(bountyAmount: Int?, bountyPlacer: String) {
         if (!Config.showBountyToasts.value) return

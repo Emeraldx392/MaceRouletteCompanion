@@ -3,12 +3,12 @@ package moe.pxe.macecompanion
 import com.mojang.authlib.GameProfile
 import com.mojang.serialization.JsonOps
 import dev.isxander.yacl3.config.v3.value
+import moe.pxe.macecompanion.CustomToasts.sendModifierChargerToast
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.enums.Modifiers
 import moe.pxe.macecompanion.util.SubtitleCallback
 import moe.pxe.macecompanion.util.TitleCallback
 import moe.pxe.macecompanion.util.OnMaceRoulette
-import moe.pxe.macecompanion.MaceCompanion
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.MinecraftClient
@@ -19,7 +19,6 @@ import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.text.TextCodecs
 import net.minecraft.util.ActionResult
-import javax.crypto.Mac
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
@@ -92,6 +91,8 @@ object StateManager {
     private val newEventRegex = """⏵ New Event Started! \(by (.+)\)""".toRegex()
     private val newEventTypeRegex = """  ⏵ Type: (.+)""".toRegex()
     private val newEventDurationRegex = """  ⏵ Length: (\d+)h""".toRegex()
+
+    private val modifierChargerRegex = """⏵ (.+) used a Modifier Charger on (.+)!\n  ◇ It will be charged for its next (\d+) appearances!""".toRegex()
     
     private val placedBountyRegex = """⏵ (.+) placed a (\d+)⛂ bounty on (.+)!""".toRegex()
     private val selfPlacedBountyRegex = """⏵ (.+) placed a (\d+)⛂ bounty on themself!""".toRegex()
@@ -112,9 +113,10 @@ object StateManager {
         return json.contains(texture)
     }
 
-    private fun extractModifierNameFromMessage(message: Text): String? {
+    private fun extractModifierNameFromMessage(message: Text, isModifierCharger: Boolean): String? {
         Modifiers.entries.forEach { modifier ->
-            if (message.string.contains(modifier.matchName) && !message.string.contains("Modifier Charger") && !message.string.contains("???")) {
+            if (message.string.contains(modifier.matchName)){
+                if((!isModifierCharger && message.string.contains("Modifier Charger")) || message.string.contains("???")) return null
                 var revealMysteryModifier = Config.showMysteryModifiers.value
                 if (messageContainsTexture(message, mysteryModifierTexture)) {
                     if(!revealMysteryModifier){
@@ -224,6 +226,14 @@ object StateManager {
                     newEvent = false
                 }
             }
+
+            modifierChargerRegex.matchEntire(message.string)?.groups?.let {
+                val player = it[1]?.value.toString()
+                val modifier = extractModifierNameFromMessage(message, true).toString()
+                val queueLength = it[3]?.value?.toInt()
+                sendModifierChargerToast(modifier, queueLength, player)
+            }
+
             placedBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyPlacer = it[1]?.value.toString()
                 val bountyAmount = it[2]?.value?.toInt()
@@ -272,7 +282,7 @@ object StateManager {
                 var modifier = Modifiers.UNKNOWN
 
                 val capturedRawName = (modReallyBoostedMatch ?: modBoostedMatch ?: modMatch)?.groupValues?.getOrNull(1)
-                val fallbackRawName = extractModifierNameFromMessage(message)
+                val fallbackRawName = extractModifierNameFromMessage(message, false)
                 if(fallbackRawName == "???") modifier = resolveModifierFromRawName(fallbackRawName) ?: Modifiers.UNKNOWN
                 if(fallbackRawName != "???") modifier = resolveModifierFromRawName(capturedRawName) ?: resolveModifierFromRawName(fallbackRawName) ?: Modifiers.UNKNOWN
                 if (modifier != Modifiers.UNKNOWN) {
