@@ -12,8 +12,8 @@ Minecraft mod that adds a few quality of life features to Mace Roulette.
   Automatically bets on a player during Mace Showdown. This player can be decided based on their amount of tracked wins, the user's preference, or just picked randomly.~~
 - **Round Info HUD**  
   Places information about the current round (such as how long the game has been going for, the amount of players alive, and the active modifiers) on the HUD.
-- ~~**Toasts**  
-  Displays notifications such as achievements, events, and purchases as toasts instead of chat messages.~~
+- **Toasts**  
+  Displays notifications such as bounties, events, and players joining as toasts.
 - ~~**Server List Info**  
   Displays status updates such as leaderboard/market resets, ongoing events, and announcements next to MR server listings~~
 
@@ -61,9 +61,11 @@ Minecraft mod that adds a few quality of life features to Mace Roulette.
       - [x] ...X/Y padding
       - [x] ...scale (optional)
       - [x] ...order
-  - [ ] Display toasts...
-    - [ ] ...for events
-    - [ ] ...for achievements
+  - [x] Display toasts...
+    - [x] ...for events
+    - [x] ...for bounties
+    - [x] ...for modifier chargers
+    - [x] ...for players joining
     - [ ] ...for purchases/earned cosmetics
     - [ ] ...for daily resets
 - [ ] Out-of-game Stuff
