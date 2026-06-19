@@ -98,6 +98,12 @@
     "mrc.config.category.miscellaneous.group.plotIds": "Plot IDs and Handles",
     "mrc.config.category.miscellaneous.group.plotIds.description": "A list of Plot IDs and Handles to look for when checking if the player is on Mace Roulette.",
 
+    "mrc.config.modifiersConfig.option.hideEliminationsWhenEliminated": "Hide when eliminated",
+    "mrc.config.modifiersConfig.option.hideEliminationsWhenEliminated.description": "Hides the elimination count after being eliminated.",
+
+    "mrc.config.modifiersConfig.option.hideStarFragmentsWhenEliminated": "Hide when eliminated",
+    "mrc.config.modifiersConfig.option.hideStarFragmentsWhenEliminated.description": "Hides the star fragment count after being eliminated.",
+
     "mrc.config.modifiersConfig.option.boosterListMax": "Maximum Boosters Shown",
     "mrc.config.modifiersConfig.option.boosterListMax.description": "The maximum amount of modifier boosters to show. Any overflow will be shown as \"+n\" at the end of the list.",
 
@@ -115,10 +121,11 @@
 
     "mrc.roundhud.round": "ʀᴏᴜɴᴅ %s",
     "mrc.roundhud.alive": "%s ᴀʟɪᴠᴇ",
-    "mrc.roundhud.eliminations": "\uD83E\uDE93 %s ᴇʟɪᴍɪɴᴀᴛɪᴏɴs",
-    "mrc.roundhud.playtime": "⌚ %s ᴇʟᴀᴘsᴇᴅ",
-    "mrc.roundhud.modifiers": "ᴍᴏᴅɪꜰɪᴇʀs:",
+    "mrc.roundhud.eliminations": "\uD83E\uDE93 %s ᴇʟɪᴍɪɴᴀᴛɪᴏɴꜱ",
+    "mrc.roundhud.playtime": "⌚ %s ᴇʟᴀᴘꜱᴇᴅ",
+    "mrc.roundhud.modifiers": "ᴍᴏᴅɪꜰɪᴇʀꜱ:",
     "mrc.roundhud.mace_chance_text": "⚄ %s ᴍᴀᴄᴇ ᴄʜᴀɴᴄᴇ",
+    "mrc.roundhud.starFragments": " %s ꜱᴛᴀʀ ꜰʀᴀɢᴍᴇɴᴛꜱ",
 
     "mrc.modifier.double": "Double Mace",
     "mrc.modifier.triple": "Triple Mace",
@@ -185,6 +192,7 @@
     "mrc.hudelement.playtime": "Game Duration",
     "mrc.hudelement.modifiers": "Modifiers",
     "mrc.hudelement.mace_chance": "Mace Chance",
+    "mrc.hudelement.star_fragments": "Star Fragments",
 
     "mrc.modmenu.authors_website": "Author's Website",
 

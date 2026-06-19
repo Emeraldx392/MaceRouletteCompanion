@@ -34,9 +34,9 @@ object PlayerHead {
     }
 
     fun player2dHeadTextComponent(profile: String): Text {
-        val json = JsonObject();
-        json.addProperty("player", profile);
-        val playerComponent = TextCodecs.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+        val json = JsonObject()
+        json.addProperty("player", profile)
+        val playerComponent = TextCodecs.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
         return playerComponent
     }
 }

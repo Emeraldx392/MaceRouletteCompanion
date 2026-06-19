@@ -1,5 +1,7 @@
 package moe.pxe.macecompanion.enums
 
+import com.google.gson.JsonObject
+import com.mojang.serialization.JsonOps
 import dev.isxander.yacl3.api.ConfigCategory
 import dev.isxander.yacl3.api.NameableEnum
 import dev.isxander.yacl3.api.Option
@@ -15,14 +17,13 @@ import moe.pxe.macecompanion.util.PlayerHead
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
-import net.minecraft.text.HoverEvent
 import net.minecraft.text.Style
 import net.minecraft.text.Text
+import net.minecraft.text.TextCodecs
 import net.minecraft.text.TextColor
 import net.minecraft.util.Colors
 import net.minecraft.util.Formatting
 import net.minecraft.util.StringIdentifiable
-import net.minecraft.util.collection.ListOperation
 import kotlin.math.absoluteValue
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -85,6 +86,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
             if (StateManager.eliminations == -1) return 0
+            if(Config.hideEliminationsWhenEliminated.value && StateManager.eliminated) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
             val text = Text.translatable("mrc.roundhud.eliminations", "${StateManager.eliminations}")
@@ -97,6 +99,61 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             context.drawTextWithShadow(textRenderer, text, xPos, yPos, -1)
             return 12
         }
+
+        override fun generateConfig(parent: Screen) = YetAnotherConfigLib.createBuilder()
+            .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+            .category(ConfigCategory.createBuilder()
+                .name(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+                .option(Option.createBuilder<Boolean>()
+                    .name(Text.translatable("mrc.config.modifiersConfig.option.hideEliminationsWhenEliminated"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.hideEliminationsWhenEliminated.description")))
+                    .binding(Config.hideEliminationsWhenEliminated.asBinding())
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+                .build())
+            .build()
+            .generateScreen(parent)
+    },
+
+    STAR_FRAGMENTS {
+        override fun render(
+            context: DrawContext,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.starFragments == -1) return 0
+            if(Config.hideStarFragmentsWhenEliminated.value && StateManager.eliminated) return 0
+
+            val textRenderer = MinecraftClient.getInstance().textRenderer
+            val json = JsonObject()
+            json.addProperty("atlas", "minecraft:particles")
+            json.addProperty("sprite", "spark_2")
+            val starFragment = TextCodecs.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
+            var text = Text.empty().append(starFragment).append(Text.translatable("mrc.roundhud.starFragments", "${StateManager.starFragments}"))
+                .setStyle(Config.getAccentStyle(0xa0f9ff))
+            val width = textRenderer.getWidth(text)
+            var xPos = 0
+            if (rightAligned) xPos = -width
+            var yPos = yOffset
+            if (bottomAligned) yPos = -yOffset - 12
+            context.drawTextWithShadow(textRenderer, text, xPos, yPos, -1)
+            return 12
+        }
+
+        override fun generateConfig(parent: Screen) = YetAnotherConfigLib.createBuilder()
+            .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+            .category(ConfigCategory.createBuilder()
+                .name(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+                .option(Option.createBuilder<Boolean>()
+                    .name(Text.translatable("mrc.config.modifiersConfig.option.hideStarFragmentsWhenEliminated"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.hideStarFragmentsWhenEliminated.description")))
+                    .binding(Config.hideStarFragmentsWhenEliminated.asBinding())
+                    .controller(TickBoxControllerBuilder::create)
+                    .build())
+                .build())
+            .build()
+            .generateScreen(parent)
     },
 
     PLAYTIME {
@@ -169,6 +226,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                 var headText2d = Text.empty()
                 if (Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
                     var index = 0
+                    val bonusBoostersAmount = playerList.size - Config.boosterListMax.value
                     for(profile in playerList) {
                         if(Config.hudLocation.value.rightAligned){
                             headText2d.append(PlayerHead.player2dHeadTextComponent(profile.name)).setStyle(Style.EMPTY.withColor(Formatting.WHITE))
@@ -178,7 +236,10 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                                 .append(PlayerHead.player2dHeadTextComponent(profile.name))
                         }
                         if(index + 1  >= Config.boosterListMax.value){
-                            val boosterBonus = Text.literal("+${playerList.size - Config.boosterListMax.value}").withColor(0xa63efc)
+                            var boosterBonus = Text.literal("+${bonusBoostersAmount}").withColor(0xa63efc)
+                            if(bonusBoostersAmount == 0){
+                                boosterBonus = Text.literal("").withColor(0xa63efc)
+                            }
                             if(Config.hudLocation.value.rightAligned){
                                 headText2d = boosterBonus
                                     .append(Text.literal(" "))
@@ -205,12 +266,13 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                 context.drawTextWithShadow(textRenderer, finalText, xPos, yPos+4, -1)
 
                 if (!Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
+                    val bonusBoostersAmount = playerList.size - Config.boosterListMax.value
                     playerList.forEachIndexed { index, profile ->
                         xPos = 28 + modifierWidth + (index*20)
                         if (rightAligned) xPos = -44 - modifierWidth - (index*20)
-                        if (index >= Config.boosterListMax.value) {
-                            context.drawTextWithShadow(textRenderer, Text.literal("+${playerList.size - Config.boosterListMax.value}").withColor(0xa63efc), xPos, yPos+4, -1)
-                            val boosterText = Text.literal("+${playerList.size - Config.boosterListMax.value}")
+                        if (index + 1 > Config.boosterListMax.value) {
+                            context.drawTextWithShadow(textRenderer, Text.literal("+${bonusBoostersAmount}").withColor(0xa63efc), xPos, yPos+4, -1)
+                            val boosterText = Text.literal("+${bonusBoostersAmount}")
                                 .setStyle(Config.getAccentStyle(0xb0b2fc))
                             context.drawTextWithShadow(textRenderer, boosterText,
                                 xPos, yPos+4, -1)

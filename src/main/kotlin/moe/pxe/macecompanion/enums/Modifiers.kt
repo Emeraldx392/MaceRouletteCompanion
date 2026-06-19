@@ -4,8 +4,6 @@ import com.mojang.authlib.properties.Property
 import moe.pxe.macecompanion.MaceCompanion
 import moe.pxe.macecompanion.util.PlayerHead
 import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.ItemEnchantmentsComponent
-import net.minecraft.enchantment.Enchantments
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.text.Text
@@ -47,8 +45,8 @@ enum class Modifiers {
     SLOW_TIME {
         override val matchName = "Slow Time"
         override val icon = Items.CLOCK.defaultStack.apply {
-            set(DataComponentTypes.DAMAGE, 9)
-            set(DataComponentTypes.MAX_DAMAGE, 10)
+            set(DataComponentTypes.DAMAGE, 850)
+            set(DataComponentTypes.MAX_DAMAGE, 1000)
         }
     },
 
@@ -56,7 +54,7 @@ enum class Modifiers {
         override val matchName = "Fast Time"
         override val icon = Items.CLOCK.defaultStack.apply {
             set(DataComponentTypes.DAMAGE, 1)
-            set(DataComponentTypes.MAX_DAMAGE, 100)
+            set(DataComponentTypes.MAX_DAMAGE, 1000)
         }
     },
 
@@ -92,7 +90,7 @@ enum class Modifiers {
 
     CAGED {
         override val matchName = "Caged!"
-        override val icon = Items.IRON_BARS.defaultStack
+        override val icon = Items.COPPER_BARS.oxidized.defaultStack
     },
 
     PILLARS {
@@ -117,12 +115,12 @@ enum class Modifiers {
 
     SHRINKING {
         override val matchName = "Shrinking Map"
-        override val icon = Items.DISC_FRAGMENT_5.defaultStack
+        override val icon = Items.MUSIC_DISC_11.defaultStack
     },
 
     DONUT {
         override val matchName = "Donut Map"
-        override val icon = Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE.defaultStack
+        override val icon = Items.MUSIC_DISC_STRAD.defaultStack
     },
 
     BOUNCY {
@@ -182,7 +180,7 @@ enum class Modifiers {
 
     PINATA {
         override val matchName = "Piñata"
-        override val icon = Items.ZOMBIE_HORSE_SPAWN_EGG.defaultStack
+        override val icon = Items.HORSE_SPAWN_EGG.defaultStack
     },
 
     EXPLOSIVE {

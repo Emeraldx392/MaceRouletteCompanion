@@ -6,12 +6,14 @@ import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.CustomToasts.sendModifierChargerToast
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.enums.Modifiers
+import moe.pxe.macecompanion.util.OnMaceRoulette
 import moe.pxe.macecompanion.util.SubtitleCallback
 import moe.pxe.macecompanion.util.TitleCallback
-import moe.pxe.macecompanion.util.OnMaceRoulette
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.MinecraftClient
+import net.minecraft.item.ItemStack
+import net.minecraft.item.Items
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket
 import net.minecraft.text.HoverEvent
@@ -19,6 +21,7 @@ import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.text.TextCodecs
 import net.minecraft.util.ActionResult
+import kotlin.math.roundToInt
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
@@ -35,6 +38,10 @@ object StateManager {
     var playersTotal = -1
         private set
     var eliminations = -1
+        private set
+    var starFragmentMultiplier = -1f
+        private set
+    var starFragments = -1
         private set
     var maceChance = -1f
         private set
@@ -61,6 +68,8 @@ object StateManager {
     var eternalModifier: Modifiers? = null
         private set
 
+    val username = MinecraftClient.getInstance().session.username.toString()
+
     private val chatJoinRegex = """\+ (.+)""".toRegex()
 
     private val chatRoundNumberRegex = """ +Round (\d+) +""".toRegex()
@@ -74,25 +83,24 @@ object StateManager {
     private val chargedModifierTexture = "eyJ0ZXh0dXJlcyI6IHsiU0tJTiI6IHsidXJsIjogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDc1Mzg2MDAwNWQzNGRkNTMwMmRhNWVmOTA1Y2Q3ODFhYzcxNDFkMjJhYmMxZGIzOWMzMWJhMmZlM2M2ODRiZCJ9fX0="
     private val mysteryModifierTexture = "eyJ0ZXh0dXJlcyI6IHsiU0tJTiI6IHsidXJsIjogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzlkODliMGJmNmY2NjU1YWJjMGFlY2NjY2Q2YTE4OGQwZWNjMzY2YTRiNWU2ZDFmZTJhM2ExY2U1MWYzMGU4YSJ9fX0="
 
-    private val chatEliminationRegex = """⏵ .+ was eliminated by .+! \((\d+) remain\)""".toRegex()
-    private val chatEarlyLeaveRegex = """⏵ .+ left while alive! \((\d+) remain\)""".toRegex()
-    private val chatBlowUpRegex = """⏵ .+ blew up! \((\d+) remain\)""".toRegex()
-    private val chatVoidDeathRegex = """⏵ .+ fell into the void! \((\d+) remain\)""".toRegex()
-    private val chatVoidEliminationRegex = """⏵ .+ was thrown into the void by .+! \((\d+) remain\)""".toRegex()
-    private val chatSpikeDeathRegex = """⏵ .+ fell on a spike! \((\d+) remain\)""".toRegex()
-    private val chatElimCounterRegex = """  ◇ \+\d+🪓, total (\d+)🪓""".toRegex()
+    private val chatEliminationRegex = """⏵ (.+) was eliminated by .+! \((\d+) remain\)""".toRegex()
+    private val chatEarlyLeaveRegex = """⏵ (.+) left while alive! \((\d+) remain\)""".toRegex()
+    private val chatBlowUpRegex = """⏵ (.+) blew up! \((\d+) remain\)""".toRegex()
+    private val chatVoidDeathRegex = """⏵ (.+) fell into the void! \((\d+) remain\)""".toRegex()
+    private val chatVoidEliminationRegex = """⏵ (.+) was thrown into the void by .+! \((\d+) remain\)""".toRegex()
+    private val chatSpikeDeathRegex = """⏵ (.+) fell on a spike! \((\d+) remain\)""".toRegex()
+    private val chatElimCounterRegex = """\s+◇ \+\d+🪓, total (\d+)🪓""".toRegex()
 
     private val chatLeaderboardHeaderRegex = """ +‌*ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ:""".toRegex()
 
     private val titleRoundNumberRegex = """ʀᴏᴜɴᴅ (\d+)""".toRegex()
     private val titlePlayersAliveRegex = """(\d+) ᴀʟɪᴠᴇ""".toRegex()
-    private val titleEliminatedRegex = """☠☠☠""".toRegex()
 
     private val newEventRegex = """⏵ New Event Started! \(by (.+)\)""".toRegex()
-    private val newEventTypeRegex = """  ⏵ Type: (.+)""".toRegex()
-    private val newEventDurationRegex = """  ⏵ Length: (\d+)h""".toRegex()
+    private val newEventTypeRegex = """\s+⏵ Type: (.+)""".toRegex()
+    private val newEventDurationRegex = """\s+⏵ Length: (\d+)h""".toRegex()
 
-    private val modifierChargerRegex = """⏵ (.+) used a Modifier Charger on (.+)!\n  ◇ It will be charged for its next (\d+) appearances!""".toRegex()
+    private val modifierChargerRegex = """⏵ (.+) used a Modifier Charger on (.+)!\n\s+◇ It will be charged for its next (\d+) appearances!""".toRegex()
     
     private val placedBountyRegex = """⏵ (.+) placed a (\d+)⛂ bounty on (.+)!""".toRegex()
     private val selfPlacedBountyRegex = """⏵ (.+) placed a (\d+)⛂ bounty on themself!""".toRegex()
@@ -100,6 +108,12 @@ object StateManager {
     private val selfRaisedBountyRegex = """⏵ (.+) raised the bounty amount on themself to (\d+)⛂!""".toRegex()
     private val rewardedBountyRegex = """⏵ (.+) was rewarded (\d+)⛂ for eliminating (.+)!""".toRegex()
     private val cashedInBountyRegex = """⏵ (.+) cashed in their bounty of (\d+)⛂!""".toRegex()
+
+    fun getPlayerSlotItemStack(slot: Int): ItemStack {
+        val playerInventory = MinecraftClient.getInstance().player?.inventory
+        val itemStack: ItemStack = playerInventory?.getStack(slot) ?: ItemStack.EMPTY
+        return itemStack
+    }
 
     private fun messageToJsonString(message: Text): String {
         return TextCodecs.CODEC
@@ -115,14 +129,12 @@ object StateManager {
 
     private fun extractModifierNameFromMessage(message: Text, isModifierCharger: Boolean): String? {
         Modifiers.entries.forEach { modifier ->
-            if (message.string.contains(modifier.matchName)){
-                if((!isModifierCharger && message.string.contains("Modifier Charger")) || message.string.contains("???")) return null
-                var revealMysteryModifier = Config.showMysteryModifiers.value
+            if (message.string.contains(modifier.matchName) && (chatModifierItemRegex.matchEntire(message.string) != null || modifierChargerRegex.matchEntire(message.string) != null)) {
+                if(!isModifierCharger && message.string.contains("Modifier Charger")) return null
+                val revealMysteryModifier = Config.showMysteryModifiers.value
                 if (messageContainsTexture(message, mysteryModifierTexture)) {
-                    if(!revealMysteryModifier){
-                        return "???"
-                    }
-                    if(revealMysteryModifier){
+                    if(!revealMysteryModifier) return "???"
+                    else {
                         mysteryModifiers.add(modifier)
                         return modifier.matchName
                     }
@@ -166,9 +178,13 @@ object StateManager {
             playersTotal = playersAlive
             playtime = TimeSource.Monotonic.markNow()
             eliminations = 0
+            starFragmentMultiplier = 1f
+            starFragments = 0
             eliminated = false
             AutoGL.sendGlMessage()
         }
+        val lastSlotItem = getPlayerSlotItemStack(8).item
+        if(lastSlotItem == Items.STICK || lastSlotItem == Items.BREEZE_ROD) eliminated = true
         round = number
         gameOngoing = true
         modifiers = mutableListOf()
@@ -185,6 +201,8 @@ object StateManager {
         playersAlive = -1
         playersTotal = -1
         eliminations = -1
+        starFragmentMultiplier = -1f
+        starFragments = -1
         maceChance = -1f
         eliminated = true
         playtime = null
@@ -196,14 +214,28 @@ object StateManager {
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
             if (overlay) return@register true
             if (!OnMaceRoulette.onMace) return@register true
-
             // Round Number Header
             chatRoundNumberRegex.matchEntire(message.string)?.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
             // Elimination Messages (slain by, left the game, blew up, fell off the map)
             val eliminationMatch = chatEliminationRegex.matchEntire(message.string) ?: chatEarlyLeaveRegex.matchEntire(message.string) ?: chatBlowUpRegex.matchEntire(message.string) ?: chatVoidDeathRegex.matchEntire(message.string) ?: chatVoidEliminationRegex.matchEntire(message.string) ?: chatSpikeDeathRegex.matchEntire(message.string)
-            eliminationMatch?.groups[1]?.let { playersAlive = it.value.toIntOrNull() ?: -1 }
+            eliminationMatch?.groups?.let {
+                val eliminatedPlayer = it[1]?.value.toString()
+                if(!eliminated && eliminatedPlayer == username) eliminated = true
+                playersAlive = it[2]?.value?.toIntOrNull() ?: -1
+                if(!eliminated) {
+                    if (playersAlive == 1) starFragmentMultiplier = 3.125f
+                    else if (playersAlive <= (playersTotal / 4)) starFragmentMultiplier = 1.5625f
+                    else if (playersAlive <= (playersTotal / 2)) starFragmentMultiplier = 1.25f
+                    starFragments = (((eliminations * 3) + (playersTotal - playersAlive)) * starFragmentMultiplier).roundToInt()
+                }
+            }
             // Elimination Counter
-            chatElimCounterRegex.matchEntire(message.string)?.groups[1]?.let { eliminations = it.value.toIntOrNull() ?: 0 }
+            chatElimCounterRegex.matchEntire(message.string)?.groups[1]?.let {
+                if(!eliminated){
+                    eliminations = it.value.toIntOrNull() ?: 0
+                    starFragments = (((eliminations * 3) + (playersTotal - playersAlive)) * starFragmentMultiplier).roundToInt()
+                }
+            }
             // Game Leaderboard Header
             chatLeaderboardHeaderRegex.matchEntire(message.string)?.let {
                 gameOngoing = false
@@ -238,39 +270,33 @@ object StateManager {
                 val bountyPlacer = it[1]?.value.toString()
                 val bountyAmount = it[2]?.value?.toInt()
                 val bountyReceiver = it[3]?.value.toString()
-                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
                 if(bountyReceiver == username) CustomToasts.sendPlacedBountyToast(bountyAmount, bountyPlacer)
             }
             selfPlacedBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyPlacer = it[1]?.value.toString()
                 val bountyAmount = it[2]?.value?.toInt()
-                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
                 if(bountyPlacer == username) CustomToasts.sendSelfPlacedBountyToast(bountyAmount)
             }
             raisedBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyPlacer = it[1]?.value.toString()
                 val bountyAmount = it[2]?.value?.toInt()
                 val bountyReceiver = it[3]?.value.toString()
-                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
                 if(bountyReceiver == username) CustomToasts.sendRaisedBountyToast(bountyAmount, bountyPlacer)
             }
             selfRaisedBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyPlacer = it[1]?.value.toString()
                 val bountyAmount = it[2]?.value?.toInt()
-                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
                 if(bountyPlacer == username) CustomToasts.sendSelfRaisedBountyToast(bountyAmount)
             }
             rewardedBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyReceiver = it[1]?.value.toString()
                 val bountyAmount = it[2]?.value?.toInt()
                 val playerWithBounty = it[3]?.value.toString()
-                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
                 if(bountyReceiver == username) CustomToasts.sendRewardedBountyToast(bountyAmount, playerWithBounty)
             }
             cashedInBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyReceiver = it[1]?.value.toString()
                 val bountyAmount = it[2]?.value?.toInt()
-                val username = MinecraftClient.getInstance().getSession().getUsername().toString()
                 if(bountyReceiver == username) CustomToasts.sendCashedInBountyToast(bountyAmount)
             }
 
@@ -316,7 +342,7 @@ object StateManager {
                         modifierBoosters[modifier]?.add(profile)
 
                     }
-                }else if (modifier != Modifiers.UNKNOWN && modBoostedMatch != null) modBoostedMatch?.let {
+                }else if (modifier != Modifiers.UNKNOWN && modBoostedMatch != null) modBoostedMatch.let {
                     it.groupValues[2].let { playerList ->
                         val playerNames = playerList.split(", ")
                         val networkHandler = MinecraftClient.getInstance().networkHandler ?: return@let
@@ -343,7 +369,6 @@ object StateManager {
                         roundNumberMatch.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
                         roundColor = packet.text.siblings[0].style ?: roundColor
                     }
-                    titleEliminatedRegex.matchEntire(packet.text.string)?.let { eliminated = true }
                     return ActionResult.PASS
                 }
             }
@@ -361,5 +386,7 @@ object StateManager {
         )
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> resetState() }
+
+
     }
 }
