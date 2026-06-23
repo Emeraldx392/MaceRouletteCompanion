@@ -77,6 +77,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val hideStarFragmentsWhenEliminated by register<Boolean>(true, BOOL)
 
     val boosterListMax by register<Int>(5, INT)
+    val customModifierIcons by register<Boolean>(false, BOOL)
     val use2dHeads by register<Boolean>(false, BOOL)
     val showMysteryModifiers by register<Boolean>(false, BOOL)
 

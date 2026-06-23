@@ -202,8 +202,13 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             StateManager.modifiers.forEach {
                 var xPos = 0
                 if (rightAligned) xPos = -16
-                context.drawItem(it.icon, xPos, yPos)
-                context.drawStackOverlay(textRenderer, it.icon, xPos, yPos)
+                if(!Config.customModifierIcons.value) {
+                    context.drawItem(it.icon, xPos, yPos)
+                    context.drawStackOverlay(textRenderer, it.icon, xPos, yPos)
+                }else {
+                    context.drawItem(it.customIcon, xPos, yPos)
+                    context.drawStackOverlay(textRenderer, it.customIcon, xPos, yPos)
+                }
                 var modifierText = it.translatable.copy().setStyle(Config.getAccentStyle(it.translatable.style))
                 if (Config.showMysteryModifiers.value && StateManager.mysteryModifiers.contains(it)){
                     modifierText.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xD2B5FF)))
@@ -302,6 +307,12 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                                 .range(0, 15)
                                 .step(1)
                         }
+                        .build())
+                    .option(Option.createBuilder<Boolean>()
+                        .name(Text.translatable("mrc.config.modifiersConfig.option.customModifierIcons"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.modifiersConfig.option.customModifierIcons.description")))
+                        .binding(Config.customModifierIcons.asBinding())
+                        .controller(TickBoxControllerBuilder::create)
                         .build())
                     .option(Option.createBuilder<Boolean>()
                         .name(Text.translatable("mrc.config.modifiersConfig.option.use2dHeads"))

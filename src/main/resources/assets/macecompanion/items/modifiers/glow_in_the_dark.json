@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "macecompanion:item/modifiers/glow_in_the_dark"
+  }
+}

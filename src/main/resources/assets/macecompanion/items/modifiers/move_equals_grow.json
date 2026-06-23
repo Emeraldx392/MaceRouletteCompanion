@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "macecompanion:item/modifiers/move_equals_grow"
+  }
+}

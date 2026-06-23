@@ -4,11 +4,11 @@
   "version": "${version}",
   "name": "Mace Roulette Companion",
   "description": "A quality-of-life mod for the Mace Roulette game on DiamondFire.",
-  "authors": ["pixiboot"],
+  "authors": ["pixiboot", "Emeraldx392"],
   "contact": {
-    "homepage": "https://modrinth.com/project/fXqvpy3I",
-    "issues": "https://github.com/real-blahaj/macecompanion/issues",
-    "sources": "https://github.com/real-blahaj/macecompanion"
+    "homepage": "https://modrinth.com/mod/macecompanion",
+    "issues": "https://github.com/Emeraldx392/MaceRouletteCompanion/issues",
+    "sources": "https://github.com/Emeraldx392/MaceRouletteCompanion"
   },
   "license": "LGPL-3.0",
   "icon": "assets/macecompanion/icon.png",
@@ -37,8 +37,8 @@
   "custom": {
     "modmenu": {
       "links": {
-        "modmenu.modrinth": "https://modrinth.com/project/fXqvpy3I",
-        "modmenu.github_releases": "https://github.com/real-blahaj/MaceCompanion/releases",
+        "modmenu.modrinth": "https://modrinth.com/mod/macecompanion",
+        "modmenu.github_releases": "https://github.com/Emeraldx392/MaceRouletteCompanion/releases",
         "mrc.modmenu.authors_website": "https://pxe.moe"
       }
     }

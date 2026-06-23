@@ -107,6 +107,9 @@
     "mrc.config.modifiersConfig.option.boosterListMax": "Maximum Boosters Shown",
     "mrc.config.modifiersConfig.option.boosterListMax.description": "The maximum amount of modifier boosters to show. Any overflow will be shown as \"+n\" at the end of the list.",
 
+    "mrc.config.modifiersConfig.option.customModifierIcons": "Use custom modifier icons (By DigbyMaximus)",
+    "mrc.config.modifiersConfig.option.customModifierIcons.description": "Use the custom modifier icons made by DigbyMaximus",
+
     "mrc.config.modifiersConfig.option.use2dHeads": "Use 2d Heads",
     "mrc.config.modifiersConfig.option.use2dHeads.description": "Use 2d heads instead of 3d",
 
@@ -167,7 +170,7 @@
     "mrc.modifier.explosive": "Explosive Burst",
     "mrc.modifier.no_jumping": "No Jumping",
     "mrc.modifier.snowball": "Snowball Fight",
-    "mrc.modifier.stacks": "Player Stacks",
+    "mrc.modifier.stacks": "Stacks",
     "mrc.modifier.lunge": "Lunge",
     "mrc.modifier.fast_time": "Fast Time",
     "mrc.modifier.rods": "Fishing Rods",
@@ -194,7 +197,7 @@
     "mrc.hudelement.mace_chance": "Mace Chance",
     "mrc.hudelement.star_fragments": "Star Fragments",
 
-    "mrc.modmenu.authors_website": "Author's Website",
+    "mrc.modmenu.authors_website": "Original Author's Website",
 
     "yacl.configurable.configure": "Configure..."
 }
