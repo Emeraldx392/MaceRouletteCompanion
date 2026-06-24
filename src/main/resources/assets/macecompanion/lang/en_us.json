@@ -197,6 +197,15 @@
     "mrc.hudelement.mace_chance": "Mace Chance",
     "mrc.hudelement.star_fragments": "Star Fragments",
 
+    "key.category.macecompanion.title": "Mace Roulette Companion",
+    "key.macecompanion.open_profile": "Open Profile",
+    "key.macecompanion.open_cosmetics": "Open Cosmetics Menu",
+    "key.macecompanion.open_events": "Open Events Menu",
+    "key.macecompanion.open_mod_options": "Open Mod Options Menu",
+    "key.macecompanion.toggle_hud": "Toggle Round Info HUD",
+    "key.macecompanion.toggle_auto_gl": "Toggle AutoGL",
+    "key.macecompanion.toggle_auto_gg": "Toggle AutoGG",
+
     "mrc.modmenu.authors_website": "Original Author's Website",
 
     "yacl.configurable.configure": "Configure..."

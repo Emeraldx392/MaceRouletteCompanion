@@ -13,7 +13,7 @@ class MaceCompanion : ModInitializer {
     companion object {
         const val MOD_ID = "macecompanion"
         val LOGGER = LoggerFactory.getLogger(MOD_ID)
-        val DEBUG_MODE = false
+        const val DEBUG_MODE = false
     }
     override fun onInitialize() {
         LOGGER.info("Initializing Mace Roulette Companion...")
@@ -22,6 +22,7 @@ class MaceCompanion : ModInitializer {
             return
         }
         if (!Config.loadFromFile()) Config.saveToFile()
+        CustomKeybinds.registerKeybinds()
         OnMaceRoulette.fillPlotIds(Config.plotIds.value.toSet())
         OnMaceRoulette.registerFlintFeature()
         StateManager.registerListeners()

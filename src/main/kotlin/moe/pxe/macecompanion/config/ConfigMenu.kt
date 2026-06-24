@@ -22,7 +22,7 @@ import net.minecraft.util.Formatting
 import java.awt.Color
 
 object ConfigMenu {
-    fun generateScreen(parent: Screen): Screen? {
+    fun generateScreen(parent: Screen?): Screen? {
         return YetAnotherConfigLib.createBuilder()
             .title(Text.translatable("mrc.config.title"))
             .category(ConfigCategory.createBuilder()
