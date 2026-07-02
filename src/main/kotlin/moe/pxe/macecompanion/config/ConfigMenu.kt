@@ -184,25 +184,73 @@ object ConfigMenu {
                     .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle"))
                     .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.description")))
                     .also {
-                        val accentColor = Option.createBuilder<Color>()
-                            .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.accentColor"))
-                            .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.accentColor.description")))
-                            .binding(Config.accentColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        val useAccentColor = Option.createBuilder<Boolean>()
-                            .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.useAccentColor"))
-                            .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.useAccentColor.description")))
-                            .binding(Config.useAccentColor.asBinding())
+                        val useAccentColors = Option.createBuilder<Boolean>()
+                            .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.useAccentColors"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.useAccentColors.description")))
+                            .binding(Config.useAccentColors.asBinding())
                             .controller(TickBoxControllerBuilder::create)
                             .build()
-                        accentColor.setAvailable(useAccentColor.pendingValue())
-                        useAccentColor.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) accentColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) accentColor.setAvailable(option.pendingValue())
+                        val accentColorNumber = Option.createBuilder<Int>()
+                                .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.accentColorNumber"))
+                                .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.accentColorNumber.description")))
+                                .binding(Config.accentColorNumber.asBinding())
+                                .controller {
+                                    IntegerSliderControllerBuilder.create(it)
+                                        .range(1, 3)
+                                        .step(1)
+                                }
+                                .build()
+                        accentColorNumber.setAvailable(useAccentColors.pendingValue())
+                        useAccentColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) accentColorNumber.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) accentColorNumber.setAvailable(option.pendingValue())
                         }
-                        it.option(useAccentColor)
-                        it.option(accentColor)
+                        val mainAccentColor = Option.createBuilder<Color>()
+                            .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.mainAccentColor"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.mainAccentColor.description")))
+                            .binding(Config.mainAccentColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        mainAccentColor.setAvailable(useAccentColors.pendingValue())
+                        useAccentColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) mainAccentColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) mainAccentColor.setAvailable(option.pendingValue())
+                        }
+                        val secondAccentColor = Option.createBuilder<Color>()
+                            .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.secondAccentColor"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.secondAccentColor.description")))
+                            .binding(Config.secondAccentColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        secondAccentColor.setAvailable(useAccentColors.pendingValue() && accentColorNumber.pendingValue() > 1)
+                        useAccentColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) secondAccentColor.setAvailable(option.pendingValue() && accentColorNumber.pendingValue() > 1)
+                            if (event == OptionEventListener.Event.STATE_CHANGE) secondAccentColor.setAvailable(option.pendingValue( )&& accentColorNumber.pendingValue() > 1)
+                        }
+                        accentColorNumber.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) secondAccentColor.setAvailable(option.pendingValue() > 1 && useAccentColors.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) secondAccentColor.setAvailable(option.pendingValue() > 1 && useAccentColors.pendingValue())
+                        }
+                        val thirdAccentColor = Option.createBuilder<Color>()
+                            .name(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.thirdAccentColor"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.category.roundhud.group.hudstyle.option.thirdAccentColor.description")))
+                            .binding(Config.thirdAccentColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        thirdAccentColor.setAvailable(useAccentColors.pendingValue() && accentColorNumber.pendingValue() > 2)
+                        useAccentColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) thirdAccentColor.setAvailable(option.pendingValue() && accentColorNumber.pendingValue() > 2)
+                            if (event == OptionEventListener.Event.STATE_CHANGE) thirdAccentColor.setAvailable(option.pendingValue( )&& accentColorNumber.pendingValue() > 2)
+                        }
+                        accentColorNumber.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) thirdAccentColor.setAvailable(option.pendingValue() > 2 && useAccentColors.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) thirdAccentColor.setAvailable(option.pendingValue() > 2 && useAccentColors.pendingValue())
+                        }
+                        it.option(useAccentColors)
+                        it.option(accentColorNumber)
+                        it.option(mainAccentColor)
+                        it.option(secondAccentColor)
+                        it.option(thirdAccentColor)
                     }
                     .build())
                 .group(ListOption.createBuilder<HudElements>()

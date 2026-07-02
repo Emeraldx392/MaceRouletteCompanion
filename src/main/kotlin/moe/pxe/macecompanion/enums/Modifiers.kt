@@ -5,6 +5,7 @@ import moe.pxe.macecompanion.MaceCompanion
 import moe.pxe.macecompanion.util.PlayerHead
 import net.minecraft.client.MinecraftClient
 import net.minecraft.component.DataComponentTypes
+import net.minecraft.component.type.UseCooldownComponent
 import net.minecraft.enchantment.EnchantmentHelper
 import net.minecraft.enchantment.EnchantmentLevelEntry
 import net.minecraft.enchantment.Enchantments
@@ -14,17 +15,18 @@ import net.minecraft.registry.RegistryKeys
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
+import java.util.Optional
 
 enum class Modifiers {
     DOUBLE {
         override val matchName = "Double Mace"
         override val icon: ItemStack = Items.MACE.defaultStack.apply {
             count = 2
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
         override val customIcon: ItemStack = Items.MACE.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/double_mace"))
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
     },
 
@@ -32,11 +34,11 @@ enum class Modifiers {
         override val matchName = "Triple Mace"
         override val icon: ItemStack = Items.MACE.defaultStack.apply {
             count = 3
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
         override val customIcon: ItemStack = Items.MACE.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/triple_mace"))
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
     },
 
@@ -44,11 +46,11 @@ enum class Modifiers {
         override val matchName = "Quadruple Mace"
         override val icon: ItemStack = Items.MACE.defaultStack.apply {
             count = 4
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
         override val customIcon: ItemStack = Items.MACE.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/quadruple_mace"))
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
     },
 
@@ -100,9 +102,12 @@ enum class Modifiers {
 
     SHOCKWAVE {
         override val matchName = "Shockwave Mace"
-        override val icon: ItemStack = Items.HEART_OF_THE_SEA.defaultStack
+        override val icon: ItemStack = Items.HEART_OF_THE_SEA.defaultStack.apply {
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
+        }
         override val customIcon: ItemStack = Items.HEART_OF_THE_SEA.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/shockwave_mace"))
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
     },
 
@@ -117,11 +122,11 @@ enum class Modifiers {
     WIND_STORM {
         override val matchName = "Wind Storm"
         override val icon: ItemStack = Items.WIND_CHARGE.defaultStack.apply {
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
         override val customIcon: ItemStack = Items.WIND_CHARGE.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/wind_storm"))
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
     },
 
@@ -237,7 +242,7 @@ enum class Modifiers {
 
     WIND_BURST {
         override val matchName = "Wind Burst Mace"
-        override val icon: ItemStack = EnchantmentHelper.getEnchantedBookWith(EnchantmentLevelEntry(MinecraftClient.getInstance().world!!.registryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOrThrow(Enchantments.WIND_BURST), 3))
+        override val icon: ItemStack = EnchantmentHelper.getEnchantedBookWith(EnchantmentLevelEntry(MinecraftClient.getInstance().world!!.registryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOrThrow(Enchantments.WIND_BURST), 1))
         override val customIcon: ItemStack = Items.BREEZE_ROD.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/wind_burst"))
         }
@@ -318,12 +323,12 @@ enum class Modifiers {
     LUNGE {
         override val matchName = "Lunge"
         override val icon: ItemStack = Items.COPPER_SPEAR.defaultStack.apply {
-            addEnchantment(MinecraftClient.getInstance().world!!.registryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOrThrow(Enchantments.LUNGE), 3)
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            addEnchantment(MinecraftClient.getInstance().world!!.registryManager.getOrThrow(RegistryKeys.ENCHANTMENT).getOrThrow(Enchantments.LUNGE), 2)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
         override val customIcon: ItemStack = Items.COPPER_SPEAR.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/lunge"))
-            set(DataComponentTypes.USE_COOLDOWN, null)
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
     },
 
@@ -345,9 +350,12 @@ enum class Modifiers {
 
     SNOWBALL {
         override val matchName = "Snowball Fight"
-        override val icon: ItemStack = Items.POWDER_SNOW_BUCKET.defaultStack
+        override val icon: ItemStack = Items.POWDER_SNOW_BUCKET.defaultStack.apply {
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
+        }
         override val customIcon: ItemStack = Items.POWDER_SNOW_BUCKET.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/snowball_fight"))
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
     },
 
@@ -439,16 +447,22 @@ enum class Modifiers {
         override val matchName = "\uE024"
         override val icon: ItemStack = Items.MACE.defaultStack.apply {
             set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "glitched_mace"))
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
         override val translatable: Text = Text.translatable("mrc.modifier.${name.lowercase()}").formatted(Formatting.RED, Formatting.BOLD)
-        override val customIcon: ItemStack = icon
+        override val customIcon: ItemStack = Items.MACE.defaultStack.apply {
+            set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/unknown"))
+            set(DataComponentTypes.USE_COOLDOWN, UseCooldownComponent(0f, Optional.of(Identifier.of(MaceCompanion.MOD_ID, "modifier_icon"))))
+        }
     },
 
     MYSTERY {
         override val matchName = "???"
         override val icon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultStack
         override val translatable: Text = Text.translatable("mrc.modifier.${name.lowercase()}").withColor(0xcfb3fc).formatted(Formatting.ITALIC)
-        override val customIcon: ItemStack = icon
+        override val customIcon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultStack.apply {
+            set(DataComponentTypes.ITEM_MODEL, Identifier.of(MaceCompanion.MOD_ID, "modifiers/mystery"))
+        }
     };
 
 

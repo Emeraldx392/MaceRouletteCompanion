@@ -185,6 +185,8 @@ object StateManager {
         }
         val lastSlotItem = getPlayerSlotItemStack(8).item
         if(lastSlotItem == Items.STICK || lastSlotItem == Items.BREEZE_ROD) eliminated = true
+        if(eliminated && number == 1) eliminations = -1
+        if(eliminated && number == 1) starFragments = -1
         round = number
         gameOngoing = true
         modifiers = mutableListOf()

@@ -60,10 +60,16 @@
 
     "mrc.config.category.roundhud.group.hudstyle": "Styling",
     "mrc.config.category.roundhud.group.hudstyle.description": "Style configuration (color, opacity, background) for the Round Info HUD.",
-    "mrc.config.category.roundhud.group.hudstyle.option.useAccentColor": "Use Accent Color",
-    "mrc.config.category.roundhud.group.hudstyle.option.useAccentColor.description": "Toggles whether the HUD should use an accent color for text or default colors.",
-    "mrc.config.category.roundhud.group.hudstyle.option.accentColor": "Accent Color",
-    "mrc.config.category.roundhud.group.hudstyle.option.accentColor.description": "The color to use if \"Use Accent Color\" is enabled.",
+    "mrc.config.category.roundhud.group.hudstyle.option.useAccentColors": "Use Accent Colors",
+    "mrc.config.category.roundhud.group.hudstyle.option.useAccentColors.description": "Toggles whether the HUD should use accent colors for text or default colors.",
+    "mrc.config.category.roundhud.group.hudstyle.option.accentColorNumber": "Number of Accent Colors",
+    "mrc.config.category.roundhud.group.hudstyle.option.accentColorNumber.description": "The number of accent colors used",
+    "mrc.config.category.roundhud.group.hudstyle.option.mainAccentColor": "Main Accent Color",
+    "mrc.config.category.roundhud.group.hudstyle.option.mainAccentColor.description": "The main color to use if \"Use Accent Color\" is enabled.",
+    "mrc.config.category.roundhud.group.hudstyle.option.secondAccentColor": "Second Accent Color",
+    "mrc.config.category.roundhud.group.hudstyle.option.secondAccentColor.description": "The second color to use along with the main one if \"Use Accent Color\" is enabled.",
+    "mrc.config.category.roundhud.group.hudstyle.option.thirdAccentColor": "Third Accent Color",
+    "mrc.config.category.roundhud.group.hudstyle.option.thirdAccentColor.description": "The third color to use along with the main and second one if \"Use Accent Color\" is enabled.",
 
     "mrc.config.category.roundhud.group.hudElements": "Elements",
     "mrc.config.category.roundhud.group.hudElements.description": "The list of elements to render in the HUD, from top to bottom. If an element cannot be rendered, it'll be skipped.",
@@ -98,37 +104,171 @@
     "mrc.config.category.miscellaneous.group.plotIds": "Plot IDs and Handles",
     "mrc.config.category.miscellaneous.group.plotIds.description": "A list of Plot IDs and Handles to look for when checking if the player is on Mace Roulette.",
 
-    "mrc.config.modifiersConfig.option.hideEliminationsWhenEliminated": "Hide when eliminated",
-    "mrc.config.modifiersConfig.option.hideEliminationsWhenEliminated.description": "Hides the elimination count after being eliminated.",
+    "mrc.config.roundNumberConfig.category.styling": "Styling",
 
-    "mrc.config.modifiersConfig.option.hideStarFragmentsWhenEliminated": "Hide when eliminated",
-    "mrc.config.modifiersConfig.option.hideStarFragmentsWhenEliminated.description": "Hides the star fragment count after being eliminated.",
+    "mrc.config.roundNumberConfig.category.styling.group.colors": "Colors",
+    "mrc.config.roundNumberConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
 
-    "mrc.config.modifiersConfig.option.boosterListMax": "Maximum Boosters Shown",
-    "mrc.config.modifiersConfig.option.boosterListMax.description": "The maximum amount of modifier boosters to show. Any overflow will be shown as \"+n\" at the end of the list.",
+    "mrc.config.roundNumberConfig.category.styling.group.colors.option.overrideRoundColors": "Override colors",
+    "mrc.config.roundNumberConfig.category.styling.group.colors.option.overrideRoundColors.description": "Toggles whether the round number HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
 
-    "mrc.config.modifiersConfig.option.customModifierIcons": "Use custom modifier icons (By DigbyMaximus)",
-    "mrc.config.modifiersConfig.option.customModifierIcons.description": "Use the custom modifier icons made by DigbyMaximus",
+    "mrc.config.roundNumberConfig.category.styling.group.colors.option.roundTextColor": "Round text color",
+    "mrc.config.roundNumberConfig.category.styling.group.colors.option.roundTextColor.description": "The color of the round text if \"Override colors\" is enabled.",
 
-    "mrc.config.modifiersConfig.option.use2dHeads": "Use 2d Heads",
-    "mrc.config.modifiersConfig.option.use2dHeads.description": "Use 2d heads instead of 3d",
+    "mrc.config.roundNumberConfig.category.styling.group.colors.option.roundNumberColor": "Round number color",
+    "mrc.config.roundNumberConfig.category.styling.group.colors.option.roundNumberColor.description": "The color of the round number if \"Override colors\" is enabled.",
 
-    "mrc.config.modifiersConfig.option.showMysteryModifiers": "Reveal Mystery Modifiers",
-    "mrc.config.modifiersConfig.option.showMysteryModifiers.description": "Reveals the mystery modifiers",
+    "mrc.config.playersAliveConfig.category.styling": "Styling",
 
-    "mrc.config.modifiersConfig.option.chanceUseColor": "Use different percentage colors",
-    "mrc.config.modifiersConfig.option.chanceUseColor.description": "The percentage color changes based on the value, from red to green.",
+    "mrc.config.playersAliveConfig.category.styling.group.colors": "Colors",
+    "mrc.config.playersAliveConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
 
-    "mrc.config.modifiersConfig.option.hideMaceChanceWhenEliminated": "Hide when eliminated",
-    "mrc.config.modifiersConfig.option.hideMaceChanceWhenEliminated.description": "Hides the mace chance after being eliminated.",
+    "mrc.config.playersAliveConfig.category.styling.group.colors.option.overridePlayerCountColors": "Override colors",
+    "mrc.config.playersAliveConfig.category.styling.group.colors.option.overridePlayerCountColors.description": "Toggles whether the players alive HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
+
+    "mrc.config.playersAliveConfig.category.styling.group.colors.option.playerCountTextColor": "ᴀʟɪᴠᴇ text color",
+    "mrc.config.playersAliveConfig.category.styling.group.colors.option.playerCountTextColor.description": "The color of the ᴀʟɪᴠᴇ text if \"Override colors\" is enabled.",
+
+    "mrc.config.playersAliveConfig.category.styling.group.colors.option.alivePlayersColor": "Alive players number color",
+    "mrc.config.playersAliveConfig.category.styling.group.colors.option.alivePlayersColor.description": "The color of the number of alive players if \"Override colors\" is enabled.",
+
+    "mrc.config.playersAliveConfig.category.styling.group.colors.option.totalPlayersColor": "Total players number color",
+    "mrc.config.playersAliveConfig.category.styling.group.colors.option.totalPlayersColor.description": "The color of the number of total players if \"Override colors\" is enabled.",
+
+    "mrc.config.eliminationsConfig.category.misc": "Miscellaneous",
+
+    "mrc.config.eliminationsConfig.category.misc.option.hideEliminationsWhenEliminated": "Hide when eliminated",
+    "mrc.config.eliminationsConfig.category.misc.option.hideEliminationsWhenEliminated.description": "Hides the elimination count after being eliminated.",
+
+    "mrc.config.eliminationsConfig.category.styling": "Styling",
+
+    "mrc.config.eliminationsConfig.category.styling.group.colors": "Colors",
+    "mrc.config.eliminationsConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
+
+    "mrc.config.eliminationsConfig.category.styling.group.colors.option.overrideEliminationsColors": "Override colors",
+    "mrc.config.eliminationsConfig.category.styling.group.colors.option.overrideEliminationsColors.description": "Toggles whether the eliminations HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
+
+    "mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsTextColor": "ᴇʟɪᴍɪɴᴀᴛɪᴏɴꜱ text color",
+    "mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsTextColor.description": "The color of the ᴇʟɪᴍɪɴᴀᴛɪᴏɴꜱ text if \"Override colors\" is enabled.",
+
+    "mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsNumberColor": "Eliminations number color",
+    "mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsNumberColor.description": "The color of the number of eliminations if \"Override colors\" is enabled.",
+
+    "mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsIconColor": "Eliminations icon color",
+    "mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsIconColor.description": "The color of the \uD83E\uDE93 icon if \"Override colors\" is enabled.",
+
+    "mrc.config.starFragmentsConfig.category.misc": "Miscellaneous",
+
+    "mrc.config.starFragmentsConfig.category.misc.option.hideStarFragmentsWhenEliminated": "Hide when eliminated",
+    "mrc.config.starFragmentsConfig.category.misc.option.hideStarFragmentsWhenEliminated.description": "Hides the star fragment count after being eliminated.",
+
+    "mrc.config.starFragmentsConfig.category.styling": "Styling",
+
+    "mrc.config.starFragmentsConfig.category.styling.group.colors": "Colors",
+    "mrc.config.starFragmentsConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
+
+    "mrc.config.starFragmentsConfig.category.styling.group.colors.option.overrideStarFragmentsColors": "Override colors",
+    "mrc.config.starFragmentsConfig.category.styling.group.colors.option.overrideStarFragmentsColors.description": "Toggles whether the star fragments HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
+
+    "mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsTextColor": "ꜱᴛᴀʀ ꜰʀᴀɢᴍᴇɴᴛꜱ text color",
+    "mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsTextColor.description": "The color of the ꜱᴛᴀʀ ꜰʀᴀɢᴍᴇɴᴛꜱ text if \"Override colors\" is enabled.",
+
+    "mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsNumberColor": "Star fragments number color",
+    "mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsNumberColor.description": "The color of the number of star fragments if \"Override colors\" is enabled.",
+
+    "mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsIconColor": "Star fragments icon color",
+    "mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsIconColor.description": "The color of the star fragments icon if \"Override colors\" is enabled.",
+
+    "mrc.config.playtimeConfig.category.styling": "Styling",
+
+    "mrc.config.playtimeConfig.category.styling.group.colors": "Colors",
+    "mrc.config.playtimeConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
+
+    "mrc.config.playtimeConfig.category.styling.group.colors.option.overridePlaytimeColors": "Override colors",
+    "mrc.config.playtimeConfig.category.styling.group.colors.option.overridePlaytimeColors.description": "Toggles whether the playtime HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
+
+    "mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeTextColor": "ᴇʟᴀᴘꜱᴇᴅ text color",
+    "mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeTextColor.description": "The color of the ᴇʟᴀᴘꜱᴇᴅ text if \"Override colors\" is enabled.",
+
+    "mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeColor": "Playtime amount color",
+    "mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeColor.description": "The color of the amount of playtime if \"Override colors\" is enabled.",
+
+    "mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeIconColor": "Playtime icon color",
+    "mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeIconColor.description": "The color of the ⌚ icon if \"Override colors\" is enabled.",
+
+    "mrc.config.modifiersConfig.category.misc": "Miscellaneous",
+
+    "mrc.config.modifiersConfig.category.misc.option.boosterListMax": "Maximum Boosters Shown",
+    "mrc.config.modifiersConfig.category.misc.option.boosterListMax.description": "The maximum amount of modifier boosters to show. Any overflow will be shown as \"+n\" at the end of the list.",
+
+    "mrc.config.modifiersConfig.category.misc.option.showMysteryModifiers": "Reveal Mystery Modifiers",
+    "mrc.config.modifiersConfig.category.misc.option.showMysteryModifiers.description": "Reveals the mystery modifiers",
+
+    "mrc.config.modifiersConfig.category.styling": "Styling",
+
+    "mrc.config.modifiersConfig.category.styling.group.colors": "Colors",
+    "mrc.config.modifiersConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
+
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.overrideModifiersColors": "Override colors",
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.overrideModifiersColors.description": "Toggles whether the modifiers HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
+
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.modifiersTextColor": "ᴍᴏᴅɪꜰɪᴇʀꜱ text color",
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.modifiersTextColor.description": "The color of the ᴍᴏᴅɪꜰɪᴇʀꜱ text if \"Override colors\" is enabled.",
+
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.normalModifierTextColor": "Normal modifier text color",
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.normalModifierTextColor.description": "The text color of regular modifiers if \"Override colors\" is enabled.",
+
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.eternalModifierTextShadowColor": "Eternal modifier shadow color",
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.eternalModifierTextShadowColor.description": "The text shadow color of eternal modifiers if \"Override colors\" is enabled.",
+
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.eternalModifierTextColor": "Eternal modifier text color",
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.eternalModifierTextColor.description": "The text color of eternal modifiers if \"Override colors\" is enabled.",
+
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.chargedModifierTextColor": "Charged modifier text color",
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.chargedModifierTextColor.description": "The text color of charged modifiers if \"Override colors\" is enabled.",
+
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.mysteryModifierTextColor": "Mystery modifier text color",
+    "mrc.config.modifiersConfig.category.styling.group.colors.option.mysteryModifierTextColor.description": "The text color of mystery modifiers if \"Override colors\" is enabled.",
+
+    "mrc.config.modifiersConfig.category.styling.group.icons": "Icons",
+    "mrc.config.modifiersConfig.category.styling.group.icons.description": "Configure the icons of this HUD element",
+
+    "mrc.config.modifiersConfig.category.styling.group.icons.option.customModifierIcons": "Use custom modifier icons (By DigbyMaximus)",
+    "mrc.config.modifiersConfig.category.styling.group.icons.option.customModifierIcons.description": "Use the custom modifier icons made by DigbyMaximus",
+
+    "mrc.config.modifiersConfig.category.styling.group.icons.option.use2dHeads": "Use 2d Heads",
+    "mrc.config.modifiersConfig.category.styling.group.icons.option.use2dHeads.description": "Use 2d heads instead of 3d",
+
+    "mrc.config.maceChanceConfig.category.misc": "Miscellaneous",
+
+    "mrc.config.maceChanceConfig.category.misc.option.hideMaceChanceWhenEliminated": "Hide when eliminated",
+    "mrc.config.maceChanceConfig.category.misc.option.hideMaceChanceWhenEliminated.description": "Hides the mace chance after being eliminated.",
+
+    "mrc.config.maceChanceConfig.category.styling": "Styling",
+
+    "mrc.config.maceChanceConfig.category.styling.group.colors": "Colors",
+    "mrc.config.maceChanceConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
+
+    "mrc.config.maceChanceConfig.category.styling.group.colors.option.overrideMaceChanceColors": "Override colors",
+    "mrc.config.maceChanceConfig.category.styling.group.colors.option.overrideMaceChanceColors.description": "Toggles whether the mace chance HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
+
+    "mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceTextColor": "ᴍᴀᴄᴇ ᴄʜᴀɴᴄᴇ text color",
+    "mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceTextColor.description": "The color of the ᴍᴀᴄᴇ ᴄʜᴀɴᴄᴇ text if \"Override colors\" is enabled.",
+
+    "mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceNumberColor": "Mace chance number color",
+    "mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceNumberColor.description": "The color of the mace chance number if \"Override colors\" is enabled.",
+
+    "mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceIconColor": "Mace chance icon color",
+    "mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceIconColor.description": "The color of the ⚄ icon if \"Override colors\" is enabled.",
+
 
     "mrc.roundhud.round": "ʀᴏᴜɴᴅ %s",
     "mrc.roundhud.alive": "%s ᴀʟɪᴠᴇ",
-    "mrc.roundhud.eliminations": "\uD83E\uDE93 %s ᴇʟɪᴍɪɴᴀᴛɪᴏɴꜱ",
-    "mrc.roundhud.playtime": "⌚ %s ᴇʟᴀᴘꜱᴇᴅ",
+    "mrc.roundhud.eliminations": "%s ᴇʟɪᴍɪɴᴀᴛɪᴏɴꜱ",
+    "mrc.roundhud.starFragments": "%s ꜱᴛᴀʀ ꜰʀᴀɢᴍᴇɴᴛꜱ",
+    "mrc.roundhud.playtime": "%s ᴇʟᴀᴘꜱᴇᴅ",
     "mrc.roundhud.modifiers": "ᴍᴏᴅɪꜰɪᴇʀꜱ:",
-    "mrc.roundhud.mace_chance_text": "⚄ %s ᴍᴀᴄᴇ ᴄʜᴀɴᴄᴇ",
-    "mrc.roundhud.starFragments": " %s ꜱᴛᴀʀ ꜰʀᴀɢᴍᴇɴᴛꜱ",
+    "mrc.roundhud.mace_chance_text": "%s ᴍᴀᴄᴇ ᴄʜᴀɴᴄᴇ",
 
     "mrc.modifier.double": "Double Mace",
     "mrc.modifier.triple": "Triple Mace",
