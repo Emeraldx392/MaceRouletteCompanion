@@ -14,6 +14,7 @@ import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.StateManager
+import moe.pxe.macecompanion.StateManager.username
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
 import moe.pxe.macecompanion.util.PlayerHead
@@ -23,7 +24,6 @@ import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.text.TextCodecs
-import net.minecraft.text.TextColor
 import net.minecraft.util.Colors
 import net.minecraft.util.Formatting
 import net.minecraft.util.StringIdentifiable
@@ -43,9 +43,9 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             if (StateManager.round == -1) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
-            val numberText = Text.literal("${StateManager.round}").setStyle(Config.getRoundNumberAccentStyle(StateManager.roundColor.color!!.rgb).withBold(true))
+            val numberText = Text.literal("${StateManager.round}").setStyle(Config.getRoundNumberAccentStyle(StateManager.roundColor?.color!!.rgb).withBold(true))
             val text = Text.translatable("mrc.roundhud.round", numberText)
-                .setStyle(Config.getRoundTextAccentStyle(StateManager.roundColor.color!!.rgb).withBold(true))
+                .setStyle(Config.getRoundTextAccentStyle(StateManager.roundColor?.color!!.rgb).withBold(true))
             val width = textRenderer.getWidth(text)
             var xPos = 0
             if (rightAligned) xPos = -width
@@ -58,7 +58,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             context.matrices.popMatrix()
             return 24
         }
-        override fun generateConfig(parent: Screen) = YetAnotherConfigLib.createBuilder()
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
             .category(ConfigCategory.createBuilder()
                 .name(Text.translatable("mrc.config.roundNumberConfig.category.styling"))
@@ -124,7 +124,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             context.drawTextWithShadow(textRenderer, text, xPos, yPos, -1)
             return 12
         }
-        override fun generateConfig(parent: Screen) = YetAnotherConfigLib.createBuilder()
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
             .category(ConfigCategory.createBuilder()
                 .name(Text.translatable("mrc.config.playersAliveConfig.category.styling"))
@@ -205,7 +205,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen) = YetAnotherConfigLib.createBuilder()
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
             .category(ConfigCategory.createBuilder()
                 .name(Text.translatable("mrc.config.eliminationsConfig.category.misc"))
@@ -299,7 +299,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen) = YetAnotherConfigLib.createBuilder()
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
             .category(ConfigCategory.createBuilder()
                 .name(Text.translatable("mrc.config.starFragmentsConfig.category.misc"))
@@ -386,7 +386,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             }
             return 0
         }
-        override fun generateConfig(parent: Screen) = YetAnotherConfigLib.createBuilder()
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
             .category(ConfigCategory.createBuilder()
                 .name(Text.translatable("mrc.config.playtimeConfig.category.styling"))
@@ -476,21 +476,21 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                 var modifierText = it.translatable.copy().setStyle(Config.getNormalModifierTextAccentStyle(Colors.YELLOW))
                 if (Config.showMysteryModifiers.value && StateManager.mysteryModifiers.contains(it)){
                     modifierText.setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF))
-                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ???").setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF)))
-                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("??? ").setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF)).append(modifierText)
+                    if(!rightAligned) modifierText.append(Text.literal(" ???").setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF)))
+                    if(rightAligned) modifierText = Text.literal("??? ").setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF)).append(modifierText)
                 }
                 if (StateManager.eternalModifier == it && StateManager.chargedModifiers.contains(it)) {
                     modifierText.setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))
-                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))).append(Text.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(Colors.WHITE, -10071549)))
-                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(Colors.WHITE, -10071549)).append(Text.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF).withShadowColor(-16777216)).append(modifierText))
+                    if(!rightAligned) modifierText.append(Text.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))).append(Text.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(Colors.WHITE, -10071549)))
+                    if(rightAligned) modifierText = Text.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(Colors.WHITE, -10071549)).append(Text.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF).withShadowColor(-16777216)).append(modifierText))
                 }else if (StateManager.eternalModifier == it) {
                     modifierText.setStyle(Config.getEternalModifierTextWithShadowAccentStyle(Colors.WHITE, -10071549))
-                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(Colors.WHITE, -10071549)))
-                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("∞ ").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(Colors.WHITE, -10071549)).append(modifierText)
+                    if(!rightAligned) modifierText.append(Text.literal(" ∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(Colors.WHITE, -10071549)))
+                    if(rightAligned) modifierText = Text.literal("∞ ").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(Colors.WHITE, -10071549)).append(modifierText)
                 }else if (StateManager.chargedModifiers.contains(it)) {
                     modifierText.setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))
-                    if(!Config.hudLocation.value.rightAligned) modifierText.append(Text.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)))
-                    if(Config.hudLocation.value.rightAligned) modifierText = Text.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)).append(modifierText)
+                    if(!rightAligned) modifierText.append(Text.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)))
+                    if(rightAligned) modifierText = Text.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)).append(modifierText)
                 }
                 var headText2d = Text.empty()
 
@@ -498,16 +498,16 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                     val bonusBoostersAmount = playerList.size - Config.boosterListMax.value
                     playerList.forEachIndexed { index, profile ->
                         if(index < Config.boosterListMax.value){
-                            if(Config.hudLocation.value.rightAligned) headText2d.append(PlayerHead.player2dHeadTextComponent(profile.name)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)).append(Text.literal(" "))
+                            if(rightAligned) headText2d.append(PlayerHead.player2dHeadTextComponent(profile.name)).setStyle(Style.EMPTY.withColor(Formatting.WHITE)).append(Text.literal(" "))
                             else headText2d.append(Text.literal(" ")).append(PlayerHead.player2dHeadTextComponent(profile.name))
                         }
                     }
                     if(bonusBoostersAmount > 0){
-                        if(Config.hudLocation.value.rightAligned) headText2d = Text.literal("+${bonusBoostersAmount} ").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)).append(headText2d)
+                        if(rightAligned) headText2d = Text.literal("+${bonusBoostersAmount} ").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)).append(headText2d)
                         else headText2d.append(Text.literal(" +${bonusBoostersAmount}").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)))
                     }
                 }
-                val finalText = if (Config.hudLocation.value.rightAligned) Text.empty().append(headText2d).append(modifierText)
+                val finalText = if (rightAligned) Text.empty().append(headText2d).append(modifierText)
                 else Text.empty().append(modifierText).append(headText2d)
                 val modifierWidth = textRenderer.getWidth(finalText)
                 xPos = 22
@@ -682,7 +682,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             var maceChanceColorIdx = (StateManager.maceChance / 7.7).toInt().absoluteValue
             if (maceChanceColorIdx > 12) maceChanceColorIdx = 12
             val text = Text.literal("⚄ ").setStyle(Config.getMaceChanceIconAccentStyle(0x79fc00))
-                .append(Text.translatable("mrc.roundhud.mace_chance_text",
+                .append(Text.translatable("mrc.roundhud.mace_chance",
                 Text.literal("%.2f%%".format(StateManager.maceChance))
                     .setStyle(Config.getMaceChanceNumberAccentStyle(textColors[maceChanceColorIdx])))
                 .setStyle(Config.getMaceChanceTextAccentStyle(0x79fc00)))
@@ -696,7 +696,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen) = YetAnotherConfigLib.createBuilder()
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
             .category(ConfigCategory.createBuilder()
                 .name(Text.translatable("mrc.config.maceChanceConfig.category.misc"))
@@ -755,6 +755,134 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                         it.option(maceChanceTextColor)
                         it.option(maceChanceNumberColor)
                         it.option(maceChanceIconColor)
+                    }
+                    .build())
+                .build())
+            .build()
+            .generateScreen(parent)
+    },
+    FPS {
+        override fun render(
+            context: DrawContext,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.fps == -1) return 0
+
+            val textRenderer = MinecraftClient.getInstance().textRenderer
+            val text = Text.translatable("mrc.roundhud.fps", Text.literal("${StateManager.fps}").setStyle(Config.getFpsNumberAccentStyle(Colors.WHITE))).setStyle(Config.getFpsTextAccentStyle(Colors.WHITE))
+            val width = textRenderer.getWidth(text)
+            var xPos = 0
+            if (rightAligned) xPos = -width
+            var yPos = yOffset
+            if (bottomAligned) yPos = -yOffset - 12
+            context.drawTextWithShadow(textRenderer, text, xPos, yPos, -1)
+            return 12
+        }
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
+            .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+            .category(ConfigCategory.createBuilder()
+                .name(Text.translatable("mrc.config.fpsConfig.category.styling"))
+                .group(OptionGroup.createBuilder()
+                    .name(Text.translatable("mrc.config.fpsConfig.category.styling.group.colors"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.fpsConfig.category.styling.group.colors.description"))).also {
+                        val overrideFpsColors = Option.createBuilder<Boolean>()
+                            .name(Text.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.overrideFpsColors"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.overrideFpsColors.description")))
+                            .binding(Config.overrideFpsColors.asBinding())
+                            .controller(TickBoxControllerBuilder::create)
+                            .build()
+                        val fpsTextColor = Option.createBuilder<Color>()
+                            .name(Text.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.fpsTextColor"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.fpsTextColor.description")))
+                            .binding(Config.fpsTextColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        fpsTextColor.setAvailable(overrideFpsColors.pendingValue())
+                        overrideFpsColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) fpsTextColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) fpsTextColor.setAvailable(option.pendingValue( ))
+                        }
+                        val fpsNumberColor = Option.createBuilder<Color>()
+                            .name(Text.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.fpsNumberColor"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.fpsNumberColor.description")))
+                            .binding(Config.fpsNumberColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        fpsNumberColor.setAvailable(overrideFpsColors.pendingValue())
+                        overrideFpsColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) fpsNumberColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) fpsNumberColor.setAvailable(option.pendingValue( ))
+                        }
+                        it.option(overrideFpsColors)
+                        it.option(fpsTextColor)
+                        it.option(fpsNumberColor)
+                    }
+                    .build())
+                .build())
+            .build()
+            .generateScreen(parent)
+    },
+    PING {
+        override fun render(
+            context: DrawContext,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            val networkHandler = MinecraftClient.getInstance().networkHandler
+            val ping = networkHandler?.getPlayerListEntry(username)!!.latency
+            if (ping <= 0) return 0
+            val pingColor = if (ping < 50) 0x1eff00 else if (ping < 100) 0xfff100 else if (ping < 200) 0xff9500 else 0xff3b3b
+            val textRenderer = MinecraftClient.getInstance().textRenderer
+            val text = Text.translatable("mrc.roundhud.ping", Text.literal("$ping").setStyle(Config.getPingNumberAccentStyle(pingColor))).setStyle(Config.getPingTextAccentStyle(pingColor))
+            val width = textRenderer.getWidth(text)
+            var xPos = 0
+            if (rightAligned) xPos = -width
+            var yPos = yOffset
+            if (bottomAligned) yPos = -yOffset - 12
+            context.drawTextWithShadow(textRenderer, text, xPos, yPos, -1)
+            return 12
+        }
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
+            .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+            .category(ConfigCategory.createBuilder()
+                .name(Text.translatable("mrc.config.pingConfig.category.styling"))
+                .group(OptionGroup.createBuilder()
+                    .name(Text.translatable("mrc.config.pingConfig.category.styling.group.colors"))
+                    .description(OptionDescription.of(Text.translatable("mrc.config.pingConfig.category.styling.group.colors.description"))).also {
+                        val overridePingColors = Option.createBuilder<Boolean>()
+                            .name(Text.translatable("mrc.config.pingConfig.category.styling.group.colors.option.overridePingColors"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.pingConfig.category.styling.group.colors.option.overridePingColors.description")))
+                            .binding(Config.overridePingColors.asBinding())
+                            .controller(TickBoxControllerBuilder::create)
+                            .build()
+                        val pingTextColor = Option.createBuilder<Color>()
+                            .name(Text.translatable("mrc.config.pingConfig.category.styling.group.colors.option.pingTextColor"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.pingConfig.category.styling.group.colors.option.pingTextColor.description")))
+                            .binding(Config.pingTextColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        pingTextColor.setAvailable(overridePingColors.pendingValue())
+                        overridePingColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) pingTextColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) pingTextColor.setAvailable(option.pendingValue( ))
+                        }
+                        val pingNumberColor = Option.createBuilder<Color>()
+                            .name(Text.translatable("mrc.config.pingConfig.category.styling.group.colors.option.pingNumberColor"))
+                            .description(OptionDescription.of(Text.translatable("mrc.config.pingConfig.category.styling.group.colors.option.pingNumberColor.description")))
+                            .binding(Config.pingNumberColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        pingNumberColor.setAvailable(overridePingColors.pendingValue())
+                        overridePingColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) pingNumberColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) pingNumberColor.setAvailable(option.pendingValue( ))
+                        }
+                        it.option(overridePingColors)
+                        it.option(pingTextColor)
+                        it.option(pingNumberColor)
                     }
                     .build())
                 .build())

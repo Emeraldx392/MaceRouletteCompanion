@@ -17,29 +17,49 @@ object RoundInfoHud {
             if (!StateManager.gameOngoing) return@attachElementBefore
 
             val window = MinecraftClient.getInstance().window
+            val scale = Config.hudScale.value
 
-            // Scale + Alignment
+            //RIGHT HUD
             context.matrices.pushMatrix()
-            context.matrices.scale(Config.hudScale.value)
-            context.matrices.translate(
-                if (Config.hudLocation.value.rightAligned) window.scaledWidth.div(Config.hudScale.value) else 0f,
-                if (Config.hudLocation.value.bottomAligned) window.scaledHeight.div(Config.hudScale.value) else 0f
-            )
-            // Padding
-            context.matrices.pushMatrix()
-            context.matrices.translate(
-                Config.hudXMargin.value.times(if (Config.hudLocation.value.rightAligned) -1f else 1f).div(Config.hudScale.value),
-                Config.hudYMargin.value.times(if (Config.hudLocation.value.bottomAligned) -1f else 1f).div(Config.hudScale.value),
-            )
+            context.matrices.scale(scale)
+
+            val rightX = window.scaledWidth.toFloat() / scale
+            val rightY = if (Config.rightHudLocation.value.bottomAligned) window.scaledHeight.toFloat() / scale else 0f
+            context.matrices.translate(rightX, rightY)
+
+            val padXRight = -Config.hudXMargin.value.toFloat() / scale
+            val padYRight = Config.hudYMargin.value.toFloat() * (if (Config.rightHudLocation.value.bottomAligned) -1f else 1f) / scale
+            context.matrices.translate(padXRight, padYRight)
 
             var yOffset = 0
-            var elements = Config.hudElements.value
-            if (Config.hudLocation.value.bottomAligned) elements = elements.reversed()
-            elements.forEach {
-                yOffset += it.render(context, yOffset, Config.hudLocation.value.rightAligned, Config.hudLocation.value.bottomAligned)
+            var rightElements = Config.rightHudElements.value
+            if (Config.rightHudLocation.value.bottomAligned) rightElements = rightElements.reversed()
+            rightElements.forEach {
+                yOffset += it.render(context, yOffset, true, Config.rightHudLocation.value.bottomAligned)
             }
 
             context.matrices.popMatrix()
+
+            //LEFT HUD
+            context.matrices.pushMatrix()
+            context.matrices.scale(scale)
+
+            // Translate to the left edge (0) and top/bottom
+            val leftY = if (Config.leftHudLocation.value.bottomAligned) window.scaledHeight.toFloat() / scale else 0f
+            context.matrices.translate(0f, leftY)
+
+            // Apply padding offset
+            val padXLeft = Config.hudXMargin.value.toFloat() / scale
+            val padYLeft = Config.hudYMargin.value.toFloat() * (if (Config.leftHudLocation.value.bottomAligned) -1f else 1f) / scale
+            context.matrices.translate(padXLeft, padYLeft)
+
+            yOffset = 0
+            var leftElements = Config.leftHudElements.value
+            if (Config.leftHudLocation.value.bottomAligned) leftElements = leftElements.reversed()
+
+            leftElements.forEach {
+                yOffset += it.render(context, yOffset, false, Config.leftHudLocation.value.bottomAligned)
+            }
             context.matrices.popMatrix()
         }
     }

@@ -3,12 +3,19 @@ package moe.pxe.macecompanion
 import com.mojang.authlib.GameProfile
 import com.mojang.serialization.JsonOps
 import dev.isxander.yacl3.config.v3.value
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.*
+import moe.pxe.macecompanion.CustomToasts.sendChaosStarterToast
+import moe.pxe.macecompanion.CustomToasts.sendEternalElectorToast
 import moe.pxe.macecompanion.CustomToasts.sendModifierChargerToast
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.enums.Modifiers
 import moe.pxe.macecompanion.util.OnMaceRoulette
+import moe.pxe.macecompanion.util.SendMessage
 import moe.pxe.macecompanion.util.SubtitleCallback
 import moe.pxe.macecompanion.util.TitleCallback
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.MinecraftClient
@@ -31,7 +38,7 @@ object StateManager {
         private set
     var round = -1
         private set
-    var roundColor = Style.EMPTY.withColor(0x9ef6fc)
+    var roundColor: Style? = Style.EMPTY.withColor(0x9ef6fc)
         private set
     var playersAlive = -1
         private set
@@ -67,6 +74,12 @@ object StateManager {
         private set
     var eternalModifier: Modifiers? = null
         private set
+    var lastMessage: Text? = null
+        private set
+    var hideFindPlayerText: Boolean = false
+        private set
+    var fps: Int = -1
+        private set
 
     val username = MinecraftClient.getInstance().session.username.toString()
 
@@ -91,17 +104,25 @@ object StateManager {
     private val chatSpikeDeathRegex = """⏵ (.+) fell on a spike! \((\d+) remain\)""".toRegex()
     private val chatElimCounterRegex = """\s+◇ \+\d+🪓, total (\d+)🪓""".toRegex()
 
-    private val chatLeaderboardHeaderRegex = """ +‌*ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ:""".toRegex()
+    private val findPlayerCommandRegex = """\s+\nYou are currently playing on:\n\n→ .+ \[14000002] \[mace]\n→ In Lobby - .+/(\d+) Remain\n→ Owner: flopsuh \n→ Server: Private Node 14\n\s+""".toRegex()
+
+    private val totalStarFragmentGainRegex = """ᴛᴏᴛᴀʟ ɢᴀɪɴ: \+(\d+)""".toRegex()
+
+    private val chatLeaderboardHeaderRegex = """\s+‌‌ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ:""".toRegex()
 
     private val titleRoundNumberRegex = """ʀᴏᴜɴᴅ (\d+)""".toRegex()
     private val titlePlayersAliveRegex = """(\d+) ᴀʟɪᴠᴇ""".toRegex()
+    private val titleEliminatedRegex = """☠☠☠""".toRegex()
 
     private val newEventRegex = """⏵ New Event Started! \(by (.+)\)""".toRegex()
     private val newEventTypeRegex = """\s+⏵ Type: (.+)""".toRegex()
     private val newEventDurationRegex = """\s+⏵ Length: (\d+)h""".toRegex()
 
     private val modifierChargerRegex = """⏵ (.+) used a Modifier Charger on (.+)!\n\s+◇ It will be charged for its next (\d+) appearances!""".toRegex()
-    
+    private val chaosStarterRegex = """⏵ (.+) used a Chaos Starter!\n\s+◇ The next round will have five modifiers!""".toRegex()
+    private val eternalElectorRegex = """⏵ (.+) used a Eternal Elector for (.+)!""".toRegex()
+    private val eternalElectorPositionRegex = """\s+◇ It has been queued at position #(\d+)!""".toRegex()
+
     private val placedBountyRegex = """⏵ (.+) placed a (\d+)⛂ bounty on (.+)!""".toRegex()
     private val selfPlacedBountyRegex = """⏵ (.+) placed a (\d+)⛂ bounty on themself!""".toRegex()
     private val raisedBountyRegex = """⏵ (.+) raised the bounty amount to (\d+)⛂ on (.+)!""".toRegex()
@@ -122,15 +143,20 @@ object StateManager {
             .toString()
     }
 
+    private fun messageToJson(message: Text): JsonObject {
+        val jsonString = messageToJsonString(message)
+        return Json.parseToJsonElement(jsonString).jsonObject
+    }
+
     private fun messageContainsTexture(message: Text, texture: String): Boolean {
         val json = messageToJsonString(message)
         return json.contains(texture)
     }
 
-    private fun extractModifierNameFromMessage(message: Text, isModifierCharger: Boolean): String? {
+    private fun extractModifierNameFromMessage(message: Text, isConsumable: Boolean): String? {
         Modifiers.entries.forEach { modifier ->
-            if (message.string.contains(modifier.matchName) && (chatModifierItemRegex.matchEntire(message.string) != null || modifierChargerRegex.matchEntire(message.string) != null)) {
-                if(!isModifierCharger && message.string.contains("Modifier Charger")) return null
+            if (message.string.contains(modifier.matchName) && (chatModifierItemRegex.matchEntire(message.string) != null || modifierChargerRegex.matchEntire(message.string) != null) || chaosStarterRegex.matchEntire(message.string) != null || eternalElectorRegex.matchEntire(message.string) != null || eternalElectorPositionRegex.matchEntire(message.string) != null) {
+                if(!isConsumable && (message.string.contains("Modifier Charger") || message.string.contains("Eternal Elector"))) return null
                 val revealMysteryModifier = Config.showMysteryModifiers.value
                 if (messageContainsTexture(message, mysteryModifierTexture)) {
                     if(!revealMysteryModifier) return "???"
@@ -184,9 +210,13 @@ object StateManager {
             AutoGL.sendGlMessage()
         }
         val lastSlotItem = getPlayerSlotItemStack(8).item
-        if(lastSlotItem == Items.STICK || lastSlotItem == Items.BREEZE_ROD) eliminated = true
+        eliminated = (lastSlotItem == Items.STICK || lastSlotItem == Items.BREEZE_ROD)
         if(eliminated && number == 1) eliminations = -1
         if(eliminated && number == 1) starFragments = -1
+        if(playersTotal == -1){
+            hideFindPlayerText = true
+            SendMessage.sendCommand("find $username")
+        }
         round = number
         gameOngoing = true
         modifiers = mutableListOf()
@@ -212,6 +242,9 @@ object StateManager {
         modifierBoosters = mutableMapOf()
     }
     fun registerListeners() {
+        ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: MinecraftClient ->
+                fps = client.currentFps
+        })
         // Chat Listener
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
             if (overlay) return@register true
@@ -221,8 +254,6 @@ object StateManager {
             // Elimination Messages (slain by, left the game, blew up, fell off the map)
             val eliminationMatch = chatEliminationRegex.matchEntire(message.string) ?: chatEarlyLeaveRegex.matchEntire(message.string) ?: chatBlowUpRegex.matchEntire(message.string) ?: chatVoidDeathRegex.matchEntire(message.string) ?: chatVoidEliminationRegex.matchEntire(message.string) ?: chatSpikeDeathRegex.matchEntire(message.string)
             eliminationMatch?.groups?.let {
-                val eliminatedPlayer = it[1]?.value.toString()
-                if(!eliminated && eliminatedPlayer == username) eliminated = true
                 playersAlive = it[2]?.value?.toIntOrNull() ?: -1
                 if(!eliminated) {
                     if (playersAlive == 1) starFragmentMultiplier = 3.125f
@@ -264,8 +295,25 @@ object StateManager {
             modifierChargerRegex.matchEntire(message.string)?.groups?.let {
                 val player = it[1]?.value.toString()
                 val modifier = extractModifierNameFromMessage(message, true).toString()
-                val queueLength = it[3]?.value?.toInt()
+                val queueLength = it[3]?.value!!.toInt()
                 sendModifierChargerToast(modifier, queueLength, player)
+            }
+            chaosStarterRegex.matchEntire(message.string)?.groups?.let {
+                val player = it[1]?.value.toString()
+                sendChaosStarterToast(player)
+            }
+            eternalElectorRegex.matchEntire(message.string)?.groups?.let {
+                lastMessage = message
+            }
+            eternalElectorPositionRegex.matchEntire(message.string)?.groups?.let { it ->
+                var player: String? = null
+                var modifier: String? = null
+                eternalElectorRegex.matchEntire(lastMessage!!.string)?.groups?.let { match ->
+                    player = match[1]?.value.toString()
+                    modifier = extractModifierNameFromMessage(lastMessage!!, true).toString()
+                }
+                val queuePosition = it[1]?.value!!.toInt()
+                sendEternalElectorToast(modifier!!, player!!, queuePosition)
             }
 
             placedBountyRegex.matchEntire(message.string)?.groups?.let {
@@ -300,6 +348,17 @@ object StateManager {
                 val bountyReceiver = it[1]?.value.toString()
                 val bountyAmount = it[2]?.value?.toInt()
                 if(bountyReceiver == username) CustomToasts.sendCashedInBountyToast(bountyAmount)
+            }
+            findPlayerCommandRegex.matchEntire(message.string)?.groups?.let {
+                val totalPlayersFound = it[1]?.value!!.toInt()
+                playersTotal = totalPlayersFound
+                if(hideFindPlayerText) return@register false
+                hideFindPlayerText = false
+            }
+
+            totalStarFragmentGainRegex.find(message.string)?.groups?.let {
+                eliminated = true
+                starFragments = it[1]?.value!!.toInt()
             }
 
             // Modifier Entry
@@ -371,6 +430,7 @@ object StateManager {
                         roundNumberMatch.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
                         roundColor = packet.text.siblings[0].style ?: roundColor
                     }
+                    titleEliminatedRegex.matchEntire(packet.text.string)?.let { eliminated = true }
                     return ActionResult.PASS
                 }
             }

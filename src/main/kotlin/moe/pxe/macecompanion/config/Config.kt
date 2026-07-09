@@ -3,7 +3,6 @@ package moe.pxe.macecompanion.config
 import com.mojang.serialization.DataResult
 import com.mojang.serialization.DynamicOps
 import com.mojang.serialization.codecs.PrimitiveCodec
-import dev.isxander.yacl3.api.Option
 import dev.isxander.yacl3.config.v3.JsonFileCodecConfig
 import dev.isxander.yacl3.config.v3.register
 import dev.isxander.yacl3.config.v3.value
@@ -11,6 +10,7 @@ import moe.pxe.macecompanion.enums.HudElements
 import moe.pxe.macecompanion.enums.HudLocation
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.text.Style
+import net.minecraft.util.Colors
 import java.awt.Color
 
 object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir.resolve("mrc.json")) {
@@ -50,7 +50,8 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     // Round Info HUD
     val displayHud by register<Boolean>(true, BOOL)
 
-    val hudLocation by register<HudLocation>(HudLocation.TOP_LEFT, HudLocation.CODEC)
+    val rightHudLocation by register<HudLocation>(HudLocation.TOP, HudLocation.CODEC)
+    val leftHudLocation by register<HudLocation>(HudLocation.TOP, HudLocation.CODEC)
     val hudXMargin by register<Int>(10, INT)
     val hudYMargin by register<Int>(10, INT)
     val hudScale by register<Float>(1f, FLOAT)
@@ -61,12 +62,13 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val secondAccentColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
     val thirdAccentColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
 
-    val hudElements by register<List<HudElements>>(listOf(
+    val leftHudElements by register<List<HudElements>>(listOf(
         HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,
-        HudElements.ELIMINATIONS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
+        HudElements.ELIMINATIONS, HudElements.STAR_FRAGMENTS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
+    val rightHudElements by register<List<HudElements>>(listOf(HudElements.PING, HudElements.FPS), HudElements.CODEC.listOf())
     // Toasts
     val showNewEventToasts by register<Boolean>(true, BOOL)
-    val showModifierChargerToasts by register<Boolean>(true, BOOL)
+    val showConsumableToasts by register<Boolean>(true, BOOL)
     val showBountyToasts by register<Boolean>(true, BOOL)
     val showPlayerJoinToasts by register<Boolean>(true, BOOL)
     val playerStrings by register<List<String>>(listOf(""), STRING.listOf())
@@ -120,6 +122,14 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val maceChanceIconColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
     val maceChanceTextColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
     val hideMaceChanceWhenEliminated by register<Boolean>(false, BOOL)
+
+    val overrideFpsColors by register<Boolean>(false, BOOL)
+    val fpsNumberColor by register<Color>(Color(Colors.WHITE), RGB_COLOR_CODEC)
+    val fpsTextColor by register<Color>(Color(Colors.WHITE), RGB_COLOR_CODEC)
+
+    val overridePingColors by register<Boolean>(false, BOOL)
+    val pingNumberColor by register<Color>(Color(Colors.WHITE), RGB_COLOR_CODEC)
+    val pingTextColor by register<Color>(Color(Colors.WHITE), RGB_COLOR_CODEC)
 
     fun getRoundTextAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)
@@ -214,5 +224,23 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     fun getMaceChanceIconAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)
         return deafultStyle.let { if (overrideMaceChanceColors.value) it.withColor(maceChanceIconColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    }
+
+    fun getFpsTextAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideFpsColors.value) it.withColor(fpsTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
+    }
+    fun getFpsNumberAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideFpsColors.value) it.withColor(fpsNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    }
+
+    fun getPingTextAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overridePingColors.value) it.withColor(pingTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
+    }
+    fun getPingNumberAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overridePingColors.value) it.withColor(pingNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
     }
 }
