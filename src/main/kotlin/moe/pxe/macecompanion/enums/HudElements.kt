@@ -14,7 +14,6 @@ import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.StateManager
-import moe.pxe.macecompanion.StateManager.username
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
 import moe.pxe.macecompanion.util.PlayerHead
@@ -674,8 +673,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
 
-            if (StateManager.maceChance == -1f) return 0
-            if (StateManager.maceChance == -100f) return 0
+            if (StateManager.maceChance < 0f) return 0
             if(Config.hideMaceChanceWhenEliminated.value && StateManager.eliminated) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
@@ -761,6 +759,153 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             .build()
             .generateScreen(parent)
     },
+    BOUNTY_BOARD {
+        override fun render(
+            context: DrawContext,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.bounties.isEmpty()) return 0
+            if (StateManager.eliminated) return 0
+
+            val textRenderer = MinecraftClient.getInstance().textRenderer
+            var yPos = yOffset
+            val sortedBounties = StateManager.bounties.entries
+                .sortedByDescending { it.value }
+                .associate { it.key to it.value }
+            if (bottomAligned) yPos = -yOffset - 12 - (sortedBounties.size * 20)
+
+            val headerText = Text.translatable("mrc.roundhud.bounty_board")
+                .setStyle(Config.getBountyBoardTextAccentStyle(0xff7cf4))
+            val headerWidth = textRenderer.getWidth(headerText)
+            var xPos = 0
+            if (rightAligned) xPos = -headerWidth
+            context.drawTextWithShadow(textRenderer, headerText, xPos, yPos, -1)
+            yPos += 12
+            var index = 1
+            sortedBounties.forEach { (profile, bountyAmount) ->
+                if(bountyAmount >= Config.bountyBoardMinBounty.value && index <=  Config.bountyBoardMaxPlayers.value) {
+                    val playerUsername = profile.name
+                    var xPos = 0
+                    if (rightAligned) xPos = -16
+                    context.drawItem(PlayerHead.fromProfile(profile), xPos, yPos)
+                    val playerText =
+                        Text.literal("$playerUsername").setStyle(Config.getBountyBoardPlayerAccentStyle(Colors.YELLOW))
+                    val bountyText =
+                        Text.literal("$bountyAmount⛂").setStyle(Config.getBountyBoardAmountAccentStyle(0xff7cf4))
+                    var finalText = playerText.append(Text.literal(" ").append(bountyText))
+                    if (rightAligned) bountyText.append(Text.literal(" ").append(playerText))
+                    val modifierWidth = textRenderer.getWidth(finalText)
+                    xPos = 22
+                    if (rightAligned) xPos = -22 - modifierWidth
+                    context.drawTextWithShadow(textRenderer, finalText, xPos, yPos + 4, -1)
+                    yPos += 20
+                    index++
+                }
+            }
+            return 12 + (sortedBounties.size * 20)
+        }
+        override fun generateConfig(parent: Screen): Screen? {
+            return YetAnotherConfigLib.createBuilder()
+                .title(Text.translatable("mrc.hudelement.${name.lowercase()}"))
+                .category(
+                    ConfigCategory.createBuilder()
+                    .name(Text.translatable("mrc.config.bountyBoardConfig.category.misc"))
+                    .option(
+                        Option.createBuilder<Int>()
+                        .name(Text.translatable("mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMaxPlayers"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMaxPlayers.description")))
+                        .binding(Config.bountyBoardMaxPlayers.asBinding())
+                        .controller {
+                            IntegerSliderControllerBuilder.create(it)
+                                .range(1, 15)
+                                .step(1)
+                        }
+                        .build())
+                        .option(
+                            Option.createBuilder<Int>()
+                                .name(Text.translatable("mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMinBounty"))
+                                .description(OptionDescription.of(Text.translatable("mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMinBounty.description")))
+                                .binding(Config.bountyBoardMinBounty.asBinding())
+                                .controller {
+                                    IntegerSliderControllerBuilder.create(it)
+                                        .range(1, 10)
+                                        .step(1)
+                                }
+                                .build())
+                    .build())
+                .category(
+                    ConfigCategory.createBuilder()
+                    .name(Text.translatable("mrc.config.bountyBoardConfig.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                        .name(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors"))
+                        .description(OptionDescription.of(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.description")))
+                        .also {
+                            val overrideBountyBoardColors = Option.createBuilder<Boolean>()
+                                .name(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.overrideBountyBoardColors"))
+                                .description(OptionDescription.of(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.overrideBountyBoardColors.description")))
+                                .binding(Config.overrideBountyBoardColors.asBinding())
+                                .controller(TickBoxControllerBuilder::create)
+                                .build()
+                            val bountyBoardTextColor = Option.createBuilder<Color>()
+                                .name(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardTextColor"))
+                                .description(OptionDescription.of(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardTextColor.description")))
+                                .binding(Config.bountyBoardTextColor.asBinding())
+                                .controller(ColorControllerBuilder::create)
+                                .build()
+                            bountyBoardTextColor.setAvailable(overrideBountyBoardColors.pendingValue())
+                            overrideBountyBoardColors.addEventListener { option, event ->
+                                if (event == OptionEventListener.Event.INITIAL) bountyBoardTextColor.setAvailable(
+                                    option.pendingValue()
+                                )
+                                if (event == OptionEventListener.Event.STATE_CHANGE) bountyBoardTextColor.setAvailable(
+                                    option.pendingValue()
+                                )
+                            }
+                            val bountyBoardPlayerColor = Option.createBuilder<Color>()
+                                .name(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardPlayerColor"))
+                                .description(OptionDescription.of(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardPlayerColor.description")))
+                                .binding(Config.bountyBoardPlayerColor.asBinding())
+                                .controller(ColorControllerBuilder::create)
+                                .build()
+                            bountyBoardPlayerColor.setAvailable(overrideBountyBoardColors.pendingValue())
+                            overrideBountyBoardColors.addEventListener { option, event ->
+                                if (event == OptionEventListener.Event.INITIAL) bountyBoardPlayerColor.setAvailable(
+                                    option.pendingValue()
+                                )
+                                if (event == OptionEventListener.Event.STATE_CHANGE) bountyBoardPlayerColor.setAvailable(
+                                    option.pendingValue()
+                                )
+                            }
+                            val bountyBoardNumberColor = Option.createBuilder<Color>()
+                                .name(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardNumberColor"))
+                                .description(OptionDescription.of(Text.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardNumberColor.description")))
+                                .binding(Config.bountyBoardNumberColor.asBinding())
+                                .controller(ColorControllerBuilder::create)
+                                .build()
+                            bountyBoardNumberColor.setAvailable(overrideBountyBoardColors.pendingValue())
+                            overrideBountyBoardColors.addEventListener { option, event ->
+                                if (event == OptionEventListener.Event.INITIAL) bountyBoardNumberColor.setAvailable(
+                                    option.pendingValue()
+                                )
+                                if (event == OptionEventListener.Event.STATE_CHANGE) bountyBoardNumberColor.setAvailable(
+                                    option.pendingValue()
+                                )
+                            }
+                            it.option(overrideBountyBoardColors)
+                            it.option(bountyBoardTextColor)
+                            it.option(bountyBoardPlayerColor)
+                            it.option(bountyBoardNumberColor)
+                        }
+                        .build())
+                    .build())
+                .save(Config::saveToFile)
+                .build()
+                .generateScreen(parent)
+        }
+    },
     FPS {
         override fun render(
             context: DrawContext,
@@ -832,7 +977,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
             val networkHandler = MinecraftClient.getInstance().networkHandler
-            val ping = networkHandler?.getPlayerListEntry(username)!!.latency
+            val ping = networkHandler?.getPlayerListEntry(StateManager.client.session.username.toString())!!.latency
             if (ping <= 0) return 0
             val pingColor = if (ping < 50) 0x1eff00 else if (ping < 100) 0xfff100 else if (ping < 200) 0xff9500 else 0xff3b3b
             val textRenderer = MinecraftClient.getInstance().textRenderer

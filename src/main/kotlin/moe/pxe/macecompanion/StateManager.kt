@@ -72,6 +72,8 @@ object StateManager {
         private set
     var modifierBoosters = mutableMapOf<Modifiers, MutableList<GameProfile>>()
         private set
+    var bounties = mutableMapOf<GameProfile, Int>()
+        private set
     var eternalModifier: Modifiers? = null
         private set
     var lastMessage: Text? = null
@@ -81,7 +83,7 @@ object StateManager {
     var fps: Int = -1
         private set
 
-    val username = MinecraftClient.getInstance().session.username.toString()
+    val client: MinecraftClient = MinecraftClient.getInstance()
 
     private val chatJoinRegex = """\+ (.+)""".toRegex()
 
@@ -129,16 +131,49 @@ object StateManager {
     private val selfRaisedBountyRegex = """⏵ (.+) raised the bounty amount on themself to (\d+)⛂!""".toRegex()
     private val rewardedBountyRegex = """⏵ (.+) was rewarded (\d+)⛂ for eliminating (.+)!""".toRegex()
     private val cashedInBountyRegex = """⏵ (.+) cashed in their bounty of (\d+)⛂!""".toRegex()
+    private val playerListBountyRegex = """.+\s+◇\s+(\d+)⛂""".toRegex()
 
-    fun getPlayerSlotItemStack(slot: Int): ItemStack {
-        val playerInventory = MinecraftClient.getInstance().player?.inventory
+    private fun getBountyData() {
+        bounties = mutableMapOf()
+        val tabHUD = client.inGameHud.playerListHud ?: return
+        client.networkHandler?.playerList?.forEach { player ->
+            val playerDisplayName = tabHUD.getPlayerName(player).string ?: return
+            playerListBountyRegex.matchEntire(playerDisplayName)?.groups[1]?.let { match ->
+                match.value.toIntOrNull()?.let { bountyValue ->
+                    if (bountyValue > 0) {
+                        bounties[player.profile] = bountyValue
+                    }
+                }
+            }
+        }
+        val personalProfile = getPlayerProfile(client.session.username.toString())
+        val personalEntry = client.networkHandler
+            ?.getPlayerListEntry(client.player?.uuid)
+            ?: return
+        val personalPlayerDisplayName = tabHUD.getPlayerName(personalEntry).string ?: return
+        playerListBountyRegex.matchEntire(personalPlayerDisplayName)?.groups[1]?.let { match ->
+            match.value.toIntOrNull()?.let { bountyValue ->
+                if (bountyValue > 0) personalProfile?.let { profile -> bounties[profile] = bountyValue }
+            }
+        }
+    }
+
+    private fun getPlayerProfile(player: String): GameProfile? {
+        if (player == client.session.username) return client.gameProfile
+        return client.networkHandler
+            ?.getPlayerListEntry(player)
+            ?.profile
+    }
+
+    private fun getPlayerSlotItemStack(slot: Int): ItemStack {
+        val playerInventory = client.player?.inventory
         val itemStack: ItemStack = playerInventory?.getStack(slot) ?: ItemStack.EMPTY
         return itemStack
     }
 
     private fun messageToJsonString(message: Text): String {
         return TextCodecs.CODEC
-            .encodeStart(MinecraftClient.getInstance().world!!.registryManager.getOps(JsonOps.INSTANCE), message)
+            .encodeStart(client.world!!.registryManager.getOps(JsonOps.INSTANCE), message)
             .getOrThrow()
             .toString()
     }
@@ -208,6 +243,7 @@ object StateManager {
             starFragments = 0
             eliminated = false
             AutoGL.sendGlMessage()
+            getBountyData()
         }
         val lastSlotItem = getPlayerSlotItemStack(8).item
         eliminated = (lastSlotItem == Items.STICK || lastSlotItem == Items.BREEZE_ROD)
@@ -215,7 +251,7 @@ object StateManager {
         if(eliminated && number == 1) starFragments = -1
         if(playersTotal == -1){
             hideFindPlayerText = true
-            SendMessage.sendCommand("find $username")
+            SendMessage.sendCommand("find ${client.session.username}")
         }
         round = number
         gameOngoing = true
@@ -240,6 +276,17 @@ object StateManager {
         playtime = null
         modifiers = mutableListOf()
         modifierBoosters = mutableMapOf()
+        chargedModifiers = mutableSetOf()
+        mysteryModifiers = mutableSetOf()
+        bounties = mutableMapOf()
+        eternalModifier = null
+        lastMessage = null
+        newEvent = false
+        newEventStarter = ""
+        newEventType = ""
+        newEventDuration = -1
+        hideFindPlayerText = false
+        checkForModifiers = false
     }
     fun registerListeners() {
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: MinecraftClient ->
@@ -317,40 +364,56 @@ object StateManager {
             }
 
             placedBountyRegex.matchEntire(message.string)?.groups?.let {
-                val bountyPlacer = it[1]?.value.toString()
-                val bountyAmount = it[2]?.value?.toInt()
-                val bountyReceiver = it[3]?.value.toString()
-                if(bountyReceiver == username) CustomToasts.sendPlacedBountyToast(bountyAmount, bountyPlacer)
+                val bountyPlacer = it[1]!!.value
+                val bountyAmount = it[2]!!.value.toInt()
+                val bountyReceiver = it[3]!!.value
+                getPlayerProfile(bountyReceiver)?.let { profile ->
+                    bounties[profile] = bountyAmount
+                }
+                if(bountyReceiver == client.session.username.toString()) CustomToasts.sendPlacedBountyToast(bountyAmount, bountyPlacer)
             }
             selfPlacedBountyRegex.matchEntire(message.string)?.groups?.let {
-                val bountyPlacer = it[1]?.value.toString()
-                val bountyAmount = it[2]?.value?.toInt()
-                if(bountyPlacer == username) CustomToasts.sendSelfPlacedBountyToast(bountyAmount)
+                val bountyPlacer = it[1]!!.value
+                val bountyAmount = it[2]!!.value.toInt()
+                getPlayerProfile(bountyPlacer)?.let { profile ->
+                    bounties[profile] = bountyAmount
+                }
+                if(bountyPlacer == client.session.username.toString()) CustomToasts.sendSelfPlacedBountyToast(bountyAmount)
             }
             raisedBountyRegex.matchEntire(message.string)?.groups?.let {
-                val bountyPlacer = it[1]?.value.toString()
-                val bountyAmount = it[2]?.value?.toInt()
-                val bountyReceiver = it[3]?.value.toString()
-                if(bountyReceiver == username) CustomToasts.sendRaisedBountyToast(bountyAmount, bountyPlacer)
+                val bountyPlacer = it[1]!!.value
+                val bountyAmount = it[2]!!.value.toInt()
+                val bountyReceiver = it[3]!!.value
+                getPlayerProfile(bountyReceiver)?.let { profile ->
+                    bounties[profile] = bountyAmount
+                }
+                if(bountyReceiver == client.session.username.toString()) CustomToasts.sendRaisedBountyToast(bountyAmount, bountyPlacer)
             }
             selfRaisedBountyRegex.matchEntire(message.string)?.groups?.let {
-                val bountyPlacer = it[1]?.value.toString()
-                val bountyAmount = it[2]?.value?.toInt()
-                if(bountyPlacer == username) CustomToasts.sendSelfRaisedBountyToast(bountyAmount)
+                val bountyPlacer = it[1]!!.value
+                val bountyAmount = it[2]!!.value.toInt()
+                getPlayerProfile(bountyPlacer)?.let { profile ->
+                    bounties[profile] = bountyAmount
+                }
+                if(bountyPlacer == client.session.username.toString()) CustomToasts.sendSelfRaisedBountyToast(bountyAmount)
             }
             rewardedBountyRegex.matchEntire(message.string)?.groups?.let {
-                val bountyReceiver = it[1]?.value.toString()
-                val bountyAmount = it[2]?.value?.toInt()
-                val playerWithBounty = it[3]?.value.toString()
-                if(bountyReceiver == username) CustomToasts.sendRewardedBountyToast(bountyAmount, playerWithBounty)
+                val bountyReceiver = it[1]!!.value
+                val bountyAmount = it[2]!!.value.toInt()
+                val playerWithBounty = it[3]!!.value
+                val playerWithBountyProfile = getPlayerProfile(playerWithBounty)
+                bounties.remove(playerWithBountyProfile)
+                if(bountyReceiver == client.session.username.toString()) CustomToasts.sendRewardedBountyToast(bountyAmount, playerWithBounty)
             }
             cashedInBountyRegex.matchEntire(message.string)?.groups?.let {
-                val bountyReceiver = it[1]?.value.toString()
-                val bountyAmount = it[2]?.value?.toInt()
-                if(bountyReceiver == username) CustomToasts.sendCashedInBountyToast(bountyAmount)
+                val bountyReceiver = it[1]!!.value
+                val bountyAmount = it[2]!!.value.toInt()
+                val receiverProfile = getPlayerProfile(bountyReceiver)
+                bounties.remove(receiverProfile)
+                if(bountyReceiver == client.session.username.toString()) CustomToasts.sendCashedInBountyToast(bountyAmount)
             }
             findPlayerCommandRegex.matchEntire(message.string)?.groups?.let {
-                val totalPlayersFound = it[1]?.value!!.toInt()
+                val totalPlayersFound = it[1]!!.value.toInt()
                 playersTotal = totalPlayersFound
                 if(hideFindPlayerText) return@register false
                 hideFindPlayerText = false
@@ -397,19 +460,18 @@ object StateManager {
                 if (modifier != Modifiers.UNKNOWN && modReallyBoostedMatch != null){
                     val hoverString = getHover(message).toString().replace("§r", "")
                     val playerNames = hoverString.split(", ")
-                    val networkHandler = MinecraftClient.getInstance().networkHandler
                     for (player in playerNames) {
-                        val profile = networkHandler?.getPlayerListEntry(player)?.profile ?: continue
-                        modifierBoosters[modifier]?.add(profile)
-
+                        getPlayerProfile(player)?.let { profile ->
+                            modifierBoosters[modifier]?.add(profile)
+                        }
                     }
                 }else if (modifier != Modifiers.UNKNOWN && modBoostedMatch != null) modBoostedMatch.let {
                     it.groupValues[2].let { playerList ->
                         val playerNames = playerList.split(", ")
-                        val networkHandler = MinecraftClient.getInstance().networkHandler ?: return@let
                         for (player in playerNames) {
-                            val profile = networkHandler.getPlayerListEntry(player)?.profile ?: continue
-                            modifierBoosters[modifier]?.add(profile)
+                            getPlayerProfile(player)?.let { profile ->
+                                modifierBoosters[modifier]?.add(profile)
+                            }
                         }
                     }
                 }

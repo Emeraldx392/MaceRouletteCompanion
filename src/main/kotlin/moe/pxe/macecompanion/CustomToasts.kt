@@ -26,21 +26,21 @@ object CustomToasts {
     fun sendModifierChargerToast(modifier: String, queueLength: Int, player: String) {
         if (!Config.showConsumableToasts.value) return
         var playerName = player
-        if(player == StateManager.username) playerName = "You"
+        if(player == StateManager.client.session.username.toString()) playerName = "You"
         val description = Text.literal("${modifier} will be charged for the next ${queueLength} appearances")
         sendCustomToast(Text.literal("${playerName} used a Modifier Charger!"), description)
     }
     fun sendChaosStarterToast(player: String) {
         if (!Config.showConsumableToasts.value) return
         var playerName = player
-        if(player == StateManager.username) playerName = "You"
+        if(player == StateManager.client.session.username.toString()) playerName = "You"
         val description = Text.literal("The next round will have five modifiers!")
         sendCustomToast(Text.literal("${playerName} used a Chaos Starter!"), description)
     }
     fun sendEternalElectorToast(modifier: String, player: String, queuePosition: Int) {
         if (!Config.showConsumableToasts.value) return
         var playerName = player
-        if(player == StateManager.username) playerName = "You"
+        if(player == StateManager.client.session.username.toString()) playerName = "You"
         val description = Text.literal("It has been queued at position #${queuePosition}!")
         sendCustomToast(Text.literal("${playerName} used a Eternal Elector for ${modifier}!"), description)
     }

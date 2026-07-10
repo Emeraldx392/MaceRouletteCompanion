@@ -65,7 +65,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val leftHudElements by register<List<HudElements>>(listOf(
         HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,
         HudElements.ELIMINATIONS, HudElements.STAR_FRAGMENTS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
-    val rightHudElements by register<List<HudElements>>(listOf(HudElements.PING, HudElements.FPS), HudElements.CODEC.listOf())
+    val rightHudElements by register<List<HudElements>>(listOf(HudElements.PING, HudElements.FPS, HudElements.BOUNTY_BOARD), HudElements.CODEC.listOf())
     // Toasts
     val showNewEventToasts by register<Boolean>(true, BOOL)
     val showConsumableToasts by register<Boolean>(true, BOOL)
@@ -122,6 +122,13 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val maceChanceIconColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
     val maceChanceTextColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
     val hideMaceChanceWhenEliminated by register<Boolean>(false, BOOL)
+
+    val overrideBountyBoardColors by register<Boolean>(false, BOOL)
+    val bountyBoardNumberColor by register<Color>(Color(0xff7cf4), RGB_COLOR_CODEC)
+    val bountyBoardPlayerColor by register<Color>(Color(Colors.YELLOW), RGB_COLOR_CODEC)
+    val bountyBoardTextColor by register<Color>(Color(0xff7cf4), RGB_COLOR_CODEC)
+    val bountyBoardMaxPlayers by register<Int>(3, INT)
+    val bountyBoardMinBounty by register<Int>(1, INT)
 
     val overrideFpsColors by register<Boolean>(false, BOOL)
     val fpsNumberColor by register<Color>(Color(Colors.WHITE), RGB_COLOR_CODEC)
@@ -224,6 +231,19 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     fun getMaceChanceIconAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)
         return deafultStyle.let { if (overrideMaceChanceColors.value) it.withColor(maceChanceIconColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    }
+
+    fun getBountyBoardTextAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideBountyBoardColors.value) it.withColor(bountyBoardTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
+    }
+    fun getBountyBoardAmountAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideBountyBoardColors.value) it.withColor(bountyBoardNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
+    }
+    fun getBountyBoardPlayerAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideBountyBoardColors.value) it.withColor(bountyBoardPlayerColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
     }
 
     fun getFpsTextAccentStyle(defaultColor: Int) : Style {

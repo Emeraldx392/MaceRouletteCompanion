@@ -267,6 +267,31 @@
     "mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceIconColor": "Mace chance icon color",
     "mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceIconColor.description": "The color of the ⚄ icon if \"Override colors\" is enabled.",
 
+    "mrc.config.bountyBoardConfig.category.misc": "Miscellaneous",
+
+    "mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMaxPlayers": "Maximum Players Shown",
+    "mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMaxPlayers.description": "The maximum amount of players with bounties to show.",
+
+    "mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMinBounty": "Minimum bounty required",
+    "mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMinBounty.description": "The minimum amount of bounty cosmetic tokens to be shown.",
+
+    "mrc.config.bountyBoardConfig.category.styling": "Styling",
+
+    "mrc.config.bountyBoardConfig.category.styling.group.colors": "Colors",
+    "mrc.config.bountyBoardConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
+
+    "mrc.config.bountyBoardConfig.category.styling.group.colors.option.overrideBountyBoardColors": "Override colors",
+    "mrc.config.bountyBoardConfig.category.styling.group.colors.option.overrideBountyBoardColors.description": "Toggles whether the bounty board HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
+
+    "mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardTextColor": "ʙᴏᴜɴᴛʏ ʙᴏᴀʀᴅ text color",
+    "mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardTextColor.description": "The color of the ʙᴏᴜɴᴛʏ ʙᴏᴀʀᴅ text if \"Override colors\" is enabled.",
+
+    "mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardPlayerColor": "Player name text color",
+    "mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardPlayerColor.description": "The text color of the player names if \"Override colors\" is enabled.",
+
+    "mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardNumberColor": "Cosmetic Tokens color",
+    "mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardNumberColor.description": "The text color of the cosmetic tokens amount if \"Override colors\" is enabled.",
+
     "mrc.config.fpsConfig.category.styling": "Styling",
 
     "mrc.config.fpsConfig.category.styling.group.colors": "Colors",
@@ -302,6 +327,7 @@
     "mrc.roundhud.playtime": "%s ᴇʟᴀᴘꜱᴇᴅ",
     "mrc.roundhud.modifiers": "ᴍᴏᴅɪꜰɪᴇʀꜱ:",
     "mrc.roundhud.mace_chance": "%s ᴍᴀᴄᴇ ᴄʜᴀɴᴄᴇ",
+    "mrc.roundhud.bounty_board": "ʙᴏᴜɴᴛʏ ʙᴏᴀʀᴅ:",
     "mrc.roundhud.fps": "%s ꜰᴘꜱ",
     "mrc.roundhud.ping": "%s ᴍꜱ",
 
@@ -369,6 +395,7 @@
     "mrc.hudelement.playtime": "Game Duration",
     "mrc.hudelement.modifiers": "Modifiers",
     "mrc.hudelement.mace_chance": "Mace Chance",
+    "mrc.hudelement.bounty_board": "Bounty Board",
     "mrc.hudelement.fps": "FPS",
     "mrc.hudelement.ping": "Ping",
 
