@@ -66,7 +66,6 @@ dependencies {
     modImplementation("dev.isxander:yet-another-config-lib:${project.property("yacl_version")}")
     modImplementation("com.terraformersmc:modmenu:${property("modmenu_version")}")
 
-    modApi("maven.modrinth:flint:${project.property("flint_version")}")
     modImplementation("net.kyori:adventure-platform-fabric:${project.property("adventure_version")}") {
         exclude("net.fabricmc.fabric-api")
     }

@@ -103,9 +103,6 @@
     "mrc.config.category.toasts.group.playerStrings.description": "List of players that trigger the toast.",
 
     "mrc.config.category.miscellaneous": "Miscellaneous",
-    "mrc.config.category.miscellaneous.option.useFlint": "Use Flint",
-    "mrc.config.category.miscellaneous.option.useFlint.description": "Flint is a library that makes developing mods for DiamondFire much easier. Installing it allows Mace Roulette Companion to tell when you're on Mace Roulette and when you're not.",
-    "mrc.config.category.miscellaneous.option.downloadFlint": "Download Flint",
 
     "mrc.config.category.miscellaneous.group.plotIds": "Plot IDs and Handles",
     "mrc.config.category.miscellaneous.group.plotIds.description": "A list of Plot IDs and Handles to look for when checking if the player is on Mace Roulette.",

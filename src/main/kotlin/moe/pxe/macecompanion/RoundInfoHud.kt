@@ -14,7 +14,6 @@ object RoundInfoHud {
             if (!Config.displayHud.value) return@attachElementBefore
 //            if (MinecraftClient.getInstance().debugHud.shouldShowDebugHud()) return@attachElementBefore
             if (MinecraftClient.getInstance().debugHudEntryList.isF3Enabled) return@attachElementBefore
-            if (!StateManager.gameOngoing) return@attachElementBefore
 
             val window = MinecraftClient.getInstance().window
             val scale = Config.hudScale.value

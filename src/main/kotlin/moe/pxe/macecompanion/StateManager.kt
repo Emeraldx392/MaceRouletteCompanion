@@ -106,7 +106,7 @@ object StateManager {
     private val chatSpikeDeathRegex = """⏵ (.+) fell on a spike! \((\d+) remain\)""".toRegex()
     private val chatElimCounterRegex = """\s+◇ \+\d+🪓, total (\d+)🪓""".toRegex()
 
-    private val findPlayerCommandRegex = """\s+\nYou are currently playing on:\n\n→ .+ \[14000002] \[mace]\n→ In Lobby - .+/(\d+) Remain\n→ Owner: flopsuh \n→ Server: Private Node 14\n\s+""".toRegex()
+    private val findPlayerCommandRegex = """→ In Lobby - .+/(\d+) Remain""".toRegex()
 
     private val totalStarFragmentGainRegex = """ᴛᴏᴛᴀʟ ɢᴀɪɴ: \+(\d+)""".toRegex()
 
@@ -295,7 +295,7 @@ object StateManager {
         // Chat Listener
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
             if (overlay) return@register true
-            if (!OnMaceRoulette.onMace) return@register true
+            if (!OnMaceRoulette.onMaceRoulette) return@register true
             // Round Number Header
             chatRoundNumberRegex.matchEntire(message.string)?.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
             // Elimination Messages (slain by, left the game, blew up, fell off the map)
@@ -412,7 +412,7 @@ object StateManager {
                 bounties.remove(receiverProfile)
                 if(bountyReceiver == client.session.username.toString()) CustomToasts.sendCashedInBountyToast(bountyAmount)
             }
-            findPlayerCommandRegex.matchEntire(message.string)?.groups?.let {
+            findPlayerCommandRegex.find(message.string)?.groups?.let {
                 val totalPlayersFound = it[1]!!.value.toInt()
                 playersTotal = totalPlayersFound
                 if(hideFindPlayerText) return@register false
@@ -487,7 +487,7 @@ object StateManager {
         TitleCallback.EVENT.register(
             object : TitleCallback {
                 override fun onTitle(packet: TitleS2CPacket): ActionResult {
-                    if (!OnMaceRoulette.onMace) return ActionResult.PASS
+                    if (!OnMaceRoulette.onMaceRoulette) return ActionResult.PASS
                     titleRoundNumberRegex.matchEntire(packet.text.string)?.let { roundNumberMatch ->
                         roundNumberMatch.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
                         roundColor = packet.text.siblings[0].style ?: roundColor
@@ -502,7 +502,7 @@ object StateManager {
         SubtitleCallback.EVENT.register(
             object : SubtitleCallback {
                 override fun onSubtitle(packet: SubtitleS2CPacket): ActionResult {
-                    if (!OnMaceRoulette.onMace) return ActionResult.PASS
+                    if (!OnMaceRoulette.onMaceRoulette) return ActionResult.PASS
                     titlePlayersAliveRegex.matchEntire(packet.text.string)?.let { playersAliveMatch -> playersAliveMatch.groups[1]?.let { playersAlive = it.value.toIntOrNull() ?: -1 } }
                     return ActionResult.PASS
                 }

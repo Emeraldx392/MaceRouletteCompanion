@@ -74,8 +74,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val playerStrings by register<List<String>>(listOf(""), STRING.listOf())
 
     // Misc. Config
-    val useFlint by register<Boolean>(true, BOOL)
-    val plotIds by register<List<String>>(listOf("mace", "maceroulette", "statless", "14000004"), STRING.listOf())
+    val plotIds by register<List<String>>(listOf("mace", "statless"), STRING.listOf())
 
     // NESTED CONFIG ===========================================================
     val overrideRoundColors by register<Boolean>(false, BOOL)
@@ -239,7 +238,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     }
     fun getBountyBoardAmountAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)
-        return deafultStyle.let { if (overrideBountyBoardColors.value) it.withColor(bountyBoardNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
+        return deafultStyle.let { if (overrideBountyBoardColors.value) it.withColor(bountyBoardNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
     }
     fun getBountyBoardPlayerAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)

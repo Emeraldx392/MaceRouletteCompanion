@@ -19,7 +19,7 @@ object HideGLGG {
     )
     fun registerListener() {
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
-            if (!OnMaceRoulette.onMace) return@register true
+            if (!OnMaceRoulette.onMaceRoulette) return@register true
             if (overlay) return@register true
             if (Config.hideGLMessages.value) glTexts.forEach { if (ContainsText.boldString(message, it)) return@register false }
             if (Config.hideGGMessages.value) ggTexts.forEach { if (ContainsText.boldString(message, it)) return@register false }

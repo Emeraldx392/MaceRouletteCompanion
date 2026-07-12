@@ -318,24 +318,6 @@ object ConfigMenu {
                 .build())
             .category(ConfigCategory.createBuilder()
                 .name(Text.translatable("mrc.config.category.miscellaneous"))
-                .option(Option.createBuilder<Boolean>()
-                    .name(Text.translatable("mrc.config.category.miscellaneous.option.useFlint"))
-                    .description(OptionDescription.of(Text.translatable("mrc.config.category.miscellaneous.option.useFlint.description")))
-                    .binding(Config.useFlint.asBinding())
-                    .controller(TickBoxControllerBuilder::create)
-                    .flag(OptionFlag.GAME_RESTART)
-                    .available(FabricLoader.getInstance().isModLoaded("flint"))
-                    .build())
-                .also {
-                    if (FabricLoader.getInstance().isModLoaded("flint")) return@also
-                    it.option(ButtonOption.createBuilder()
-                        .name(Text.translatable("mrc.config.category.miscellaneous.option.downloadFlint"))
-                        .description(OptionDescription.of(Text.translatable("mrc.config.category.miscellaneous.option.useFlint.description")))
-                        .action { screen, _ ->
-                            ConfirmLinkScreen.open(screen, "https://modrinth.com/mod/flint")
-                        }
-                        .build())
-                }
                 .group(ListOption.createBuilder<String>()
                     .name(Text.translatable("mrc.config.category.miscellaneous.group.plotIds"))
                     .description(OptionDescription.of(Text.translatable("mrc.config.category.miscellaneous.group.plotIds.description")))
@@ -349,7 +331,6 @@ object ConfigMenu {
                     .flag({
                         OnMaceRoulette.fillPlotIds(Config.plotIds.value.toSet())
                     })
-                    .available(FabricLoader.getInstance().isModLoaded("flint"))
                     .build())
                 .build())
             .save(Config::saveToFile)

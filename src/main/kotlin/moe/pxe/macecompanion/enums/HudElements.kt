@@ -16,6 +16,7 @@ import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.StateManager
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
+import moe.pxe.macecompanion.util.OnMaceRoulette
 import moe.pxe.macecompanion.util.PlayerHead
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
@@ -40,6 +41,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
             if (StateManager.round == -1) return 0
+            if (!StateManager.gameOngoing) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
             val numberText = Text.literal("${StateManager.round}").setStyle(Config.getRoundNumberAccentStyle(StateManager.roundColor?.color!!.rgb).withBold(true))
@@ -110,6 +112,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
             if (StateManager.playersAlive == -1) return 0
+            if (!StateManager.gameOngoing) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
             val countText = Text.literal("${StateManager.playersAlive}").setStyle(Config.getAlivePLayersAccentStyle(0xd5fcf5))
@@ -188,6 +191,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
             if (StateManager.eliminations == -1) return 0
+            if (!StateManager.gameOngoing) return 0
             if(Config.hideEliminationsWhenEliminated.value && StateManager.eliminated) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
@@ -278,6 +282,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
             if (StateManager.starFragments == -1) return 0
+            if (!StateManager.gameOngoing) return 0
+            if(OnMaceRoulette.isStatless) return 0
             if(Config.hideStarFragmentsWhenEliminated.value && StateManager.eliminated) return 0
 
             val textRenderer = MinecraftClient.getInstance().textRenderer
@@ -371,6 +377,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
+            if (!StateManager.gameOngoing) return 0
+
             StateManager.playtime?.let {
                 val textRenderer = MinecraftClient.getInstance().textRenderer
                 val text = Text.literal("⌚ ").setStyle(Config.getPlaytimeIconAccentStyle(0x3efca1)).append(Text.translatable("mrc.roundhud.playtime", Text.literal(it.elapsedNow().toLong(DurationUnit.SECONDS).toDuration(DurationUnit.SECONDS).toString()).setStyle(Config.getPlaytimeNumberAccentStyle(0x3efca1)))
@@ -450,6 +458,8 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
             if (StateManager.modifiers.isEmpty()) return 0
+            if (!StateManager.gameOngoing) return 0
+
             val textRenderer = MinecraftClient.getInstance().textRenderer
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12 - (StateManager.modifiers.size*20)
@@ -672,7 +682,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-
+            if (!StateManager.gameOngoing) return 0
             if (StateManager.maceChance < 0f) return 0
             if(Config.hideMaceChanceWhenEliminated.value && StateManager.eliminated) return 0
 
@@ -766,6 +776,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
+            if (!StateManager.gameOngoing) return 0
             if (StateManager.bounties.isEmpty()) return 0
             if (StateManager.eliminated) return 0
 
@@ -784,6 +795,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             context.drawTextWithShadow(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
             var index = 1
+            var bountyCount = 0
             sortedBounties.forEach { (profile, bountyAmount) ->
                 if(bountyAmount >= Config.bountyBoardMinBounty.value && index <=  Config.bountyBoardMaxPlayers.value) {
                     val playerUsername = profile.name
@@ -794,17 +806,27 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
                         Text.literal("$playerUsername").setStyle(Config.getBountyBoardPlayerAccentStyle(Colors.YELLOW))
                     val bountyText =
                         Text.literal("$bountyAmount⛂").setStyle(Config.getBountyBoardAmountAccentStyle(0xff7cf4))
-                    var finalText = playerText.append(Text.literal(" ").append(bountyText))
-                    if (rightAligned) bountyText.append(Text.literal(" ").append(playerText))
+                    val finalText = if (rightAligned) {
+                        Text.empty()
+                            .append(bountyText)
+                            .append(Text.literal(" "))
+                            .append(playerText)
+                    } else {
+                        Text.empty()
+                            .append(playerText)
+                            .append(Text.literal(" "))
+                            .append(bountyText)
+                    }
                     val modifierWidth = textRenderer.getWidth(finalText)
                     xPos = 22
                     if (rightAligned) xPos = -22 - modifierWidth
                     context.drawTextWithShadow(textRenderer, finalText, xPos, yPos + 4, -1)
                     yPos += 20
+                    bountyCount++
                     index++
                 }
             }
-            return 12 + (sortedBounties.size * 20)
+            return 12 + (bountyCount * 20)
         }
         override fun generateConfig(parent: Screen): Screen? {
             return YetAnotherConfigLib.createBuilder()
@@ -977,7 +999,7 @@ enum class HudElements : NameableEnum, StringIdentifiable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
             val networkHandler = MinecraftClient.getInstance().networkHandler
-            val ping = networkHandler?.getPlayerListEntry(StateManager.client.session.username.toString())!!.latency
+            val ping = networkHandler?.getPlayerListEntry(StateManager.client.session.username.toString())?.latency ?: return 0
             if (ping <= 0) return 0
             val pingColor = if (ping < 50) 0x1eff00 else if (ping < 100) 0xfff100 else if (ping < 200) 0xff9500 else 0xff3b3b
             val textRenderer = MinecraftClient.getInstance().textRenderer
