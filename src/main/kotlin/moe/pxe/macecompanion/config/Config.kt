@@ -70,8 +70,9 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val showNewEventToasts by register<Boolean>(true, BOOL)
     val showConsumableToasts by register<Boolean>(true, BOOL)
     val showBountyToasts by register<Boolean>(true, BOOL)
-    val showPlayerJoinToasts by register<Boolean>(true, BOOL)
-    val playerStrings by register<List<String>>(listOf(""), STRING.listOf())
+    val showPlayerToasts by register<Boolean>(true, BOOL)
+    val hidePlayerJoinedLeftMessages by register<Boolean>(false, BOOL)
+    val playerStrings by register<List<String>>(listOf("flopsuh"), STRING.listOf())
 
     // Misc. Config
     val plotIds by register<List<String>>(listOf("mace", "statless"), STRING.listOf())

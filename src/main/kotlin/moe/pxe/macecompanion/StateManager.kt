@@ -76,7 +76,9 @@ object StateManager {
         private set
     var eternalModifier: Modifiers? = null
         private set
-    var lastMessage: Component? = null
+    var eternalElectorPlayer: String? = null
+        private set
+    var eternalElectorModifier: String? = null
         private set
     var hideFindPlayerText: Boolean = false
         private set
@@ -86,6 +88,9 @@ object StateManager {
     val client: Minecraft = Minecraft.getInstance()
 
     private val chatJoinRegex = """\+ (.+)""".toRegex()
+    private val chatJoinDFnNormalRegex = """(.+) joined.""".toRegex()
+    private val chatJoinDFnSpecialRegex = """\[.+](.+) joined!""".toRegex()
+    private val chatLeaveRegex = """(.+) left\.""".toRegex()
 
     private val chatRoundNumberRegex = """ +Round (\d+) +""".toRegex()
 
@@ -158,7 +163,7 @@ object StateManager {
         }
     }
 
-    private fun getPlayerProfile(player: String): GameProfile? {
+    fun getPlayerProfile(player: String): GameProfile? {
         if (player == client.user.name) return client.gameProfile
         return client.connection
             ?.getPlayerInfo(player)
@@ -280,7 +285,8 @@ object StateManager {
         mysteryModifiers = mutableSetOf()
         bounties = mutableMapOf()
         eternalModifier = null
-        lastMessage = null
+        eternalElectorModifier = null
+        eternalElectorPlayer = null
         newEvent = false
         newEventStarter = ""
         newEventType = ""
@@ -321,8 +327,20 @@ object StateManager {
                 gameOngoing = false
                 AutoGG.sendGGMessage()
             }
-            chatJoinRegex.matchEntire(message.string)?.groups[1]?.let {
-                if(Config.showPlayerJoinToasts.value) CustomToasts.sendPlayerJoinedToast(it.value)
+            chatJoinRegex.matchEntire(message.string)?.groups?.let {
+                if(Config.showPlayerToasts.value) CustomToasts.sendPlayerJoinedToast(it[1]?.value.toString())
+                if(Config.hidePlayerJoinedLeftMessages.value) return@register false
+            }
+            chatJoinDFnNormalRegex.matchEntire(message.string)?.let {
+                if(Config.hidePlayerJoinedLeftMessages.value) return@register false
+            }
+            chatJoinDFnSpecialRegex.matchEntire(message.string)?.groups?.let {
+                if(Config.showPlayerToasts.value) CustomToasts.sendPlayerJoinedToast(it[1]?.value.toString())
+                if(Config.hidePlayerJoinedLeftMessages.value) return@register false
+            }
+            chatLeaveRegex.matchEntire(message.string)?.groups?.let {
+                if(Config.showPlayerToasts.value) CustomToasts.sendPlayerLeftToast(it[1]?.value.toString())
+                if(Config.hidePlayerJoinedLeftMessages.value) return@register false
             }
             newEventRegex.matchEntire(message.string)?.groups[1]?.let {
                 newEvent = true
@@ -350,17 +368,14 @@ object StateManager {
                 sendChaosStarterToast(player)
             }
             eternalElectorRegex.matchEntire(message.string)?.groups?.let {
-                lastMessage = message
+                eternalElectorPlayer = it[1]?.value.toString()
+                eternalElectorModifier = it[2]?.value.toString()
             }
             eternalElectorPositionRegex.matchEntire(message.string)?.groups?.let { it ->
-                var player: String? = null
-                var modifier: String? = null
-                eternalElectorRegex.matchEntire(lastMessage!!.string)?.groups?.let { match ->
-                    player = match[1]?.value.toString()
-                    modifier = extractModifierNameFromMessage(lastMessage!!, true).toString()
-                }
                 val queuePosition = it[1]?.value!!.toInt()
-                sendEternalElectorToast(modifier!!, player!!, queuePosition)
+                if(eternalElectorPlayer != null && eternalElectorModifier != null) sendEternalElectorToast(eternalElectorModifier!!, eternalElectorPlayer!!, queuePosition)
+                eternalElectorPlayer = null
+                eternalElectorModifier = null
             }
 
             placedBountyRegex.matchEntire(message.string)?.groups?.let {

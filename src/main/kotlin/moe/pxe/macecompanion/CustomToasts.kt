@@ -76,7 +76,17 @@ object CustomToasts {
         sendCustomToast(Component.literal("Bounty Cashed In!"), description)
     }
     fun sendPlayerJoinedToast(player: String){
-        if(!Config.playerStrings.value.contains(player)) return
+        val playerProfile = StateManager.getPlayerProfile(player) ?: return
+        val hasProfileName = Config.playerStrings.value.contains(playerProfile.name)
+        val hasProfileUuid = Config.playerStrings.value.contains(playerProfile.id.toString())
+        if(!hasProfileName && !hasProfileUuid) return
         sendCustomToast(Component.literal("Player Joined!"), Component.literal("$player joined the game!"))
+    }
+    fun sendPlayerLeftToast(player: String){
+        val playerProfile = StateManager.getPlayerProfile(player) ?: return
+        val hasProfileName = Config.playerStrings.value.contains(playerProfile.name)
+        val hasProfileUuid = Config.playerStrings.value.contains(playerProfile.id.toString())
+        if(!hasProfileName && !hasProfileUuid) return
+        sendCustomToast(Component.literal("Player Left"), Component.literal("$player left."))
     }
 }

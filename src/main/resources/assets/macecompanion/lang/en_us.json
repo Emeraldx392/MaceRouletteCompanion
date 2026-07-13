@@ -89,9 +89,11 @@
     "mrc.config.category.toasts.group.game.option.showBountyToasts": "Show Bounty Toasts",
     "mrc.config.category.toasts.group.game.option.showBountyToasts.description": "A toast that shows when a bounty has been placed on you, has increased, or when you're awarded with a bounty, or when you cash in your bounty.",
 
-    "mrc.config.category.toasts.group.player.option.showPlayerToasts": "Show Player Join Toasts",
-    "mrc.config.category.toasts.group.player.option.showPlayerToasts.description": "A toast that shows when a specific player joins the game.",
+    "mrc.config.category.toasts.group.player.option.showPlayerToasts": "Show Player Joined/Left Toasts",
+    "mrc.config.category.toasts.group.player.option.showPlayerToasts.description": "A toast that shows when a specific player joins or leaves the game.",
 
+    "mrc.config.category.toasts.group.player.option.hidePlayerJoinedLeftMessages": "Hide Player Joined/Left Messages",
+    "mrc.config.category.toasts.group.player.option.hidePlayerJoinedLeftMessages.description": "Hides the message when a player joins or leaves the game.",
 
     "mrc.config.category.toasts.group.game": "Game Toasts",
     "mrc.config.category.toasts.group.game.description": "Toasts related to the game",
