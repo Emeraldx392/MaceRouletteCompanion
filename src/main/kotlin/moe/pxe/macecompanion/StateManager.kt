@@ -18,16 +18,16 @@ import moe.pxe.macecompanion.util.TitleCallback
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
-import net.minecraft.client.MinecraftClient
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket
-import net.minecraft.network.packet.s2c.play.TitleS2CPacket
-import net.minecraft.text.HoverEvent
-import net.minecraft.text.Style
-import net.minecraft.text.Text
-import net.minecraft.text.TextCodecs
-import net.minecraft.util.ActionResult
+import net.minecraft.client.Minecraft
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
+import net.minecraft.network.chat.HoverEvent
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.ComponentSerialization
+import net.minecraft.world.InteractionResult
 import kotlin.math.roundToInt
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
@@ -76,14 +76,14 @@ object StateManager {
         private set
     var eternalModifier: Modifiers? = null
         private set
-    var lastMessage: Text? = null
+    var lastMessage: Component? = null
         private set
     var hideFindPlayerText: Boolean = false
         private set
     var fps: Int = -1
         private set
 
-    val client: MinecraftClient = MinecraftClient.getInstance()
+    val client: Minecraft = Minecraft.getInstance()
 
     private val chatJoinRegex = """\+ (.+)""".toRegex()
 
@@ -135,9 +135,9 @@ object StateManager {
 
     private fun getBountyData() {
         bounties = mutableMapOf()
-        val tabHUD = client.inGameHud.playerListHud ?: return
-        client.networkHandler?.playerList?.forEach { player ->
-            val playerDisplayName = tabHUD.getPlayerName(player).string ?: return
+        val tabHUD = client.gui.tabList
+        client.connection?.onlinePlayers?.forEach { player ->
+            val playerDisplayName = tabHUD.getNameForDisplay(player).string
             playerListBountyRegex.matchEntire(playerDisplayName)?.groups[1]?.let { match ->
                 match.value.toIntOrNull()?.let { bountyValue ->
                     if (bountyValue > 0) {
@@ -146,11 +146,11 @@ object StateManager {
                 }
             }
         }
-        val personalProfile = getPlayerProfile(client.session.username.toString())
-        val personalEntry = client.networkHandler
-            ?.getPlayerListEntry(client.player?.uuid)
+        val personalProfile = getPlayerProfile(client.user.name)
+        val personalEntry = client.connection
+            ?.getPlayerInfo(client.player!!.uuid)
             ?: return
-        val personalPlayerDisplayName = tabHUD.getPlayerName(personalEntry).string ?: return
+        val personalPlayerDisplayName = tabHUD.getNameForDisplay(   personalEntry).string
         playerListBountyRegex.matchEntire(personalPlayerDisplayName)?.groups[1]?.let { match ->
             match.value.toIntOrNull()?.let { bountyValue ->
                 if (bountyValue > 0) personalProfile?.let { profile -> bounties[profile] = bountyValue }
@@ -159,36 +159,36 @@ object StateManager {
     }
 
     private fun getPlayerProfile(player: String): GameProfile? {
-        if (player == client.session.username) return client.gameProfile
-        return client.networkHandler
-            ?.getPlayerListEntry(player)
+        if (player == client.user.name) return client.gameProfile
+        return client.connection
+            ?.getPlayerInfo(player)
             ?.profile
     }
 
     private fun getPlayerSlotItemStack(slot: Int): ItemStack {
         val playerInventory = client.player?.inventory
-        val itemStack: ItemStack = playerInventory?.getStack(slot) ?: ItemStack.EMPTY
+        val itemStack: ItemStack = playerInventory?.getSlot(slot)?.get() ?: ItemStack.EMPTY
         return itemStack
     }
 
-    private fun messageToJsonString(message: Text): String {
-        return TextCodecs.CODEC
-            .encodeStart(client.world!!.registryManager.getOps(JsonOps.INSTANCE), message)
+    private fun messageToJsonString(message: Component): String {
+        return ComponentSerialization.CODEC
+            .encodeStart(client.level!!.registryAccess().createSerializationContext(JsonOps.INSTANCE), message)
             .getOrThrow()
             .toString()
     }
 
-    private fun messageToJson(message: Text): JsonObject {
+    private fun messageToJson(message: Component): JsonObject {
         val jsonString = messageToJsonString(message)
         return Json.parseToJsonElement(jsonString).jsonObject
     }
 
-    private fun messageContainsTexture(message: Text, texture: String): Boolean {
+    private fun messageContainsTexture(message: Component, texture: String): Boolean {
         val json = messageToJsonString(message)
         return json.contains(texture)
     }
 
-    private fun extractModifierNameFromMessage(message: Text, isConsumable: Boolean): String? {
+    private fun extractModifierNameFromMessage(message: Component, isConsumable: Boolean): String? {
         Modifiers.entries.forEach { modifier ->
             if (message.string.contains(modifier.matchName) && (chatModifierItemRegex.matchEntire(message.string) != null || modifierChargerRegex.matchEntire(message.string) != null) || chaosStarterRegex.matchEntire(message.string) != null || eternalElectorRegex.matchEntire(message.string) != null || eternalElectorPositionRegex.matchEntire(message.string) != null) {
                 if(!isConsumable && (message.string.contains("Modifier Charger") || message.string.contains("Eternal Elector"))) return null
@@ -213,11 +213,11 @@ object StateManager {
             candidate == enum.matchName || candidate.contains(enum.matchName) || enum.matchName.contains(candidate)
         }
     }
-    private fun getHover(text: Text): String? {
+    private fun getHover(text: Component): String? {
         val hover = text.style.hoverEvent
-        if (hover != null && hover.action == HoverEvent.Action.SHOW_TEXT) {
+        if (hover != null && hover.action() == HoverEvent.Action.SHOW_TEXT) {
             val showText = hover as? HoverEvent.ShowText
-            val content: Text? = showText?.value
+            val content: Component? = showText?.value
             val readableText = content?.string
             if (readableText != null) {
                 return readableText
@@ -251,7 +251,7 @@ object StateManager {
         if(eliminated && number == 1) starFragments = -1
         if(playersTotal == -1){
             hideFindPlayerText = true
-            SendMessage.sendCommand("find ${client.session.username}")
+            SendMessage.sendCommand("find ${client.user.name}")
         }
         round = number
         gameOngoing = true
@@ -289,8 +289,8 @@ object StateManager {
         checkForModifiers = false
     }
     fun registerListeners() {
-        ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: MinecraftClient ->
-                fps = client.currentFps
+        ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: Minecraft ->
+                fps = client.fps
         })
         // Chat Listener
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
@@ -370,7 +370,7 @@ object StateManager {
                 getPlayerProfile(bountyReceiver)?.let { profile ->
                     bounties[profile] = bountyAmount
                 }
-                if(bountyReceiver == client.session.username.toString()) CustomToasts.sendPlacedBountyToast(bountyAmount, bountyPlacer)
+                if(bountyReceiver == client.user.name) CustomToasts.sendPlacedBountyToast(bountyAmount, bountyPlacer)
             }
             selfPlacedBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyPlacer = it[1]!!.value
@@ -378,7 +378,7 @@ object StateManager {
                 getPlayerProfile(bountyPlacer)?.let { profile ->
                     bounties[profile] = bountyAmount
                 }
-                if(bountyPlacer == client.session.username.toString()) CustomToasts.sendSelfPlacedBountyToast(bountyAmount)
+                if(bountyPlacer == client.user.name) CustomToasts.sendSelfPlacedBountyToast(bountyAmount)
             }
             raisedBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyPlacer = it[1]!!.value
@@ -387,7 +387,7 @@ object StateManager {
                 getPlayerProfile(bountyReceiver)?.let { profile ->
                     bounties[profile] = bountyAmount
                 }
-                if(bountyReceiver == client.session.username.toString()) CustomToasts.sendRaisedBountyToast(bountyAmount, bountyPlacer)
+                if(bountyReceiver == client.user.name) CustomToasts.sendRaisedBountyToast(bountyAmount, bountyPlacer)
             }
             selfRaisedBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyPlacer = it[1]!!.value
@@ -395,7 +395,7 @@ object StateManager {
                 getPlayerProfile(bountyPlacer)?.let { profile ->
                     bounties[profile] = bountyAmount
                 }
-                if(bountyPlacer == client.session.username.toString()) CustomToasts.sendSelfRaisedBountyToast(bountyAmount)
+                if(bountyPlacer == client.user.name) CustomToasts.sendSelfRaisedBountyToast(bountyAmount)
             }
             rewardedBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyReceiver = it[1]!!.value
@@ -403,14 +403,14 @@ object StateManager {
                 val playerWithBounty = it[3]!!.value
                 val playerWithBountyProfile = getPlayerProfile(playerWithBounty)
                 bounties.remove(playerWithBountyProfile)
-                if(bountyReceiver == client.session.username.toString()) CustomToasts.sendRewardedBountyToast(bountyAmount, playerWithBounty)
+                if(bountyReceiver == client.user.name) CustomToasts.sendRewardedBountyToast(bountyAmount, playerWithBounty)
             }
             cashedInBountyRegex.matchEntire(message.string)?.groups?.let {
                 val bountyReceiver = it[1]!!.value
                 val bountyAmount = it[2]!!.value.toInt()
                 val receiverProfile = getPlayerProfile(bountyReceiver)
                 bounties.remove(receiverProfile)
-                if(bountyReceiver == client.session.username.toString()) CustomToasts.sendCashedInBountyToast(bountyAmount)
+                if(bountyReceiver == client.user.name) CustomToasts.sendCashedInBountyToast(bountyAmount)
             }
             findPlayerCommandRegex.find(message.string)?.groups?.let {
                 val totalPlayersFound = it[1]!!.value.toInt()
@@ -486,14 +486,14 @@ object StateManager {
         // Title Listener
         TitleCallback.EVENT.register(
             object : TitleCallback {
-                override fun onTitle(packet: TitleS2CPacket): ActionResult {
-                    if (!OnMaceRoulette.onMaceRoulette) return ActionResult.PASS
+                override fun setTitleText(packet: ClientboundSetTitleTextPacket): InteractionResult {
+                    if (!OnMaceRoulette.onMaceRoulette) return InteractionResult.PASS
                     titleRoundNumberRegex.matchEntire(packet.text.string)?.let { roundNumberMatch ->
                         roundNumberMatch.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
                         roundColor = packet.text.siblings[0].style ?: roundColor
                     }
                     titleEliminatedRegex.matchEntire(packet.text.string)?.let { eliminated = true }
-                    return ActionResult.PASS
+                    return InteractionResult.PASS
                 }
             }
         )
@@ -501,10 +501,10 @@ object StateManager {
         // Subtitle Listener
         SubtitleCallback.EVENT.register(
             object : SubtitleCallback {
-                override fun onSubtitle(packet: SubtitleS2CPacket): ActionResult {
-                    if (!OnMaceRoulette.onMaceRoulette) return ActionResult.PASS
+                override fun setSubtitleText(packet: ClientboundSetSubtitleTextPacket): InteractionResult {
+                    if (!OnMaceRoulette.onMaceRoulette) return InteractionResult.PASS
                     titlePlayersAliveRegex.matchEntire(packet.text.string)?.let { playersAliveMatch -> playersAliveMatch.groups[1]?.let { playersAlive = it.value.toIntOrNull() ?: -1 } }
-                    return ActionResult.PASS
+                    return InteractionResult.PASS
                 }
             }
         )

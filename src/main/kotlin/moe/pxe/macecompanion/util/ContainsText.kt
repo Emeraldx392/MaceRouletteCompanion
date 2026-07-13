@@ -1,9 +1,9 @@
 package moe.pxe.macecompanion.util
 
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 
 object ContainsText {
-    fun strict(text: Text, subtext: Text): Boolean {
+    fun strict(text: Component, subtext: Component): Boolean {
         if (text.string.contains(subtext.string) && text.style.equals(subtext.style)) {
             return true
         }
@@ -13,7 +13,7 @@ object ContainsText {
         return false
     }
 
-    fun boldString(text: Text, subtext: String): Boolean {
+    fun boldString(text: Component, subtext: String): Boolean {
         if (text.string.contains(subtext) && text.style.isBold) {
             return true
         }

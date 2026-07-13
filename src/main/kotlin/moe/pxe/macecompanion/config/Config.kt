@@ -9,8 +9,8 @@ import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.enums.HudElements
 import moe.pxe.macecompanion.enums.HudLocation
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.text.Style
-import net.minecraft.util.Colors
+import net.minecraft.network.chat.Style
+import net.minecraft.util.CommonColors
 import java.awt.Color
 
 object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir.resolve("mrc.json")) {
@@ -124,18 +124,18 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
 
     val overrideBountyBoardColors by register<Boolean>(false, BOOL)
     val bountyBoardNumberColor by register<Color>(Color(0xff7cf4), RGB_COLOR_CODEC)
-    val bountyBoardPlayerColor by register<Color>(Color(Colors.YELLOW), RGB_COLOR_CODEC)
+    val bountyBoardPlayerColor by register<Color>(Color(CommonColors.YELLOW), RGB_COLOR_CODEC)
     val bountyBoardTextColor by register<Color>(Color(0xff7cf4), RGB_COLOR_CODEC)
     val bountyBoardMaxPlayers by register<Int>(3, INT)
     val bountyBoardMinBounty by register<Int>(1, INT)
 
     val overrideFpsColors by register<Boolean>(false, BOOL)
-    val fpsNumberColor by register<Color>(Color(Colors.WHITE), RGB_COLOR_CODEC)
-    val fpsTextColor by register<Color>(Color(Colors.WHITE), RGB_COLOR_CODEC)
+    val fpsNumberColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+    val fpsTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
     val overridePingColors by register<Boolean>(false, BOOL)
-    val pingNumberColor by register<Color>(Color(Colors.WHITE), RGB_COLOR_CODEC)
-    val pingTextColor by register<Color>(Color(Colors.WHITE), RGB_COLOR_CODEC)
+    val pingNumberColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+    val pingTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
     fun getRoundTextAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)

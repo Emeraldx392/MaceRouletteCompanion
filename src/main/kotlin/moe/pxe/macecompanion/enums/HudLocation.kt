@@ -1,10 +1,10 @@
 package moe.pxe.macecompanion.enums
 
 import dev.isxander.yacl3.api.NameableEnum
-import net.minecraft.text.Text
-import net.minecraft.util.StringIdentifiable
+import net.minecraft.network.chat.Component
+import net.minecraft.util.StringRepresentable
 
-enum class HudLocation : NameableEnum, StringIdentifiable {
+enum class HudLocation : NameableEnum, StringRepresentable {
     TOP {
         override val bottomAligned = false
     },
@@ -12,10 +12,10 @@ enum class HudLocation : NameableEnum, StringIdentifiable {
         override val bottomAligned = true
     };
     abstract val bottomAligned: Boolean
-    override fun asString(): String = name
-    override fun getDisplayName(): Text = Text.translatable("mrc.hudlocation.${name.lowercase()}")
+    override fun getSerializedName(): String = name
+    override fun getDisplayName(): Component = Component.translatable("mrc.hudlocation.${name.lowercase()}")
 
     companion object {
-        val CODEC = StringIdentifiable.createCodec(::values)
+        val CODEC = StringRepresentable.fromEnum(::values)
     }
 }

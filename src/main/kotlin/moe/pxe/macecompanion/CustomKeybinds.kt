@@ -6,129 +6,125 @@ import moe.pxe.macecompanion.config.ConfigMenu
 import moe.pxe.macecompanion.util.SendMessage
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
-import net.minecraft.client.option.KeyBinding
-import net.minecraft.client.util.InputUtil
-import net.minecraft.text.Style
-import net.minecraft.text.Text
-import net.minecraft.util.Colors
-import net.minecraft.util.Identifier
+import net.minecraft.client.KeyMapping
+import com.mojang.blaze3d.platform.InputConstants
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.Component
+import net.minecraft.util.CommonColors
+import net.minecraft.resources.Identifier
 
 object CustomKeybinds {
-    lateinit var openProfileKeyBinding: KeyBinding
+    lateinit var openProfileKeyBinding: KeyMapping
         private set
-    lateinit var openCosmeticsKeyBinding: KeyBinding
+    lateinit var openCosmeticsKeyBinding: KeyMapping
         private set
-    lateinit var openEventsKeyBinding: KeyBinding
+    lateinit var openEventsKeyBinding: KeyMapping
         private set
-    lateinit var openModOptionsKeyBinding: KeyBinding
+    lateinit var openModOptionsKeyBinding: KeyMapping
         private set
-    lateinit var toggleHudKeyBinding: KeyBinding
+    lateinit var toggleHudKeyBinding: KeyMapping
         private set
-    lateinit var toggleAutoGLKeyBinding: KeyBinding
+    lateinit var toggleAutoGLKeyBinding: KeyMapping
         private set
-    lateinit var toggleAutoGGKeyBinding: KeyBinding
+    lateinit var toggleAutoGGKeyBinding: KeyMapping
         private set
 
     fun registerKeybinds() {
         MaceCompanion.LOGGER.info("Registering mod keybinds")
 
-        val maceRouletteCategory = KeyBinding.Category.create(Identifier.of(MaceCompanion.MOD_ID, "title"))
+        val maceRouletteCategory = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "title"))
 
         openProfileKeyBinding = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
+            KeyMapping(
                 "key.macecompanion.open_profile",
-                InputUtil.Type.KEYSYM,
-                InputUtil.UNKNOWN_KEY.code,
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
         )
         openCosmeticsKeyBinding = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
+            KeyMapping(
                 "key.macecompanion.open_cosmetics",
-                InputUtil.Type.KEYSYM,
-                InputUtil.UNKNOWN_KEY.code,
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
         )
         openEventsKeyBinding = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
+            KeyMapping(
                 "key.macecompanion.open_events",
-                InputUtil.Type.KEYSYM,
-                InputUtil.UNKNOWN_KEY.code,
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
         )
         openModOptionsKeyBinding = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
+            KeyMapping(
                 "key.macecompanion.open_mod_options",
-                InputUtil.Type.KEYSYM,
-                InputUtil.UNKNOWN_KEY.code,
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
         )
         toggleHudKeyBinding = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
+            KeyMapping(
                 "key.macecompanion.toggle_hud",
-                InputUtil.Type.KEYSYM,
-                InputUtil.UNKNOWN_KEY.code,
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
         )
         toggleAutoGLKeyBinding = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
+            KeyMapping(
                 "key.macecompanion.toggle_auto_gl",
-                InputUtil.Type.KEYSYM,
-                InputUtil.UNKNOWN_KEY.code,
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
         )
         toggleAutoGGKeyBinding = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
+            KeyMapping(
                 "key.macecompanion.toggle_auto_gg",
-                InputUtil.Type.KEYSYM,
-                InputUtil.UNKNOWN_KEY.code,
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
         )
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
-            while (openProfileKeyBinding.wasPressed()) {
+            while (openProfileKeyBinding.consumeClick()) {
                 SendMessage.sendMessage("@profile")
             }
-            while (openCosmeticsKeyBinding.wasPressed()) {
+            while (openCosmeticsKeyBinding.consumeClick()) {
                 SendMessage.sendMessage("@cosmetics")
             }
-            while (openEventsKeyBinding.wasPressed()) {
+            while (openEventsKeyBinding.consumeClick()) {
                 SendMessage.sendMessage("@events")
             }
-            while (openModOptionsKeyBinding.wasPressed()) {
-                if (client.currentScreen == null) {
+            while (openModOptionsKeyBinding.consumeClick()) {
+                if (client.screen == null) {
                     val configScreen = ConfigMenu.generateScreen(null)
                     client.setScreen(configScreen)
                 }
             }
-            while (toggleHudKeyBinding.wasPressed()) {
+            while (toggleHudKeyBinding.consumeClick()) {
                 val newValue = !Config.displayHud.value
                 Config.displayHud.set(newValue)
                 Config.saveToFile()
             }
-            while (toggleAutoGLKeyBinding.wasPressed()) {
+            while (toggleAutoGLKeyBinding.consumeClick()) {
                 val newValue = !Config.useAutoGL.value
                 Config.useAutoGL.set(newValue)
                 Config.saveToFile()
-                if(newValue) client.player?.sendMessage(Text.literal("Auto GL enabled!").setStyle(Style.EMPTY.withColor(
-                    Colors.GREEN)), false)
-                if(!newValue) client.player?.sendMessage(Text.literal("Auto GL disabled!").setStyle(Style.EMPTY.withColor(
-                    Colors.RED)), false)
+                if(newValue) client.player?.displayClientMessage(Component.literal("Auto GL enabled!").withColor(CommonColors.GREEN), false)
+                if(!newValue) client.player?.displayClientMessage(Component.literal("Auto GL disabled!").withColor(CommonColors.RED), false)
             }
-            while (toggleAutoGGKeyBinding.wasPressed()) {
+            while (toggleAutoGGKeyBinding.consumeClick()) {
                 val newValue = !Config.useAutoGG.value
                 Config.useAutoGG.set(newValue)
                 Config.saveToFile()
-                if(newValue) client.player?.sendMessage(Text.literal("Auto GG enabled!").setStyle(Style.EMPTY.withColor(
-                    Colors.GREEN)), false)
-                if(!newValue) client.player?.sendMessage(Text.literal("Auto GG disabled!").setStyle(Style.EMPTY.withColor(
-                    Colors.RED)), false)
+                if(newValue) client.player?.displayClientMessage(Component.literal("Auto GG enabled!").withColor(CommonColors.GREEN), false)
+                if(!newValue) client.player?.displayClientMessage(Component.literal("Auto GG disabled!").withColor(CommonColors.RED), false)
             }
         }
     }

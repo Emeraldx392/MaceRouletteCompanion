@@ -4,12 +4,12 @@ import dev.isxander.yacl3.api.Controller
 import dev.isxander.yacl3.api.Option
 import dev.isxander.yacl3.api.controller.StringControllerBuilder
 import dev.isxander.yacl3.impl.controller.AbstractControllerBuilderImpl
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
 
 class FormattedStringControllerBuilder(val opt: Option<String>) : AbstractControllerBuilderImpl<String>(opt), StringControllerBuilder {
     private var formatter = FormattedStringController.DEFAULT_FORMATTER
 
-    fun valueFormatter(func: (String) -> Text): FormattedStringControllerBuilder {
+    fun valueFormatter(func: (String) -> Component): FormattedStringControllerBuilder {
         formatter = func
         return this
     }

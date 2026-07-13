@@ -4,23 +4,23 @@ import dev.isxander.yacl3.api.Option
 import dev.isxander.yacl3.gui.AbstractWidget
 import dev.isxander.yacl3.gui.TooltipButtonWidget
 import dev.isxander.yacl3.gui.YACLScreen
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.gui.Click
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.gui.Element
-import net.minecraft.client.gui.ParentElement
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.input.CharInput
-import net.minecraft.client.input.KeyInput
-import net.minecraft.text.Text
+import net.minecraft.client.Minecraft
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.events.GuiEventListener
+import net.minecraft.client.gui.components.events.ContainerEventHandler
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.CharacterEvent
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.network.chat.Component
 import kotlin.math.min
 
-class ConfigurableOptionElement : AbstractWidget, ParentElement {
+class ConfigurableOptionElement : AbstractWidget, ContainerEventHandler {
     val configureScreen: () -> Screen?
     val entryWidget: AbstractWidget
     val opt: Option<*>
 
-    private var focused: Element? = null
+    private var focused: GuiEventListener? = null
     private var dragging = false
     private val optionNameString: String
 
@@ -47,10 +47,10 @@ class ConfigurableOptionElement : AbstractWidget, ParentElement {
             dim.y(),
             20,
             20,
-            Text.literal("\u2630"),
-            Text.translatable("yacl.configurable.configure")
+            Component.literal("\u2630"),
+            Component.translatable("yacl.configurable.configure")
         ) { button ->
-            configureScreen()?.let { MinecraftClient.getInstance().setScreen(it) }
+            configureScreen()?.let { Minecraft.getInstance().setScreen(it) }
             updateButtonStates()
         }
 
@@ -60,26 +60,26 @@ class ConfigurableOptionElement : AbstractWidget, ParentElement {
 
     val configureButton: TooltipButtonWidget
 
-    override fun children(): List<Element> {
+    override fun children(): List<GuiEventListener> {
         return listOf(entryWidget, configureButton)
     }
 
-    override fun mouseClicked(click: Click, doubled: Boolean): Boolean {
-        val returnValue = super<ParentElement>.mouseClicked(click, doubled)
+    override fun mouseClicked(click: MouseButtonEvent, doubled: Boolean): Boolean {
+        val returnValue = super<ContainerEventHandler>.mouseClicked(click, doubled)
         updateButtonStates()
         return returnValue
     }
 
-    override fun mouseReleased(click: Click): Boolean {
-        return super<ParentElement>.mouseReleased(click)
+    override fun mouseReleased(click: MouseButtonEvent): Boolean {
+        return super<ContainerEventHandler>.mouseReleased(click)
     }
 
     override fun mouseDragged(
-        click: Click,
+        click: MouseButtonEvent,
         offsetX: Double,
         offsetY: Double
     ): Boolean {
-        return super<ParentElement>.mouseDragged(click, offsetX, offsetY)
+        return super<ContainerEventHandler>.mouseDragged(click, offsetX, offsetY)
     }
 
     override fun isDragging(): Boolean {
@@ -90,30 +90,30 @@ class ConfigurableOptionElement : AbstractWidget, ParentElement {
         this.dragging = dragging
     }
 
-    override fun keyPressed(input: KeyInput?): Boolean {
-        val returnValue = super<ParentElement>.keyPressed(input)
+    override fun keyPressed(input: KeyEvent): Boolean {
+        val returnValue = super<ContainerEventHandler>.keyPressed(input)
         updateButtonStates()
         return returnValue
     }
 
-    override fun keyReleased(input: KeyInput?): Boolean {
-        return super<ParentElement>.keyReleased(input)
+    override fun keyReleased(input: KeyEvent): Boolean {
+        return super<ContainerEventHandler>.keyReleased(input)
     }
 
-    override fun charTyped(input: CharInput?): Boolean {
-        return super<ParentElement>.charTyped(input)
+    override fun charTyped(input: CharacterEvent): Boolean {
+        return super<ContainerEventHandler>.charTyped(input)
     }
 
-    override fun getFocused(): Element? {
+    override fun getFocused(): GuiEventListener? {
         return focused
     }
 
-    override fun setFocused(focused: Element?) {
+    override fun setFocused(focused: GuiEventListener?) {
         this.focused = focused
     }
 
     override fun render(
-        context: DrawContext?,
+        context: GuiGraphics,
         mouseX: Int,
         mouseY: Int,
         deltaTicks: Float

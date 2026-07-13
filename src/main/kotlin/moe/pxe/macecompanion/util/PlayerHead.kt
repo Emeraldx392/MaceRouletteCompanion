@@ -6,13 +6,12 @@ import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
 import com.mojang.serialization.JsonOps
-import net.minecraft.client.MinecraftClient
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.ProfileComponent
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.text.Text
-import net.minecraft.text.TextCodecs
+import net.minecraft.core.component.DataComponents
+import net.minecraft.world.item.component.ResolvableProfile
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.ComponentSerialization
 import java.util.UUID
 
 object PlayerHead {
@@ -27,16 +26,15 @@ object PlayerHead {
     fun fromProfile(profile: GameProfile): ItemStack {
         headItemCache[profile]?.also { return it }
         val head = ItemStack(Items.PLAYER_HEAD)
-        MinecraftClient.getInstance().skinProvider.fetchSkinTextures(profile)
-        head.set(DataComponentTypes.PROFILE, ProfileComponent.ofStatic(profile))
+        head.set(DataComponents.PROFILE, ResolvableProfile.createResolved(profile))
         headItemCache[profile] = head
         return head
     }
 
-    fun player2dHeadTextComponent(profile: String): Text {
+    fun player2dHeadTextComponent(profile: String): Component {
         val json = JsonObject()
         json.addProperty("player", profile)
-        val playerComponent = TextCodecs.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
+        val playerComponent = ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
         return playerComponent
     }
 }

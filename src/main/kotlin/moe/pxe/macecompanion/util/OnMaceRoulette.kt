@@ -3,10 +3,9 @@ package moe.pxe.macecompanion.util
 import moe.pxe.macecompanion.StateManager
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 
 object OnMaceRoulette {
-    val client: MinecraftClient = MinecraftClient.getInstance()
 
     val patchPlotRegex = """⏵ Current Patch""".toRegex()
     val plotRegex = """\s+\nYou are currently playing on:\n\n→ .+ \[(\d+)] \[(.+)]""".toRegex()
@@ -20,9 +19,9 @@ object OnMaceRoulette {
     val plotHandles = mutableSetOf<String>()
 
     fun isOnDiamondfire(): Boolean{
-        val client = MinecraftClient.getInstance()
-        val serverEntry = client.currentServerEntry ?: return false
-        val address = serverEntry.address.lowercase()
+        val client = Minecraft.getInstance()
+        val serverEntry = Minecraft.getInstance().currentServer ?: return false
+        val address = serverEntry.ip.lowercase()
         return address.endsWith("diamondfire.games") ||
                 address == "mcdiamondfire.com"
                 || address.contains("148.113.223.138")
@@ -38,7 +37,7 @@ object OnMaceRoulette {
     fun requestPlotId() {
         if(onDiamondfire) {
             hidePlotRegex = true
-            SendMessage.sendCommand("find ${client.session.username}")
+            SendMessage.sendCommand("find ${Minecraft.getInstance().user.name}")
         }
     }
     fun registerServerAndPlotListeners(){

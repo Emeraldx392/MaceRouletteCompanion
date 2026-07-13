@@ -6,9 +6,7 @@ import moe.pxe.macecompanion.util.OnMaceRoulette
 import moe.pxe.macecompanion.util.SendMessage
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.ModInitializer
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.client.MinecraftClient
 import org.slf4j.LoggerFactory
 
 class MaceCompanion : ModInitializer {
