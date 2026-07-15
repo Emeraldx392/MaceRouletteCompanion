@@ -26,6 +26,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.util.CommonColors
 import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.util.StringRepresentable
 import java.awt.Color
 import kotlin.math.absoluteValue
@@ -501,21 +502,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                     if(!rightAligned) modifierText.append(Component.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)))
                     if(rightAligned) modifierText = Component.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)).append(modifierText)
                 }
-                var headText2d = Component.empty()
-
-                if (Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
-                    val bonusBoostersAmount = playerList.size - Config.boosterListMax.value
-                    playerList.forEachIndexed { index, profile ->
-                        if(index < Config.boosterListMax.value){
-                            if(rightAligned) headText2d.append(PlayerHead.player2dHeadTextComponent(profile.name)).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)).append(Component.literal(" "))
-                            else headText2d.append(Component.literal(" ")).append(PlayerHead.player2dHeadTextComponent(profile.name))
-                        }
-                    }
-                    if(bonusBoostersAmount > 0){
-                        if(rightAligned) headText2d = Component.literal("+${bonusBoostersAmount} ").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)).append(headText2d)
-                        else headText2d.append(Component.literal(" +${bonusBoostersAmount}").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)))
-                    }
-                }
+                var headText2d = if (Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
+                    PlayerHead.player2dHeadTextComponentList(playerList, Config.boosterListMax.value, rightAligned)
+                } ?: Component.literal("") else Component.literal("")
                 val finalText = if (rightAligned) Component.empty().append(headText2d).append(modifierText)
                 else Component.empty().append(modifierText).append(headText2d)
                 val modifierWidth = textRenderer.width(finalText)
@@ -809,12 +798,12 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                     val finalText = if (rightAligned) {
                         Component.empty()
                             .append(bountyText)
-                            .append(Component.literal(" "))
+                            .append(" ")
                             .append(playerText)
                     } else {
                         Component.empty()
                             .append(playerText)
-                            .append(Component.literal(" "))
+                            .append(" ")
                             .append(bountyText)
                     }
                     val modifierWidth = textRenderer.width(finalText)
