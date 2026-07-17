@@ -5,7 +5,7 @@ import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.config.ConfigMenu
 import moe.pxe.macecompanion.util.SendMessage
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.minecraft.client.KeyMapping
 import com.mojang.blaze3d.platform.InputConstants
 import net.minecraft.network.chat.Style
@@ -34,7 +34,7 @@ object CustomKeybinds {
 
         val maceRouletteCategory = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "title"))
 
-        openProfileKeyBinding = KeyBindingHelper.registerKeyBinding(
+        openProfileKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_profile",
                 InputConstants.Type.KEYSYM,
@@ -42,7 +42,7 @@ object CustomKeybinds {
                 maceRouletteCategory
             )
         )
-        openCosmeticsKeyBinding = KeyBindingHelper.registerKeyBinding(
+        openCosmeticsKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_cosmetics",
                 InputConstants.Type.KEYSYM,
@@ -50,7 +50,7 @@ object CustomKeybinds {
                 maceRouletteCategory
             )
         )
-        openEventsKeyBinding = KeyBindingHelper.registerKeyBinding(
+        openEventsKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_events",
                 InputConstants.Type.KEYSYM,
@@ -58,7 +58,7 @@ object CustomKeybinds {
                 maceRouletteCategory
             )
         )
-        openModOptionsKeyBinding = KeyBindingHelper.registerKeyBinding(
+        openModOptionsKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_mod_options",
                 InputConstants.Type.KEYSYM,
@@ -66,7 +66,7 @@ object CustomKeybinds {
                 maceRouletteCategory
             )
         )
-        toggleHudKeyBinding = KeyBindingHelper.registerKeyBinding(
+        toggleHudKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.toggle_hud",
                 InputConstants.Type.KEYSYM,
@@ -74,7 +74,7 @@ object CustomKeybinds {
                 maceRouletteCategory
             )
         )
-        toggleAutoGLKeyBinding = KeyBindingHelper.registerKeyBinding(
+        toggleAutoGLKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.toggle_auto_gl",
                 InputConstants.Type.KEYSYM,
@@ -82,7 +82,7 @@ object CustomKeybinds {
                 maceRouletteCategory
             )
         )
-        toggleAutoGGKeyBinding = KeyBindingHelper.registerKeyBinding(
+        toggleAutoGGKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.toggle_auto_gg",
                 InputConstants.Type.KEYSYM,
@@ -116,15 +116,15 @@ object CustomKeybinds {
                 val newValue = !Config.useAutoGL.value
                 Config.useAutoGL.set(newValue)
                 Config.saveToFile()
-                if(newValue) client.player?.displayClientMessage(Component.literal("Auto GL enabled!").withColor(CommonColors.GREEN), false)
-                if(!newValue) client.player?.displayClientMessage(Component.literal("Auto GL disabled!").withColor(CommonColors.RED), false)
+                if(newValue) client.player?.sendSystemMessage(Component.literal("Auto GL enabled!").withColor(CommonColors.GREEN))
+                if(!newValue) client.player?.sendSystemMessage(Component.literal("Auto GL disabled!").withColor(CommonColors.RED))
             }
             while (toggleAutoGGKeyBinding.consumeClick()) {
                 val newValue = !Config.useAutoGG.value
                 Config.useAutoGG.set(newValue)
                 Config.saveToFile()
-                if(newValue) client.player?.displayClientMessage(Component.literal("Auto GG enabled!").withColor(CommonColors.GREEN), false)
-                if(!newValue) client.player?.displayClientMessage(Component.literal("Auto GG disabled!").withColor(CommonColors.RED), false)
+                if(newValue) client.player?.sendSystemMessage(Component.literal("Auto GG enabled!").withColor(CommonColors.GREEN))
+                if(!newValue) client.player?.sendSystemMessage(Component.literal("Auto GG disabled!").withColor(CommonColors.RED))
             }
         }
     }

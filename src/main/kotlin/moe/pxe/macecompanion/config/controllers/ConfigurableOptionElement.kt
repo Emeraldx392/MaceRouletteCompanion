@@ -6,7 +6,7 @@ import dev.isxander.yacl3.gui.TooltipButtonWidget
 import dev.isxander.yacl3.gui.YACLScreen
 import net.minecraft.client.Minecraft
 import net.minecraft.client.input.MouseButtonEvent
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.events.GuiEventListener
 import net.minecraft.client.gui.components.events.ContainerEventHandler
 import net.minecraft.client.gui.screens.Screen
@@ -112,8 +112,8 @@ class ConfigurableOptionElement : AbstractWidget, ContainerEventHandler {
         this.focused = focused
     }
 
-    override fun render(
-        context: GuiGraphics,
+    override fun extractRenderState(
+        context: GuiGraphicsExtractor,
         mouseX: Int,
         mouseY: Int,
         deltaTicks: Float
@@ -123,8 +123,8 @@ class ConfigurableOptionElement : AbstractWidget, ContainerEventHandler {
 //        entryWidget.dimension = entryWidget.dimension.withY(dimension.y())
         entryWidget.dimension = dimension.expanded(-20, 0)
 
-        configureButton.render(context, mouseX, mouseY, deltaTicks)
-        entryWidget.render(context, mouseX, mouseY, deltaTicks)
+        configureButton.extractRenderState(context, mouseX, mouseY, deltaTicks)
+        entryWidget.extractRenderState(context, mouseX, mouseY, deltaTicks)
     }
 
     private fun updateButtonStates() {

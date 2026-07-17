@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.2.0"
-    id("fabric-loom") version "1.14-SNAPSHOT"
+    kotlin("jvm") version "2.3.0"
+    id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT"
     id("maven-publish")
 }
 
@@ -14,9 +14,9 @@ base {
     archivesName.set("${project.property("archives_base_name")}-mc${project.property("minecraft_version")}")
 }
 
-val targetJavaVersion = 21
+val targetJavaVersion = 25
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    toolchain.languageVersion.set(JavaLanguageVersion.of(targetJavaVersion))
     // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
     // if it is present.
     // If you remove this line, sources will not be generated.
@@ -59,17 +59,12 @@ repositories {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
-    mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
+    implementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
+    implementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
-    modImplementation("dev.isxander:yet-another-config-lib:${project.property("yacl_version")}")
-    modImplementation("com.terraformersmc:modmenu:${property("modmenu_version")}")
-
-    modImplementation("net.kyori:adventure-platform-fabric:${project.property("adventure_version")}") {
-        exclude("net.fabricmc.fabric-api")
-    }
+    implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+    implementation("dev.isxander:yet-another-config-lib:${project.property("yacl_version")}")
+    implementation("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
 }
 
 tasks.processResources {

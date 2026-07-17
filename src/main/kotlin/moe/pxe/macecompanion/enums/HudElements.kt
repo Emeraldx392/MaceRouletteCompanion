@@ -19,17 +19,13 @@ import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
 import moe.pxe.macecompanion.util.OnMaceRoulette
 import moe.pxe.macecompanion.util.PlayerHead
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.Screen
-import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.util.CommonColors
-import net.minecraft.ChatFormatting
-import net.minecraft.network.chat.MutableComponent
 import net.minecraft.util.StringRepresentable
 import java.awt.Color
-import java.lang.Math.round
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.time.DurationUnit
@@ -38,7 +34,7 @@ import kotlin.time.toDuration
 enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
     ROUND_NUMBER {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -58,7 +54,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             context.pose().pushMatrix()
             context.pose().scale(2f)
             context.pose().translate(xPos.toFloat(), yPos)
-            context.drawString(textRenderer, text, 0, 0, -1)
+            context.text(textRenderer, text, 0, 0, -1)
             context.pose().popMatrix()
             return 24
         }
@@ -109,7 +105,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
     PLAYERS_ALIVE {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -126,7 +122,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (rightAligned) xPos = -width
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, text, xPos, yPos, -1)
+            context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
@@ -190,7 +186,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         val textColors = arrayOf(0xff2c01, 0xff5500, 0xff8400, 0xffa503, 0xffd202, 0xfff400, 0xe6ff01, 0xc0ff03, 0x92ff00, 0x74ff02, 0x3cff01, 0x13ff00, 0x01ff00)
 
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -214,7 +210,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (rightAligned) xPos = -width
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, finalText, xPos, yPos, -1)
+            context.text(textRenderer, finalText, xPos, yPos, -1)
             return 12
         }
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
@@ -277,7 +273,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
     ELIMINATIONS {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -296,7 +292,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (rightAligned) xPos = -width
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, text, xPos, yPos, -1)
+            context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
 
@@ -368,7 +364,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
     STAR_FRAGMENTS {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -392,7 +388,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (rightAligned) xPos = -width
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, text, xPos, yPos, -1)
+            context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
 
@@ -464,7 +460,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
     PLAYTIME {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -480,7 +476,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 if (rightAligned) xPos = -width
                 var yPos = yOffset
                 if (bottomAligned) yPos = -yOffset - 12
-                context.drawString(textRenderer, text, xPos, yPos, -1)
+                context.text(textRenderer, text, xPos, yPos, -1)
                 return 12
             }
             return 0
@@ -544,7 +540,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
     MODIFIERS {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -561,18 +557,18 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             val headerWidth = textRenderer.width(headerText)
             var xPos = 0
             if (rightAligned) xPos = -headerWidth
-            context.drawString(textRenderer, headerText, xPos, yPos, -1)
+            context.text(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
 
             StateManager.modifiers.forEach {
                 var xPos = 0
                 if (rightAligned) xPos = -16
                 if(!Config.customModifierIcons.value) {
-                    context.renderItem(it.icon, xPos, yPos)
-                    context.renderItemDecorations(textRenderer, it.icon, xPos, yPos)
+                    context.item(it.icon, xPos, yPos)
+                    context.itemDecorations(textRenderer, it.icon, xPos, yPos)
                 }else {
-                    context.renderItem(it.customIcon, xPos, yPos)
-                    context.renderItemDecorations(textRenderer, it.customIcon, xPos, yPos)
+                    context.item(it.customIcon, xPos, yPos)
+                    context.itemDecorations(textRenderer, it.customIcon, xPos, yPos)
                 }
                 var modifierText = it.translatable.copy().setStyle(Config.getNormalModifierTextAccentStyle(CommonColors.YELLOW))
                 if (Config.showMysteryModifiers.value && StateManager.mysteryModifiers.contains(it)){
@@ -601,7 +597,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 val modifierWidth = textRenderer.width(finalText)
                 xPos = 22
                 if (rightAligned) xPos = -22 - modifierWidth
-                context.drawString(textRenderer, finalText, xPos, yPos+4, -1)
+                context.text(textRenderer, finalText, xPos, yPos+4, -1)
 
                 if (!Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
                     val bonusBoostersAmount = playerList.size - Config.boosterListMax.value
@@ -609,12 +605,12 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                         if(index < Config.boosterListMax.value) {
                             xPos = 28 + modifierWidth + (index * 15)
                             if (rightAligned) xPos = -44 - modifierWidth - (index * 15)
-                            context.renderItem(PlayerHead.fromProfile(profile), xPos, yPos)
+                            context.item(PlayerHead.fromProfile(profile), xPos, yPos)
                         }
                     }
                     if (rightAligned) xPos -= 15
                     else xPos += 15
-                    if(bonusBoostersAmount > 0) context.drawString(textRenderer, Component.literal("+${bonusBoostersAmount}").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)), xPos, yPos + 4, -1)
+                    if(bonusBoostersAmount > 0) context.text(textRenderer, Component.literal("+${bonusBoostersAmount}").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)), xPos, yPos + 4, -1)
                 }
 
                 yPos += 20
@@ -757,7 +753,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         val textColors = arrayOf(0xff2c01, 0xff5500, 0xff8400, 0xffa503, 0xffd202, 0xfff400, 0xe6ff01, 0xc0ff03, 0x92ff00, 0x74ff02, 0x3cff01, 0x13ff00, 0x01ff00)
 
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -780,7 +776,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (rightAligned) xPos = -width
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, text, xPos, yPos, -1)
+            context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
 
@@ -851,7 +847,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
     },
     BOUNTY_BOARD {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -872,7 +868,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             val headerWidth = textRenderer.width(headerText)
             var xPos = 0
             if (rightAligned) xPos = -headerWidth
-            context.drawString(textRenderer, headerText, xPos, yPos, -1)
+            context.text(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
             var index = 1
             var bountyCount = 0
@@ -881,7 +877,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                     val playerUsername = profile.name
                     var xPos = 0
                     if (rightAligned) xPos = -16
-                    context.renderItem(PlayerHead.fromProfile(profile), xPos, yPos)
+                    context.item(PlayerHead.fromProfile(profile), xPos, yPos)
                     val playerText =
                         Component.literal("$playerUsername").setStyle(Config.getBountyBoardPlayerAccentStyle(CommonColors.YELLOW))
                     val bountyText =
@@ -900,7 +896,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                     val modifierWidth = textRenderer.width(finalText)
                     xPos = 22
                     if (rightAligned) xPos = -22 - modifierWidth
-                    context.drawString(textRenderer, finalText, xPos, yPos + 4, -1)
+                    context.text(textRenderer, finalText, xPos, yPos + 4, -1)
                     yPos += 20
                     bountyCount++
                     index++
@@ -1010,7 +1006,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
     },
     FPS {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -1024,7 +1020,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (rightAligned) xPos = -width
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, text, xPos, yPos, -1)
+            context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
@@ -1073,7 +1069,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
     },
     PING {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -1089,7 +1085,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (rightAligned) xPos = -width
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, text, xPos, yPos, -1)
+            context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
@@ -1138,7 +1134,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
     },
     TPS {
         override fun render(
-            context: GuiGraphics,
+            context: GuiGraphicsExtractor,
             yOffset: Int,
             rightAligned: Boolean,
             bottomAligned: Boolean
@@ -1152,7 +1148,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (rightAligned) xPos = -width
             var yPos = yOffset
             if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, text, xPos, yPos, -1)
+            context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
@@ -1200,7 +1196,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             .generateScreen(parent)
     },;
 
-    abstract fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int
+    abstract fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int
     override fun generateConfig(parent: Screen): Screen? = null
     override fun getSerializedName(): String = name
     override fun getDisplayName(): Component = Component.translatable("mrc.hudelement.${name.lowercase()}")
