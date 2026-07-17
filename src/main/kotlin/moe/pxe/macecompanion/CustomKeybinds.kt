@@ -102,9 +102,9 @@ object CustomKeybinds {
                 SendMessage.sendMessage("@events")
             }
             while (openModOptionsKeyBinding.consumeClick()) {
-                if (client.screen == null) {
+                if (client.gui.screen() == null) {
                     val configScreen = ConfigMenu.generateScreen(null)
-                    client.setScreen(configScreen)
+                    client.gui.setScreen(configScreen)
                 }
             }
             while (toggleHudKeyBinding.consumeClick()) {

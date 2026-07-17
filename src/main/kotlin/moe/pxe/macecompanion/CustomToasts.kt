@@ -10,7 +10,7 @@ object CustomToasts {
     //Generic toast
     fun sendCustomToast(title: Component, description: Component) {
         SystemToast.add(
-            Minecraft.getInstance().toastManager,
+            Minecraft.getInstance().gui.toastManager(),
             SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
             title,
             description

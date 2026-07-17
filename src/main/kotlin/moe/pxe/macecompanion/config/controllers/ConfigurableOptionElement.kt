@@ -50,7 +50,7 @@ class ConfigurableOptionElement : AbstractWidget, ContainerEventHandler {
             Component.literal("\u2630"),
             Component.translatable("yacl.configurable.configure")
         ) { button ->
-            configureScreen()?.let { Minecraft.getInstance().setScreen(it) }
+            configureScreen()?.let { Minecraft.getInstance().setScreenAndShow(it) }
             updateButtonStates()
         }
 

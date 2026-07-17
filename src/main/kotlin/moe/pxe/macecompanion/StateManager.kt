@@ -158,7 +158,7 @@ object StateManager {
 
     private fun getBountyData() {
         bounties = mutableMapOf()
-        val tabHUD = client.gui.tabList
+        val tabHUD = client.gui.hud.tabList
         client.connection?.onlinePlayers?.forEach { player ->
             val playerDisplayName = tabHUD.getNameForDisplay(player).string
             playerListBountyRegex.matchEntire(playerDisplayName)?.groups[1]?.let { match ->
@@ -229,7 +229,7 @@ object StateManager {
         return null
     }
     private fun getShowdownVotes(playerString: String): Int {
-        val bossOverlay = client.gui.bossOverlay
+        val bossOverlay = client.gui.hud.bossOverlay
         val bossBars = bossOverlay.events
         val bossBarLerpingEvents = bossBars.values
         if (bossBarLerpingEvents.isEmpty()) return -1

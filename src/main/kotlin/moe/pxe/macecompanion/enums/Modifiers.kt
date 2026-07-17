@@ -148,8 +148,8 @@ enum class Modifiers {
 
     CAGED {
         override val matchName = "Caged!"
-        override val icon: ItemStack = Items.COPPER_BARS.oxidized.defaultInstance
-        override val customIcon: ItemStack = Items.COPPER_BARS.oxidized.defaultInstance.apply {
+        override val icon: ItemStack = Items.COPPER_BARS.waxed.oxidized.defaultInstance
+        override val customIcon: ItemStack = Items.COPPER_BARS.waxed.oxidized.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/caged"))
         }
     },
@@ -258,8 +258,8 @@ enum class Modifiers {
 
     CEILING {
         override val matchName = "Ceiling"
-        override val icon: ItemStack = Items.WAXED_OXIDIZED_COPPER_TRAPDOOR.defaultInstance
-        override val customIcon: ItemStack = Items.WAXED_OXIDIZED_COPPER_TRAPDOOR.defaultInstance.apply {
+        override val icon: ItemStack = Items.COPPER_TRAPDOOR.waxed.oxidized.defaultInstance
+        override val customIcon: ItemStack = Items.COPPER_TRAPDOOR.waxed.oxidized.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/ceiling"))
         }
     },
@@ -421,8 +421,8 @@ enum class Modifiers {
 
     MIRROR {
         override val matchName = "Mirror"
-        override val icon: ItemStack = Items.WHITE_BANNER.defaultInstance
-        override val customIcon: ItemStack = Items.WHITE_BANNER.defaultInstance.apply {
+        override val icon: ItemStack = Items.BANNER.white.defaultInstance
+        override val customIcon: ItemStack = Items.BANNER.white.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/mirror"))
         }
     },
@@ -430,7 +430,7 @@ enum class Modifiers {
     MINEFIELD {
         override val matchName = "Minefield"
         override val icon: ItemStack = Items.MANGROVE_PRESSURE_PLATE.defaultInstance
-        override val customIcon: ItemStack = Items.WHITE_BANNER.defaultInstance.apply {
+        override val customIcon: ItemStack = Items.MANGROVE_PRESSURE_PLATE.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/minefield"))
         }
     },
@@ -458,9 +458,9 @@ enum class Modifiers {
 
     MYSTERY {
         override val matchName = "???"
-        override val icon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance
+        override val icon: ItemStack = Items.DYED_CANDLE.lightGray.defaultInstance
         override val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withColor(0xcfb3fc).withStyle(ChatFormatting.ITALIC)
-        override val customIcon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance.apply {
+        override val customIcon: ItemStack = Items.DYED_CANDLE.lightGray.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/mystery"))
         }
     };
