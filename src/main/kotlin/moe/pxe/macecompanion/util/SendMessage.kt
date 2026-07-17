@@ -9,8 +9,8 @@ import net.minecraft.resources.Identifier
 import java.util.Optional
 
 object SendMessage {
-    private val delayedMessages = mutableListOf<String>()
-    private val delayedTicks = mutableListOf<Int>()
+    private data class DelayedAction(var remainingTicks: Int, val action: () -> Unit)
+    private val delayedActions = mutableListOf<DelayedAction>()
 
     fun sendMessage(message: String) {
         if (MaceCompanion.DEBUG_MODE) {
@@ -21,8 +21,16 @@ object SendMessage {
         player.connection.sendChat(message)
     }
     fun sendDelayedMessage(message: String, delay: Int) {
-        delayedMessages.add(message)
-        delayedTicks.add(delay)
+        schedule(delay) {
+            sendMessage(message)
+        }
+    }
+    fun schedule(ticks: Int, action: () -> Unit) {
+        if (ticks <= 0) {
+            action()
+            return
+        }
+        delayedActions.add(DelayedAction(ticks, action))
     }
     fun sendCommand(message: String) {
         if (MaceCompanion.DEBUG_MODE) {
@@ -32,6 +40,7 @@ object SendMessage {
         val player = Minecraft.getInstance().player ?: return
         player.connection.sendCommand(message)
     }
+
     fun sendPlotCommand(command: String) {
         if (MaceCompanion.DEBUG_MODE) {
             MaceCompanion.LOGGER.info("Debug Mode prevented the plot command \"${command}\" from being sent.")
@@ -43,18 +52,15 @@ object SendMessage {
             Optional.of(CompoundTag().also { it.putString("command", command) })
         ))
     }
-
     fun registerTickListener() {
         ClientTickEvents.START_CLIENT_TICK.register {
-            for (i in delayedMessages.indices) {
-                if (i >= delayedTicks.size) return@register
-                delayedTicks[i]--
-                if (delayedTicks[i] <= 0) {
-                    MaceCompanion.LOGGER.info("$delayedMessages $delayedTicks")
-                    sendMessage(delayedMessages[i])
-                    delayedTicks.removeAt(i)
-                    delayedMessages.removeAt(i)
-                    MaceCompanion.LOGGER.info("$delayedMessages $delayedTicks")
+            val iterator = delayedActions.iterator()
+            while (iterator.hasNext()) {
+                val item = iterator.next()
+                item.remainingTicks--
+                if (item.remainingTicks <= 0) {
+                    item.action()
+                    iterator.remove()
                 }
             }
         }

@@ -30,6 +30,20 @@
     "mrc.config.category.automsg.group.hidemessages.option.hideGLMessages": "Hide GL Messages",
     "mrc.config.category.automsg.group.hidemessages.option.hideGLMessages.description": "Hides all GL/HF messages at the start of a game. All other messages are preserved.",
 
+    "mrc.config.category.autobet": "AutoBet",
+
+    "mrc.config.category.autobet.group.autobet": "AutoBet options",
+    "mrc.config.category.autobet.group.autobet.description": "General configuration for AutoBet",
+
+    "mrc.config.category.autobet.group.autobet.option.useAutoBet": "Use AutoBet",
+    "mrc.config.category.autobet.group.autobet.option.useAutoBet.description": "Toggles the use of the AutoBet function",
+
+    "mrc.config.category.autobet.group.autobet.option.autoBetDelayTicks": "Delay",
+    "mrc.config.category.autobet.group.autobet.option.autoBetDelayTicks.description": "Sends the vote after a set amount of time.",
+
+    "mrc.config.category.autobet.group.autoBetConditions": "AutoBet conditions",
+    "mrc.config.category.autobet.group.autoBetConditions.description": "The conditions to vote a player during showdown, if a condition fails it will move to the next one",
+
     "mrc.config.category.roundhud": "Round Info HUD",
 
     "mrc.config.category.roundhud.group.hudoptions": "HUD Options",
@@ -397,6 +411,15 @@
     "mrc.hudelement.bounty_board": "Bounty Board",
     "mrc.hudelement.fps": "FPS",
     "mrc.hudelement.ping": "Ping",
+
+    "mrc.betConditions.is_red": "Is red",
+    "mrc.betConditions.is_blue": "Is blue",
+    "mrc.betConditions.is_you": "Is you",
+    "mrc.betConditions.is_not_you": "Is not you",
+    "mrc.betConditions.is_most_voted": "Is most voted",
+    "mrc.betConditions.is_least_voted": "Is least voted",
+    "mrc.betConditions.choose_randomly": "Choose randomly",
+
 
     "key.category.macecompanion.title": "Mace Roulette Companion",
     "key.macecompanion.open_profile": "Open Profile",

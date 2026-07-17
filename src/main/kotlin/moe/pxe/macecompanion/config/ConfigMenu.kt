@@ -10,6 +10,7 @@ import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.config.controllers.EnumWithConfigControllerBuilder
 import moe.pxe.macecompanion.config.controllers.FormattedStringControllerBuilder
+import moe.pxe.macecompanion.enums.BetConditions
 import moe.pxe.macecompanion.enums.HudElements
 import moe.pxe.macecompanion.enums.HudLocation
 import moe.pxe.macecompanion.util.OnMaceRoulette
@@ -136,6 +137,41 @@ object ConfigMenu {
                         )
                         .controller(TickBoxControllerBuilder::create)
                         .build())
+                    .build())
+                .build())
+            .category(ConfigCategory.createBuilder()
+                .name(Component.translatable("mrc.config.category.autobet"))
+                .group(OptionGroup.createBuilder()
+                    .name(Component.translatable("mrc.config.category.autobet.group.autobet"))
+                    .description(OptionDescription.of(Component.translatable("mrc.config.category.autobet.group.autobet.description")))
+                    .option(Option.createBuilder<Boolean>()
+                        .name(Component.translatable("mrc.config.category.autobet.group.autobet.option.useAutoBet"))
+                        .description(OptionDescription.of(Component.translatable("mrc.config.category.autobet.group.autobet.option.useAutoBet.description")))
+                        .binding(
+                            Config.useAutoBet.asBinding()
+                        )
+                        .controller(TickBoxControllerBuilder::create)
+                        .build())
+                    .option(Option.createBuilder<Int>()
+                        .name(Component.translatable("mrc.config.category.autobet.group.autobet.option.autoBetDelayTicks"))
+                        .description(OptionDescription.of(Component.translatable("mrc.config.category.autobet.group.autobet.option.autoBetDelayTicks.description")))
+                        .binding(
+                            Config.autoBetDelayTicks.asBinding()
+                        )
+                        .controller {
+                            IntegerSliderControllerBuilder.create(it)
+                                .range(0, 300)
+                                .step(1)
+                                .formatValue { i -> Component.nullToEmpty("${String.format("%.2f", i.toFloat()/20f)} seconds") }
+                        }
+                        .build())
+                    .build())
+                .group(ListOption.createBuilder<BetConditions>()
+                    .name(Component.translatable("mrc.config.category.autobet.group.autoBetConditions"))
+                    .description(OptionDescription.of(Component.translatable("mrc.config.category.autobet.group.autoBetConditions.description")))
+                    .binding(Config.autoBetConditions.asBinding())
+                    .controller { EnumControllerBuilder.create(it).enumClass(BetConditions::class.java) }
+                    .initial(BetConditions.IS_RED)
                     .build())
                 .build())
             .category(ConfigCategory.createBuilder()

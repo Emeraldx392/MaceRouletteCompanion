@@ -13,6 +13,7 @@
   "license": "LGPL-3.0",
   "icon": "assets/macecompanion/icon.png",
   "environment": "client",
+  "accessWidener": "macecompanion.accesswidener",
   "entrypoints": {
     "fabric-datagen": [
       "moe.pxe.macecompanion.MaceCompanionDataGenerator"

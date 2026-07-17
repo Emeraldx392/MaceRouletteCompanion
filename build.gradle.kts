@@ -24,6 +24,7 @@ java {
 }
 
 loom {
+    accessWidenerPath = file("src/main/resources/macecompanion.accesswidener")
     mods {
         register("macecompanion") {
             sourceSet("main")

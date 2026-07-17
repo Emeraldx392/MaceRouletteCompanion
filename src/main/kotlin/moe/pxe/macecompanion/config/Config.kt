@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.PrimitiveCodec
 import dev.isxander.yacl3.config.v3.JsonFileCodecConfig
 import dev.isxander.yacl3.config.v3.register
 import dev.isxander.yacl3.config.v3.value
+import moe.pxe.macecompanion.enums.BetConditions
 import moe.pxe.macecompanion.enums.HudElements
 import moe.pxe.macecompanion.enums.HudLocation
 import net.fabricmc.loader.api.FabricLoader
@@ -46,6 +47,11 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
 
     val hideGGMessages by register<Boolean>(false, BOOL)
     val hideGLMessages by register<Boolean>(false, BOOL)
+
+    // AutoBet
+    val useAutoBet by register<Boolean>(true, BOOL)
+    val autoBetDelayTicks by register<Int>(60, INT)
+    val autoBetConditions by register<List<BetConditions>>(listOf(BetConditions.IS_MOST_VOTED, BetConditions.CHOOSE_RANDOMLY), BetConditions.CODEC.listOf())
 
     // Round Info HUD
     val displayHud by register<Boolean>(true, BOOL)

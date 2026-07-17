@@ -3,9 +3,8 @@ package moe.pxe.macecompanion
 import com.mojang.authlib.GameProfile
 import com.mojang.serialization.JsonOps
 import dev.isxander.yacl3.config.v3.value
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.*
+import moe.pxe.macecompanion.AutoBet.sendAutoBet
 import moe.pxe.macecompanion.CustomToasts.sendChaosStarterToast
 import moe.pxe.macecompanion.CustomToasts.sendEternalElectorToast
 import moe.pxe.macecompanion.CustomToasts.sendModifierChargerToast
@@ -19,18 +18,22 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.Minecraft
-import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
-import net.minecraft.network.chat.HoverEvent
-import net.minecraft.network.chat.Style
+import net.minecraft.client.gui.components.LerpingBossEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
+import net.minecraft.network.chat.HoverEvent
+import net.minecraft.network.chat.Style
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
+import net.minecraft.util.CommonColors
 import net.minecraft.world.InteractionResult
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import java.util.*
 import kotlin.math.roundToInt
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
+
 
 object StateManager {
 
@@ -84,6 +87,10 @@ object StateManager {
         private set
     var fps: Int = -1
         private set
+    var redPlayer: GameProfile? = null
+    var bluePlayer: GameProfile? = null
+    var redVotesPercentage: Int = -1
+    var blueVotesPercentage: Int = -1
 
     val client: Minecraft = Minecraft.getInstance()
 
@@ -91,6 +98,10 @@ object StateManager {
     private val chatJoinDFnNormalRegex = """(.+) joined.""".toRegex()
     private val chatJoinDFnSpecialRegex = """\[.+](.+) joined!""".toRegex()
     private val chatLeaveRegex = """(.+) left\.""".toRegex()
+
+    private val showdownVotingRegex = """\s+(.+)\s+vs\.\s+(.+)""".toRegex()
+    private val showdownBarRegex = """.+ - (\d+)%""".toRegex()
+    private val showdownOverRegex ="""☆ Showdown Over ☆""".toRegex()
 
     private val chatRoundNumberRegex = """ +Round (\d+) +""".toRegex()
 
@@ -210,7 +221,34 @@ object StateManager {
         }
         return null
     }
-
+    private fun getShowdownVotes(playerString: String): Int {
+        val bossOverlay = client.gui.bossOverlay
+        val bossBars = bossOverlay.events
+        val bossBarLerpingEvents = bossBars.values
+        if (bossBarLerpingEvents.isEmpty()) return -1
+        var value: Int = -1
+        bossBarLerpingEvents.forEach { bar ->
+            val name = bar.name.string
+            val profile = resolvePlayerFromRawName(name)?.name
+            if(profile == playerString) {
+                val match = showdownBarRegex.find(name)?.groups?.let {
+                    value = it[1]?.value?.toInt() ?: -1
+                }
+            }
+            val match = showdownBarRegex.find(name)
+            match?.groups?.get(1)?.value?.toIntOrNull()
+        }
+        return value
+    }
+    private fun resolvePlayerFromRawName(rawName: String?): GameProfile? {
+        val candidate = rawName?.trim().orEmpty()
+        if (candidate.isEmpty()) return null
+        if(rawName?.contains(client.user.name) ?: false) return client.gameProfile
+        client.connection?.onlinePlayers?.forEach { player ->
+            if(rawName?.contains(player.profile.name) ?: false) return player.profile
+        }
+        return null
+    }
     private fun resolveModifierFromRawName(rawName: String?): Modifiers? {
         val candidate = rawName?.trim().orEmpty()
         if (candidate.isEmpty()) return null
@@ -293,9 +331,15 @@ object StateManager {
         newEventDuration = -1
         hideFindPlayerText = false
         checkForModifiers = false
+        redPlayer = null
+        bluePlayer = null
+        redVotesPercentage = -1
+        blueVotesPercentage = -1
     }
     fun registerListeners() {
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: Minecraft ->
+                redPlayer?.let { redVotesPercentage = getShowdownVotes(it.name) }
+                bluePlayer?.let { blueVotesPercentage = getShowdownVotes(it.name) }
                 fps = client.fps
         })
         // Chat Listener
@@ -321,6 +365,10 @@ object StateManager {
                     eliminations = it.value.toIntOrNull() ?: 0
                     starFragments = (((eliminations * 3) + (playersTotal - playersAlive)) * starFragmentMultiplier).roundToInt()
                 }
+            }
+            chatEarlyLeaveRegex.matchEntire(message.string)?.groups[1]?.let {
+                val playerThatLeft = getPlayerProfile(it.value)
+                if(bounties.contains(playerThatLeft))bounties.remove(playerThatLeft)
             }
             // Game Leaderboard Header
             chatLeaderboardHeaderRegex.matchEntire(message.string)?.let {
@@ -369,7 +417,7 @@ object StateManager {
             }
             eternalElectorRegex.matchEntire(message.string)?.groups?.let {
                 eternalElectorPlayer = it[1]?.value.toString()
-                eternalElectorModifier = it[2]?.value.toString()
+                eternalElectorModifier = extractModifierNameFromMessage(message,true).toString()
             }
             eternalElectorPositionRegex.matchEntire(message.string)?.groups?.let { it ->
                 val queuePosition = it[1]?.value!!.toInt()
@@ -437,6 +485,18 @@ object StateManager {
             totalStarFragmentGainRegex.find(message.string)?.groups?.let {
                 eliminated = true
                 starFragments = it[1]?.value!!.toInt()
+            }
+
+            showdownVotingRegex.find(message.string)?.groups?.let {
+                redPlayer = resolvePlayerFromRawName(it[1]?.value)
+                bluePlayer = resolvePlayerFromRawName(it[2]?.value)
+                sendAutoBet()
+            }
+            showdownOverRegex.matchEntire(message.string)?.groups?.let {
+                redPlayer = null
+                bluePlayer = null
+                redVotesPercentage = -1
+                blueVotesPercentage = -1
             }
 
             // Modifier Entry
@@ -525,7 +585,5 @@ object StateManager {
         )
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> resetState() }
-
-
     }
 }
