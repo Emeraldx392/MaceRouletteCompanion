@@ -354,7 +354,7 @@ enum class Modifiers {
     FREEZE_BURST {
         override val matchName = "Freeze Burst"
         override val icon: ItemStack = Items.POWDER_SNOW_BUCKET.defaultInstance
-        override val customIcon: ItemStack = Items.POWDER_SNOW_BUCKET.customIcon("modifiers/freezer_burst")
+        override val customIcon: ItemStack = Items.POWDER_SNOW_BUCKET.customIcon("modifiers/freeze_burst")
     },
 
     SQUARE_MAP {
