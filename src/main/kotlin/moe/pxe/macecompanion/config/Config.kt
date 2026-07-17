@@ -50,7 +50,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
 
     // AutoBet
     val useAutoBet by register<Boolean>(true, BOOL)
-    val autoBetDelayTicks by register<Int>(60, INT)
+    val autoBetDelayTicks by register<Int>(40, INT)
     val autoBetConditions by register<List<BetConditions>>(listOf(BetConditions.IS_MOST_VOTED, BetConditions.CHOOSE_RANDOMLY), BetConditions.CODEC.listOf())
 
     // Round Info HUD
@@ -69,7 +69,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val thirdAccentColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
 
     val leftHudElements by register<List<HudElements>>(listOf(
-        HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,
+        HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,HudElements.ACCURACY,
         HudElements.ELIMINATIONS, HudElements.STAR_FRAGMENTS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
     val rightHudElements by register<List<HudElements>>(listOf(HudElements.PING, HudElements.FPS, HudElements.BOUNTY_BOARD), HudElements.CODEC.listOf())
     // Toasts
@@ -92,6 +92,11 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val alivePlayersColor by register<Color>(Color(0xd5fcf5), RGB_COLOR_CODEC)
     val totalPlayersColor by register<Color>(Color(0xd0d0d0), RGB_COLOR_CODEC)
     val playerCountTextColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
+
+    val overrideAccuracyColors by register<Boolean>(false, BOOL)
+    val accuracyColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
+    val accuracyIconColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
+    val accuracyTextColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
 
     val hideEliminationsWhenEliminated by register<Boolean>(false, BOOL)
     val overrideEliminationsColors by register<Boolean>(false, BOOL)
@@ -124,9 +129,9 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val showMysteryModifiers by register<Boolean>(false, BOOL)
 
     val overrideMaceChanceColors by register<Boolean>(false, BOOL)
-    val maceChanceNumberColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
-    val maceChanceIconColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
-    val maceChanceTextColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
+    val maceChanceNumberColor by register<Color>(Color(0x42C1FF), RGB_COLOR_CODEC)
+    val maceChanceIconColor by register<Color>(Color(0x42C1FF), RGB_COLOR_CODEC)
+    val maceChanceTextColor by register<Color>(Color(0x42C1FF), RGB_COLOR_CODEC)
     val hideMaceChanceWhenEliminated by register<Boolean>(false, BOOL)
 
     val overrideBountyBoardColors by register<Boolean>(false, BOOL)
@@ -143,6 +148,10 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val overridePingColors by register<Boolean>(false, BOOL)
     val pingNumberColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
     val pingTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+
+    val overrideTpsColors by register<Boolean>(false, BOOL)
+    val tpsNumberColor by register<Color>(Color(0xbfff00), RGB_COLOR_CODEC)
+    val tpsTextColor by register<Color>(Color(0xbfff00), RGB_COLOR_CODEC)
 
     fun getRoundTextAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)
@@ -164,6 +173,19 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     fun getTotalPLayersAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)
         return deafultStyle.let { if (overridePlayerCountColors.value) it.withColor(totalPlayersColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    }
+
+    fun getAccuracyTextAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideAccuracyColors.value) it.withColor(accuracyTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
+    }
+    fun getAccuracyAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideAccuracyColors.value) it.withColor(accuracyColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    }
+    fun getAccuracyIconAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideAccuracyColors.value) it.withColor(accuracyIconColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
     }
 
     fun getEliminationsTextAccentStyle(defaultColor: Int) : Style {
@@ -268,5 +290,14 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     fun getPingNumberAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)
         return deafultStyle.let { if (overridePingColors.value) it.withColor(pingNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    }
+
+    fun getTpsTextAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideTpsColors.value) it.withColor(tpsTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
+    }
+    fun getTpsNumberAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (overrideTpsColors.value) it.withColor(tpsNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
     }
 }

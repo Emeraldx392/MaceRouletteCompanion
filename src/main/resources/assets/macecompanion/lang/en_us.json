@@ -154,6 +154,24 @@
     "mrc.config.playersAliveConfig.category.styling.group.colors.option.totalPlayersColor": "Total players number color",
     "mrc.config.playersAliveConfig.category.styling.group.colors.option.totalPlayersColor.description": "The color of the number of total players if \"Override colors\" is enabled.",
 
+    "mrc.config.accuracyConfig.category.styling": "Styling",
+
+    "mrc.config.accuracyConfig.category.styling.group.colors": "Colors",
+    "mrc.config.accuracyConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
+
+    "mrc.config.accuracyConfig.category.styling.group.colors.option.overrideAccuracyColors": "Override colors",
+    "mrc.config.accuracyConfig.category.styling.group.colors.option.overrideAccuracyColors.description": "Toggles whether the accuracy HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
+
+    "mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyTextColor": "ᴀᴄᴄᴜʀᴀᴄʏ text color",
+    "mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyTextColor.description": "The color of the ᴀᴄᴄᴜʀᴀᴄʏ text and the mace attempt counts if \"Override colors\" is enabled.",
+
+    "mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyColor": "Accuracy number color",
+    "mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyColor.description": "The color of the percentage of accuracy if \"Override colors\" is enabled.",
+
+    "mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyIconColor": "Accuracy icon color",
+    "mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyIconColor.description": "The color of the \uD83C\uDFF9 icon if \"Override colors\" is enabled.",
+
+
     "mrc.config.eliminationsConfig.category.misc": "Miscellaneous",
 
     "mrc.config.eliminationsConfig.category.misc.option.hideEliminationsWhenEliminated": "Hide when eliminated",
@@ -333,8 +351,24 @@
     "mrc.config.pingConfig.category.styling.group.colors.option.pingNumberColor": "Ping number color",
     "mrc.config.pingConfig.category.styling.group.colors.option.pingNumberColor.description": "The color of the amount of ping if \"Override colors\" is enabled.",
 
+    "mrc.config.tpsConfig.category.styling": "Styling",
+
+    "mrc.config.tpsConfig.category.styling.group.colors": "Colors",
+    "mrc.config.tpsConfig.category.styling.group.colors.description": "Override the colors of this HUD element",
+
+    "mrc.config.tpsConfig.category.styling.group.colors.option.overrideTpsColors": "Override colors",
+    "mrc.config.tpsConfig.category.styling.group.colors.option.overrideTpsColors.description": "Toggles whether the tps HUD element should use custom accent colors instead of the default colors or the main HUD accent colors.",
+
+    "mrc.config.tpsConfig.category.styling.group.colors.option.tpsTextColor": "ᴛᴘꜱ text color",
+    "mrc.config.tpsConfig.category.styling.group.colors.option.tpsTextColor.description": "The color of the ᴛᴘꜱ text if \"Override colors\" is enabled.",
+
+    "mrc.config.tpsConfig.category.styling.group.colors.option.tpsNumberColor": "Tps number color",
+    "mrc.config.tpsConfig.category.styling.group.colors.option.tpsNumberColor.description": "The color of the number of tps if \"Override colors\" is enabled.",
+
+
     "mrc.roundhud.round": "ʀᴏᴜɴᴅ %s",
     "mrc.roundhud.alive": "%s ᴀʟɪᴠᴇ",
+    "mrc.roundhud.accuracy": "%s (%s) ᴀᴄᴄᴜʀᴀᴄʏ",
     "mrc.roundhud.eliminations": "%s ᴇʟɪᴍɪɴᴀᴛɪᴏɴꜱ",
     "mrc.roundhud.starFragments": "%s ꜱᴛᴀʀ ꜰʀᴀɢᴍᴇɴᴛꜱ",
     "mrc.roundhud.playtime": "%s ᴇʟᴀᴘꜱᴇᴅ",
@@ -343,6 +377,7 @@
     "mrc.roundhud.bounty_board": "ʙᴏᴜɴᴛʏ ʙᴏᴀʀᴅ:",
     "mrc.roundhud.fps": "%s ꜰᴘꜱ",
     "mrc.roundhud.ping": "%s ᴍꜱ",
+    "mrc.roundhud.tps": "%s ᴛᴘꜱ",
 
     "mrc.modifier.double": "Double Mace",
     "mrc.modifier.triple": "Triple Mace",
@@ -403,6 +438,7 @@
 
     "mrc.hudelement.round_number": "Round Number",
     "mrc.hudelement.players_alive": "Players Alive/Total",
+    "mrc.hudelement.accuracy": "Accuracy",
     "mrc.hudelement.eliminations": "Eliminations",
     "mrc.hudelement.star_fragments": "Star Fragments",
     "mrc.hudelement.playtime": "Game Duration",
@@ -411,6 +447,7 @@
     "mrc.hudelement.bounty_board": "Bounty Board",
     "mrc.hudelement.fps": "FPS",
     "mrc.hudelement.ping": "Ping",
+    "mrc.hudelement.tps": "TPS",
 
     "mrc.betConditions.is_red": "Is red",
     "mrc.betConditions.is_blue": "Is blue",

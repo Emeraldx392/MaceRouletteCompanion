@@ -29,7 +29,9 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.util.StringRepresentable
 import java.awt.Color
+import java.lang.Math.round
 import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -183,6 +185,95 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             .build()
             .generateScreen(parent)
     },
+
+    ACCURACY {
+        val textColors = arrayOf(0xff2c01, 0xff5500, 0xff8400, 0xffa503, 0xffd202, 0xfff400, 0xe6ff01, 0xc0ff03, 0x92ff00, 0x74ff02, 0x3cff01, 0x13ff00, 0x01ff00)
+
+        override fun render(
+            context: GuiGraphics,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.maceAttempts.isEmpty()) return 0
+            if (!StateManager.gameOngoing) return 0
+
+            val textRenderer = Minecraft.getInstance().font
+            val totalMaceAttempts = StateManager.maceAttempts.size
+            val successfulMaceAttempts = StateManager.maceAttempts.count { it.value }
+            val accuracy = (successfulMaceAttempts.toFloat() / totalMaceAttempts.toFloat() * 100).roundToInt()
+            var accuracyColorIdx = (accuracy / 7.7).toInt().absoluteValue
+
+            val iconText = Component.literal("\uD83C\uDFF9 ").setStyle(Config.getAccuracyIconAccentStyle(0x79fc00))
+            val countText = Component.literal("$successfulMaceAttempts/$totalMaceAttempts").setStyle(Config.getAccuracyTextAccentStyle(0x79fc00))
+            val percentageText = Component.literal("$accuracy%").setStyle(Config.getAccuracyAccentStyle(textColors[accuracyColorIdx]))
+            val text = Component.translatable("mrc.roundhud.accuracy", percentageText, countText).setStyle(Config.getAccuracyTextAccentStyle(0x79fc00))
+            val finalText = iconText.append(text)
+            val width = textRenderer.width(finalText)
+            var xPos = 0
+            if (rightAligned) xPos = -width
+            var yPos = yOffset
+            if (bottomAligned) yPos = -yOffset - 12
+            context.drawString(textRenderer, finalText, xPos, yPos, -1)
+            return 12
+        }
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
+            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
+            .category(ConfigCategory.createBuilder()
+                .name(Component.translatable("mrc.config.accuracyConfig.category.styling"))
+                .group(OptionGroup.createBuilder()
+                    .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors"))
+                    .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.description"))).also {
+                        val overrideAccuracyColors = Option.createBuilder<Boolean>()
+                            .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.overrideAccuracyColors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.overrideAccuracyColors.description")))
+                            .binding(Config.overrideAccuracyColors.asBinding())
+                            .controller(TickBoxControllerBuilder::create)
+                            .build()
+                        val accuracyTextColor = Option.createBuilder<Color>()
+                            .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyTextColor"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyTextColor.description")))
+                            .binding(Config.accuracyTextColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        accuracyTextColor.setAvailable(overrideAccuracyColors.pendingValue())
+                        overrideAccuracyColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) accuracyTextColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) accuracyTextColor.setAvailable(option.pendingValue( ))
+                        }
+                        val accuracyColor = Option.createBuilder<Color>()
+                            .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyColor"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyColor.description")))
+                            .binding(Config.accuracyColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        accuracyColor.setAvailable(overrideAccuracyColors.pendingValue())
+                        overrideAccuracyColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) accuracyColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) accuracyColor.setAvailable(option.pendingValue( ))
+                        }
+                        val accuracyIconColor = Option.createBuilder<Color>()
+                            .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyIconColor"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyIconColor.description")))
+                            .binding(Config.accuracyIconColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        accuracyIconColor.setAvailable(overrideAccuracyColors.pendingValue())
+                        overrideAccuracyColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) accuracyIconColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) accuracyIconColor.setAvailable(option.pendingValue( ))
+                        }
+                        it.option(overrideAccuracyColors)
+                        it.option(accuracyTextColor)
+                        it.option(accuracyColor)
+                        it.option(accuracyIconColor)
+                    }
+                    .build())
+                .build())
+            .build()
+            .generateScreen(parent)
+    },
+
 
     ELIMINATIONS {
         override fun render(
@@ -678,11 +769,11 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             val textRenderer = Minecraft.getInstance().font
             var maceChanceColorIdx = (StateManager.maceChance / 7.7).toInt().absoluteValue
             if (maceChanceColorIdx > 12) maceChanceColorIdx = 12
-            val text = Component.literal("⚄ ").setStyle(Config.getMaceChanceIconAccentStyle(0x79fc00))
+            val text = Component.literal("⚄ ").setStyle(Config.getMaceChanceIconAccentStyle(0x42C1FF))
                 .append(Component.translatable("mrc.roundhud.mace_chance",
                 Component.literal("%.2f%%".format(StateManager.maceChance))
                     .setStyle(Config.getMaceChanceNumberAccentStyle(textColors[maceChanceColorIdx])))
-                .setStyle(Config.getMaceChanceTextAccentStyle(0x79fc00)))
+                .setStyle(Config.getMaceChanceTextAccentStyle(0x42C1FF)))
 
             val width = textRenderer.width(text)
             var xPos = 0
@@ -1044,7 +1135,70 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 .build())
             .build()
             .generateScreen(parent)
-    };
+    },
+    TPS {
+        override fun render(
+            context: GuiGraphics,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.tps == -1f) return 0
+
+            val textRenderer = Minecraft.getInstance().font
+            val text = Component.translatable("mrc.roundhud.tps", Component.literal("${StateManager.tps}").setStyle(Config.getTpsNumberAccentStyle(0xbfff00))).setStyle(Config.getTpsTextAccentStyle(0xbfff00))
+            val width = textRenderer.width(text)
+            var xPos = 0
+            if (rightAligned) xPos = -width
+            var yPos = yOffset
+            if (bottomAligned) yPos = -yOffset - 12
+            context.drawString(textRenderer, text, xPos, yPos, -1)
+            return 12
+        }
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
+            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
+            .category(ConfigCategory.createBuilder()
+                .name(Component.translatable("mrc.config.tpsConfig.category.styling"))
+                .group(OptionGroup.createBuilder()
+                    .name(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors"))
+                    .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.description"))).also {
+                        val overrideTpsColors = Option.createBuilder<Boolean>()
+                            .name(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.overrideTpsColors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.overrideTpsColors.description")))
+                            .binding(Config.overrideTpsColors.asBinding())
+                            .controller(TickBoxControllerBuilder::create)
+                            .build()
+                        val tpsTextColor = Option.createBuilder<Color>()
+                            .name(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.tpsTextColor"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.tpsTextColor.description")))
+                            .binding(Config.tpsTextColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        tpsTextColor.setAvailable(overrideTpsColors.pendingValue())
+                        overrideTpsColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) tpsTextColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) tpsTextColor.setAvailable(option.pendingValue( ))
+                        }
+                        val tpsNumberColor = Option.createBuilder<Color>()
+                            .name(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.tpsNumberColor"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.tpsNumberColor.description")))
+                            .binding(Config.tpsNumberColor.asBinding())
+                            .controller(ColorControllerBuilder::create)
+                            .build()
+                        tpsNumberColor.setAvailable(overrideTpsColors.pendingValue())
+                        overrideTpsColors.addEventListener { option, event ->
+                            if (event == OptionEventListener.Event.INITIAL) tpsNumberColor.setAvailable(option.pendingValue())
+                            if (event == OptionEventListener.Event.STATE_CHANGE) tpsNumberColor.setAvailable(option.pendingValue( ))
+                        }
+                        it.option(overrideTpsColors)
+                        it.option(tpsTextColor)
+                        it.option(tpsNumberColor)
+                    }
+                    .build())
+                .build())
+            .build()
+            .generateScreen(parent)
+    },;
 
     abstract fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int
     override fun generateConfig(parent: Screen): Screen? = null

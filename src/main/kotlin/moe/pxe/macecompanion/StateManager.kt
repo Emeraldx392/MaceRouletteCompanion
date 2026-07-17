@@ -18,18 +18,17 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.components.LerpingBossEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
-import net.minecraft.util.CommonColors
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import java.util.*
+import kotlin.Int
+import kotlin.collections.mutableListOf
 import kotlin.math.roundToInt
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
@@ -75,6 +74,8 @@ object StateManager {
         private set
     var modifierBoosters = mutableMapOf<Modifiers, MutableList<GameProfile>>()
         private set
+    var maceAttempts = mutableMapOf<Int, Boolean>()
+        private set
     var bounties = mutableMapOf<GameProfile, Int>()
         private set
     var eternalModifier: Modifiers? = null
@@ -85,7 +86,13 @@ object StateManager {
         private set
     var hideFindPlayerText: Boolean = false
         private set
+    var hasMace: Boolean = false
+        private set
     var fps: Int = -1
+        private set
+    var tps: Float = -1f
+        private set
+    var lastRoundWithMace: Int = -1
         private set
     var redPlayer: GameProfile? = null
     var bluePlayer: GameProfile? = null
@@ -281,6 +288,8 @@ object StateManager {
         if (round != 1 && number == 1) {
             playersTotal = playersAlive
             playtime = TimeSource.Monotonic.markNow()
+            lastRoundWithMace = -1
+            maceAttempts = mutableMapOf()
             eliminations = 0
             starFragmentMultiplier = 1f
             starFragments = 0
@@ -290,8 +299,11 @@ object StateManager {
         }
         val lastSlotItem = getPlayerSlotItemStack(8).item
         eliminated = (lastSlotItem == Items.STICK || lastSlotItem == Items.BREEZE_ROD)
-        if(eliminated && number == 1) eliminations = -1
-        if(eliminated && number == 1) starFragments = -1
+        if(eliminated && number == 1){
+            eliminations = -1
+            maceAttempts = mutableMapOf()
+            starFragments = -1
+        }
         if(playersTotal == -1){
             hideFindPlayerText = true
             SendMessage.sendCommand("find ${client.user.name}")
@@ -335,12 +347,20 @@ object StateManager {
         bluePlayer = null
         redVotesPercentage = -1
         blueVotesPercentage = -1
+        lastRoundWithMace = -1
+        maceAttempts = mutableMapOf()
     }
     fun registerListeners() {
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: Minecraft ->
                 redPlayer?.let { redVotesPercentage = getShowdownVotes(it.name) }
                 bluePlayer?.let { blueVotesPercentage = getShowdownVotes(it.name) }
                 fps = client.fps
+                tps = client.level?.tickRateManager()?.tickrate() ?: -1f
+                hasMace = (!eliminated && (client.player?.inventory?.hasAnyOf(setOf(Items.MACE))?: false))
+                if(hasMace) {
+                    lastRoundWithMace = round
+                    if(!(maceAttempts[round] ?: false)) maceAttempts[round] = false
+                }
         })
         // Chat Listener
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
@@ -362,6 +382,7 @@ object StateManager {
             // Elimination Counter
             chatElimCounterRegex.matchEntire(message.string)?.groups[1]?.let {
                 if(!eliminated){
+                    if(lastRoundWithMace == round){ maceAttempts[round] = true }
                     eliminations = it.value.toIntOrNull() ?: 0
                     starFragments = (((eliminations * 3) + (playersTotal - playersAlive)) * starFragmentMultiplier).roundToInt()
                 }
@@ -565,7 +586,7 @@ object StateManager {
                     if (!OnMaceRoulette.onMaceRoulette) return InteractionResult.PASS
                     titleRoundNumberRegex.matchEntire(packet.text.string)?.let { roundNumberMatch ->
                         roundNumberMatch.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
-                        roundColor = packet.text.siblings[0].style ?: roundColor
+                        roundColor = packet.text.siblings[0].style
                     }
                     titleEliminatedRegex.matchEntire(packet.text.string)?.let { eliminated = true }
                     return InteractionResult.PASS
