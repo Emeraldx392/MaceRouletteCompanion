@@ -94,6 +94,10 @@ object StateManager {
         private set
     var lastRoundWithMace: Int = -1
         private set
+    var summerPoints: Int = -1
+        private set
+    var summerColor: Int = 0xffffff
+        private set
     var redPlayer: GameProfile? = null
     var bluePlayer: GameProfile? = null
     var redVotesPercentage: Int = -1
@@ -105,6 +109,9 @@ object StateManager {
     private val chatJoinDFnNormalRegex = """(.+) joined.""".toRegex()
     private val chatJoinDFnSpecialRegex = """\[.+](.+) joined!""".toRegex()
     private val chatLeaveRegex = """(.+) left\.""".toRegex()
+
+    private val summerPointRegex = """⚑ (.+) scored 1 point for team (.+)! \(.+\)""".toRegex()
+    private val summerPointsRegex = """⚑ (.+) scored (\d+) points for team (.+)! \(.+\)""".toRegex()
 
     private val showdownVotingRegex = """\s+(.+)\s+vs\.\s+(.+)""".toRegex()
     private val showdownBarRegex = """.+ - (\d+)%""".toRegex()
@@ -294,6 +301,7 @@ object StateManager {
             starFragmentMultiplier = 1f
             starFragments = 0
             eliminated = false
+            summerPoints = -1
             AutoGL.sendGlMessage()
             getBountyData()
         }
@@ -349,6 +357,7 @@ object StateManager {
         blueVotesPercentage = -1
         lastRoundWithMace = -1
         maceAttempts = mutableMapOf()
+        summerPoints = -1
     }
     fun registerListeners() {
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: Minecraft ->
@@ -377,6 +386,35 @@ object StateManager {
                     else if (playersAlive <= (playersTotal / 4)) starFragmentMultiplier = 1.5625f
                     else if (playersAlive <= (playersTotal / 2)) starFragmentMultiplier = 1.25f
                     starFragments = (((eliminations * 3) + (playersTotal - playersAlive)) * starFragmentMultiplier).roundToInt()
+                }
+            }
+            summerPointRegex.matchEntire(message.string)?.groups?.let {
+                val player = it[1]?.value
+                val team = it[2]?.value
+                if(player == client.user.name) {
+                    summerPoints++
+                    if (summerColor == 0xffffff) when (team) {
+                        "Melon" -> summerColor = 0xFF7CAE
+                        "Apricot" -> summerColor = 0xFF7E47
+                        "Lemon" -> summerColor = 0xFFC447
+                        "Pear" -> summerColor = 0x78D647
+                        "Berry" -> summerColor = 0x47B6FF
+                    }
+                }
+            }
+            summerPointsRegex.matchEntire(message.string)?.groups?.let {
+                val player = it[1]?.value
+                val points = it[2]?.value?.toInt() ?: 0
+                val team = it[3]?.value
+                if(player == client.user.name) {
+                    summerPoints += points
+                    if (summerColor == 0xffffff) when (team) {
+                        "Melon" -> summerColor = 0xFF7CAE
+                        "Apricot" -> summerColor = 0xFF7E47
+                        "Lemon" -> summerColor = 0xFFC447
+                        "Pear" -> summerColor = 0x78D647
+                        "Berry" -> summerColor = 0x47B6FF
+                    }
                 }
             }
             // Elimination Counter

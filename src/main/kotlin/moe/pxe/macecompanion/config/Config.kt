@@ -71,7 +71,7 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val leftHudElements by register<List<HudElements>>(listOf(
         HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,HudElements.ACCURACY,
         HudElements.ELIMINATIONS, HudElements.STAR_FRAGMENTS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
-    val rightHudElements by register<List<HudElements>>(listOf(HudElements.PING, HudElements.FPS, HudElements.BOUNTY_BOARD), HudElements.CODEC.listOf())
+    val rightHudElements by register<List<HudElements>>(listOf(HudElements.PING, HudElements.FPS, HudElements.SUMMER_POINTS, HudElements.BOUNTY_BOARD), HudElements.CODEC.listOf())
     // Toasts
     val showNewEventToasts by register<Boolean>(true, BOOL)
     val showConsumableToasts by register<Boolean>(true, BOOL)
@@ -199,6 +199,19 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     fun getEliminationsIconAccentStyle(defaultColor: Int) : Style {
         val deafultStyle = Style.EMPTY.withColor(defaultColor)
         return deafultStyle.let { if (overrideEliminationsColors.value) it.withColor(eliminationsIconColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    }
+    
+    fun getSummerPointsTextAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let {  if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
+    }
+    fun getSummerPointsNumberAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    }
+    fun getSummerPointsIconAccentStyle(defaultColor: Int) : Style {
+        val deafultStyle = Style.EMPTY.withColor(defaultColor)
+        return deafultStyle.let { if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
     }
 
     fun getStarFragmentsTextAccentStyle(defaultColor: Int) : Style {
