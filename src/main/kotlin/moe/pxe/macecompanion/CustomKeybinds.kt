@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.minecraft.client.KeyMapping
 import com.mojang.blaze3d.platform.InputConstants
-import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
 import net.minecraft.resources.Identifier
@@ -19,6 +18,8 @@ object CustomKeybinds {
     lateinit var openCosmeticsKeyBinding: KeyMapping
         private set
     lateinit var openEventsKeyBinding: KeyMapping
+        private set
+    lateinit var openSummerKeyBinding: KeyMapping
         private set
     lateinit var openModOptionsKeyBinding: KeyMapping
         private set
@@ -53,6 +54,14 @@ object CustomKeybinds {
         openEventsKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_events",
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
+                maceRouletteCategory
+            )
+        )
+        openSummerKeyBinding = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.macecompanion.open_summer",
                 InputConstants.Type.KEYSYM,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
@@ -100,6 +109,9 @@ object CustomKeybinds {
             }
             while (openEventsKeyBinding.consumeClick()) {
                 SendMessage.sendMessage("@events")
+            }
+            while (openSummerKeyBinding.consumeClick()) {
+                SendMessage.sendMessage("@summer")
             }
             while (openModOptionsKeyBinding.consumeClick()) {
                 if (client.screen == null) {
