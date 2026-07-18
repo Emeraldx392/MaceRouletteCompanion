@@ -8,8 +8,8 @@ Minecraft mod that adds a few quality of life features to Mace Roulette.
   Automatically sends a message at the end of a game. Including "gg" or "good game" will give you five extra stars each game.
 - **AutoGL**  
   Automatically sends a message at the start of a game. Including "gl", "hf", "good luck", or "have fun" will give you five extra stars each game.
-- ~~**AutoBet**  
-  Automatically bets on a player during Mace Showdown. This player can be decided based on their amount of tracked wins, the user's preference, or just picked randomly.~~
+- **AutoBet**  
+  Automatically bets on a player during Mace Showdown. This player can be decided based on the user's preference, or just picked randomly.
 - **Round Info HUD**  
   Places information about the current round (such as how long the game has been going for, the amount of players alive, and the active modifiers) on the HUD.
 - **Toasts**  
@@ -43,13 +43,13 @@ Minecraft mod that adds a few quality of life features to Mace Roulette.
     - [x] Include delay
     - [x] Pull from config
     - [x] Hide GL Messages
-  - [ ] AutoBet
-    - [ ] Vote for red
-    - [ ] ...for blue
-    - [ ] ...randomly
-    - [ ] Include delay
-    - [ ] Vote based on user preference
-    - [ ] ...based on existing votes
+  - [x] AutoBet
+    - [x] Vote for red
+    - [x] ...for blue
+    - [x] ...randomly
+    - [x] Include delay
+    - [x] Vote based on user preference
+    - [x] ...based on existing votes
     - [ ] ...based on tracked wins
 - [ ] HUD Elements
   - [x] Round Info HUD
@@ -64,7 +64,7 @@ Minecraft mod that adds a few quality of life features to Mace Roulette.
   - [x] Display toasts...
     - [x] ...for events
     - [x] ...for bounties
-    - [x] ...for modifier chargers
+    - [x] ...for consumables
     - [x] ...for players joining
     - [ ] ...for purchases/earned cosmetics
     - [ ] ...for daily resets
