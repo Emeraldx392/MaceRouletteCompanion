@@ -361,6 +361,30 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             .build()
             .generateScreen(parent)
     },
+    SUMMER_POINTS {
+        override fun render(
+            context: GuiGraphicsExtractor,
+            yOffset: Int,
+            rightAligned: Boolean,
+            bottomAligned: Boolean
+        ): Int {
+            if (StateManager.summerPoints == -1) return 0
+            if (!StateManager.gameOngoing) return 0
+
+            val textRenderer = Minecraft.getInstance().font
+            val textIcon = Component.literal("⚑ ").setStyle(Config.getSummerPointsIconAccentStyle(StateManager.summerColor))
+            val text = textIcon.append(Component.translatable("mrc.roundhud.summer_points", Component.literal("${StateManager.eliminations}")
+                .setStyle(Config.getSummerPointsNumberAccentStyle(StateManager.summerColor)))
+                .setStyle(Config.getSummerPointsTextAccentStyle(StateManager.summerColor)))
+            val width = textRenderer.width(text)
+            var xPos = 0
+            if (rightAligned) xPos = -width
+            var yPos = yOffset
+            if (bottomAligned) yPos = -yOffset - 12
+            context.text(textRenderer, text, xPos, yPos, -1)
+            return 12
+            }
+        },
 
     STAR_FRAGMENTS {
         override fun render(
@@ -572,20 +596,20 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 }
                 var modifierText = it.translatable.copy().setStyle(Config.getNormalModifierTextAccentStyle(CommonColors.YELLOW))
                 if (Config.showMysteryModifiers.value && StateManager.mysteryModifiers.contains(it)){
-                    modifierText.setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF))
+                    modifierText.style = Config.getMysteryModifierTextAccentStyle(0xD2B5FF)
                     if(!rightAligned) modifierText.append(Component.literal(" ???").setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF)))
                     if(rightAligned) modifierText = Component.literal("??? ").setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF)).append(modifierText)
                 }
                 if (StateManager.eternalModifier == it && StateManager.chargedModifiers.contains(it)) {
-                    modifierText.setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))
+                    modifierText.style = Config.getChargedModifierTextAccentStyle(0x0786FF)
                     if(!rightAligned) modifierText.append(Component.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))).append(Component.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)))
                     if(rightAligned) modifierText = Component.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)).append(Component.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF).withShadowColor(-16777216)).append(modifierText))
                 }else if (StateManager.eternalModifier == it) {
-                    modifierText.setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549))
+                    modifierText.style = Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)
                     if(!rightAligned) modifierText.append(Component.literal(" ∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)))
                     if(rightAligned) modifierText = Component.literal("∞ ").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)).append(modifierText)
                 }else if (StateManager.chargedModifiers.contains(it)) {
-                    modifierText.setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))
+                    modifierText.style = Config.getChargedModifierTextAccentStyle(0x0786FF)
                     if(!rightAligned) modifierText.append(Component.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)))
                     if(rightAligned) modifierText = Component.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)).append(modifierText)
                 }
