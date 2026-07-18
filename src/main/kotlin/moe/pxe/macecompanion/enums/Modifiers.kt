@@ -189,7 +189,7 @@ enum class Modifiers {
     SHRINKING {
         override val matchName = "Shrinking Map"
         override val icon: ItemStack = Items.MUSIC_DISC_11.defaultInstance
-        override val customIcon: ItemStack = Items.FROGSPAWN.defaultInstance.apply {
+        override val customIcon: ItemStack = Items.MUSIC_DISC_11.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/shrinking_map"))
         }
     },
@@ -205,7 +205,7 @@ enum class Modifiers {
     BOUNCY {
         override val matchName = "Bouncy Floor"
         override val icon: ItemStack = Items.SLIME_BLOCK.defaultInstance
-        override val customIcon: ItemStack = Items.MUSIC_DISC_STRAD.defaultInstance.apply {
+        override val customIcon: ItemStack = Items.SLIME_BLOCK.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/bouncy_floor"))
         }
     },
@@ -213,7 +213,7 @@ enum class Modifiers {
     ICE {
         override val matchName = "Icy Floor"
         override val icon: ItemStack = Items.ICE.defaultInstance
-        override val customIcon: ItemStack = Items.MUSIC_DISC_STRAD.defaultInstance.apply {
+        override val customIcon: ItemStack = Items.ICE.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/icy_floor"))
         }
     },
@@ -343,7 +343,7 @@ enum class Modifiers {
     MAGNETIC {
         override val matchName = "Magnetic Burst"
         override val icon: ItemStack = Items.IRON_NAUTILUS_ARMOR.defaultInstance
-        override val customIcon: ItemStack = Items.FISHING_ROD.defaultInstance.apply {
+        override val customIcon: ItemStack = Items.IRON_NAUTILUS_ARMOR.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/magnetic_burst"))
         }
     },
@@ -441,6 +441,54 @@ enum class Modifiers {
         override val customIcon: ItemStack = Items.SLIME_BALL.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/bouncy_charges"))
         }
+    },
+
+    PUNCH_EQUALS_FREEZE {
+        override val matchName = "Punch = Freeze"
+        override val icon: ItemStack = Items.SNOWBALL.defaultInstance
+        override val customIcon: ItemStack = icon
+    },
+
+    FREEZE_BURST {
+        override val matchName = "Freeze Burst"
+        override val icon: ItemStack = Items.POWDER_SNOW_BUCKET.defaultInstance
+        override val customIcon: ItemStack = icon
+    },
+
+    SQUARE_MAP {
+        override val matchName = "Square Map"
+        override val icon: ItemStack = Items.STONE_PRESSURE_PLATE.defaultInstance
+        override val customIcon: ItemStack = icon
+    },
+
+    LIGHTNING_MACE {
+        override val matchName = "Lightning Mace"
+        override val icon: ItemStack = Items.LIGHTNING_ROD.waxed.oxidized.defaultInstance
+        override val customIcon: ItemStack = icon
+    },
+
+    REWIND {
+        override val matchName = "Rewind"
+        override val icon: ItemStack = Items.HARNESS.purple.defaultInstance
+        override val customIcon: ItemStack = icon
+    },
+
+    UMBRELLA {
+        override val matchName = "Umbrella"
+        override val icon: ItemStack = Items.CRIMSON_FUNGUS.defaultInstance
+        override val customIcon: ItemStack = icon
+    },
+
+    KEEP_SPRINTING {
+        override val matchName = "Keep Sprinting"
+        override val icon: ItemStack = Items.COPPER_BOOTS.defaultInstance
+        override val customIcon: ItemStack = icon
+    },
+
+    HONEY_BURST {
+        override val matchName = "Honey Burst"
+        override val icon: ItemStack = Items.HONEY_BLOCK.defaultInstance
+        override val customIcon: ItemStack = icon
     },
 
     UNKNOWN {
