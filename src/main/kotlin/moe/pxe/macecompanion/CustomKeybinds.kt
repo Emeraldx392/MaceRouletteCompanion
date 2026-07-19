@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.minecraft.client.KeyMapping
 import com.mojang.blaze3d.platform.InputConstants
+import moe.pxe.macecompanion.util.OnMaceRoulette
 import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
@@ -103,16 +104,16 @@ object CustomKeybinds {
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             while (openProfileKeyBinding.consumeClick()) {
-                SendMessage.sendMessage("@profile")
+                if(OnMaceRoulette.onMaceRoulette) SendMessage.sendMessage("@profile")
             }
             while (openCosmeticsKeyBinding.consumeClick()) {
-                SendMessage.sendMessage("@cosmetics")
+                if(OnMaceRoulette.onMaceRoulette) SendMessage.sendMessage("@cosmetics")
             }
             while (openEventsKeyBinding.consumeClick()) {
-                SendMessage.sendMessage("@events")
+                if(OnMaceRoulette.onMaceRoulette) SendMessage.sendMessage("@events")
             }
             while (openSummerKeyBinding.consumeClick()) {
-                SendMessage.sendMessage("@summer")
+                if(OnMaceRoulette.onMaceRoulette) SendMessage.sendMessage("@summer")
             }
             while (openModOptionsKeyBinding.consumeClick()) {
                 if (client.gui.screen() == null) {
