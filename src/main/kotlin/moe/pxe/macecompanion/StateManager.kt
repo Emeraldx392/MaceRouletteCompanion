@@ -392,7 +392,8 @@ object StateManager {
                 val player = it[1]?.value
                 val team = it[2]?.value
                 if(player == client.user.name) {
-                    summerPoints++
+                    if(summerPoints == -1) summerPoints = 1
+                    else summerPoints ++
                     if (summerColor == 0xffffff) when (team) {
                         "Melon" -> summerColor = 0xFF7CAE
                         "Apricot" -> summerColor = 0xFF7E47
@@ -407,7 +408,8 @@ object StateManager {
                 val points = it[2]?.value?.toInt() ?: 0
                 val team = it[3]?.value
                 if(player == client.user.name) {
-                    summerPoints += points
+                    if(summerPoints == -1) summerPoints = points
+                    else summerPoints += points
                     if (summerColor == 0xffffff) when (team) {
                         "Melon" -> summerColor = 0xFF7CAE
                         "Apricot" -> summerColor = 0xFF7E47
