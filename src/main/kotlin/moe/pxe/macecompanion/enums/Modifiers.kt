@@ -473,6 +473,12 @@ enum class Modifiers {
         override val customIcon: ItemStack = icon
     },
 
+    TEAM_PAINT {
+        override val matchName = "Team Paint"
+        override val icon: ItemStack = Items.BRUSH.defaultInstance
+        override val customIcon: ItemStack = icon
+    },
+
     UMBRELLA {
         override val matchName = "Umbrella"
         override val icon: ItemStack = Items.CRIMSON_FUNGUS.defaultInstance
