@@ -373,7 +373,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
             val textRenderer = Minecraft.getInstance().font
             val textIcon = Component.literal("⚑ ").setStyle(Config.getSummerPointsIconAccentStyle(StateManager.summerColor))
-            val text = textIcon.append(Component.translatable("mrc.roundhud.summer_points", Component.literal("${StateManager.eliminations}")
+            val text = textIcon.append(Component.translatable("mrc.roundhud.summer_points", Component.literal("${StateManager.summerPoints}")
                 .setStyle(Config.getSummerPointsNumberAccentStyle(StateManager.summerColor)))
                 .setStyle(Config.getSummerPointsTextAccentStyle(StateManager.summerColor)))
             val width = textRenderer.width(text)
