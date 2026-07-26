@@ -10,7 +10,7 @@ import net.minecraft.resources.Identifier
 object RoundInfoHud {
     fun registerListener() {
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, Identifier.fromNamespaceAndPath("macecompanion","round_info")
-        ) { context, tickCounter ->
+        ) { context, _ ->
             if (!Config.displayHud.value) return@attachElementBefore
             if (Minecraft.getInstance().debugEntries.isOverlayVisible) return@attachElementBefore
 

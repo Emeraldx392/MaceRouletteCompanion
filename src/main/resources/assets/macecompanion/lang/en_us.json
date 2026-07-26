@@ -238,9 +238,6 @@
     "mrc.config.modifiersConfig.category.misc.option.boosterListMax": "Maximum Boosters Shown",
     "mrc.config.modifiersConfig.category.misc.option.boosterListMax.description": "The maximum amount of modifier boosters to show. Any overflow will be shown as \"+n\" at the end of the list.",
 
-    "mrc.config.modifiersConfig.category.misc.option.showMysteryModifiers": "Reveal Mystery Modifiers",
-    "mrc.config.modifiersConfig.category.misc.option.showMysteryModifiers.description": "Reveals the mystery modifiers",
-
     "mrc.config.modifiersConfig.category.styling": "Styling",
 
     "mrc.config.modifiersConfig.category.styling.group.colors": "Colors",

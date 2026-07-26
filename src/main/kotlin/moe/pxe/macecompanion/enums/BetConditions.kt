@@ -1,7 +1,8 @@
 package moe.pxe.macecompanion.enums
 
 import dev.isxander.yacl3.api.NameableEnum
-import moe.pxe.macecompanion.StateManager
+import moe.pxe.macecompanion.stateManagers.ShowdownManager.blueVotesPercentage
+import moe.pxe.macecompanion.stateManagers.ShowdownManager.redVotesPercentage
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.util.StringRepresentable
@@ -36,16 +37,16 @@ enum class BetConditions : NameableEnum, StringRepresentable  {
     },
     IS_MOST_VOTED {
         override fun calculate(usernameRed: String, usernameBlue: String): String? {
-            return if (StateManager.redVotesPercentage > StateManager.blueVotesPercentage) "red"
-            else if (StateManager.redVotesPercentage < StateManager.blueVotesPercentage) "blue"
+            return if (redVotesPercentage > blueVotesPercentage) "red"
+            else if (redVotesPercentage < blueVotesPercentage) "blue"
             else null
         }
 
     },
     IS_LEAST_VOTED {
         override fun calculate(usernameRed: String, usernameBlue: String): String? {
-            return if (StateManager.redVotesPercentage > StateManager.blueVotesPercentage) "blue"
-            else if (StateManager.redVotesPercentage < StateManager.blueVotesPercentage) "red"
+            return if (redVotesPercentage > blueVotesPercentage) "blue"
+            else if (redVotesPercentage < blueVotesPercentage) "red"
             else null
         }
     },

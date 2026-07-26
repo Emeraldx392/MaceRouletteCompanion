@@ -13,7 +13,7 @@ import moe.pxe.macecompanion.config.controllers.FormattedStringControllerBuilder
 import moe.pxe.macecompanion.enums.BetConditions
 import moe.pxe.macecompanion.enums.HudElements
 import moe.pxe.macecompanion.enums.HudLocation
-import moe.pxe.macecompanion.util.OnMaceRoulette
+import moe.pxe.macecompanion.stateManagers.PlotManager
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.Component
@@ -201,13 +201,17 @@ object ConfigMenu {
                         .name(Component.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudXMargin"))
                         .description(OptionDescription.of(Component.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudXMargin.description")))
                         .binding(Config.hudXMargin.asBinding())
-                        .controller({ IntegerFieldControllerBuilder.create(it).formatValue { Component.nullToEmpty("$it pixels") } })
+                        .controller {
+                            IntegerFieldControllerBuilder.create(it).formatValue { Component.nullToEmpty("$it pixels") }
+                        }
                         .build())
                     .option(Option.createBuilder<Int>()
                         .name(Component.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudYMargin"))
                         .description(OptionDescription.of(Component.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudYMargin.description")))
                         .binding(Config.hudYMargin.asBinding())
-                        .controller({ IntegerFieldControllerBuilder.create(it).formatValue { Component.nullToEmpty("$it pixels") } })
+                        .controller {
+                            IntegerFieldControllerBuilder.create(it).formatValue { Component.nullToEmpty("$it pixels") }
+                        }
                         .build())
                     .option(Option.createBuilder<Float>()
                         .name(Component.translatable("mrc.config.category.roundhud.group.hudtransforms.option.hudScale"))
@@ -369,7 +373,7 @@ object ConfigMenu {
                     }
                     .initial("")
                     .flag({
-                        OnMaceRoulette.fillPlotIds(Config.plotIds.value.toSet())
+                        PlotManager.fillPlotIds(Config.plotIds.value.toSet())
                     })
                     .build())
                 .build())
