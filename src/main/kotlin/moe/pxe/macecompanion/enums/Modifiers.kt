@@ -2,7 +2,8 @@ package moe.pxe.macecompanion.enums
 
 import com.mojang.authlib.properties.Property
 import moe.pxe.macecompanion.MaceCompanion
-import moe.pxe.macecompanion.util.PlayerHead
+import moe.pxe.macecompanion.config.Config.getMysteryModifierTextAccentStyle
+import moe.pxe.macecompanion.util.PlayerProfile.headFromProperty
 import net.minecraft.client.Minecraft
 import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.component.UseCooldown
@@ -94,7 +95,7 @@ enum class Modifiers {
 
     MISS_EQUALS_DIE {
         override val matchName = "Miss = Die"
-        override val icon: ItemStack = PlayerHead.fromProperty(Property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2I4NTJiYTE1ODRkYTllNTcxNDg1OTk5NTQ1MWU0Yjk0NzQ4YzRkZDYzYWU0NTQzYzE1ZjlmOGFlYzY1YzgifX19"))
+        override val icon: ItemStack = headFromProperty(Property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2I4NTJiYTE1ODRkYTllNTcxNDg1OTk5NTQ1MWU0Yjk0NzQ4YzRkZDYzYWU0NTQzYzE1ZjlmOGFlYzY1YzgifX19"))
         override val customIcon: ItemStack = Items.PLAYER_HEAD.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/miss_equals_die"))
         }
@@ -266,7 +267,7 @@ enum class Modifiers {
 
     RANDOM_SIZE {
         override val matchName = "Random Size"
-        override val icon: ItemStack = PlayerHead.fromProperty(Property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzZkNGEwMWRiNjEyNjYwMWRlZDE0MDZjZjYyMzhjZTJiNzAyNGVhY2U1ZWE2MDRmYmMyMDhhMmFmMjljOTdhZCJ9fX0="))
+        override val icon: ItemStack = headFromProperty(Property("textures", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzZkNGEwMWRiNjEyNjYwMWRlZDE0MDZjZjYyMzhjZTJiNzAyNGVhY2U1ZWE2MDRmYmMyMDhhMmFmMjljOTdhZCJ9fX0="))
         override val customIcon: ItemStack = Items.PLAYER_HEAD.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/random_size"))
         }
@@ -531,7 +532,7 @@ enum class Modifiers {
     MYSTERY {
         override val matchName = "???"
         override val icon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance
-        override val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withColor(0xcfb3fc).withStyle(ChatFormatting.ITALIC)
+        override val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(getMysteryModifierTextAccentStyle(0xD2B5FF)).withStyle(ChatFormatting.ITALIC)
         override val customIcon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/mystery"))
         }

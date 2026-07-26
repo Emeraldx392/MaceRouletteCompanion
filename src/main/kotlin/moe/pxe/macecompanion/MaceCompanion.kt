@@ -2,7 +2,19 @@ package moe.pxe.macecompanion
 
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.config.Config
-import moe.pxe.macecompanion.util.OnMaceRoulette
+import moe.pxe.macecompanion.stateManagers.AccuracyManager
+import moe.pxe.macecompanion.stateManagers.BountyManager
+import moe.pxe.macecompanion.stateManagers.ConsumableManager
+import moe.pxe.macecompanion.stateManagers.EliminationManager
+import moe.pxe.macecompanion.stateManagers.EventManager
+import moe.pxe.macecompanion.stateManagers.ModifierManager
+import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager
+import moe.pxe.macecompanion.stateManagers.PlayersOnlineManager
+import moe.pxe.macecompanion.stateManagers.PlotManager
+import moe.pxe.macecompanion.stateManagers.RoundManager
+import moe.pxe.macecompanion.stateManagers.ShowdownManager
+import moe.pxe.macecompanion.stateManagers.StarFragmentManager
+import moe.pxe.macecompanion.stateManagers.SummerPointsManager
 import moe.pxe.macecompanion.util.SendMessage
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.ModInitializer
@@ -12,7 +24,7 @@ import org.slf4j.LoggerFactory
 class MaceCompanion : ModInitializer {
     companion object {
         const val MOD_ID = "macecompanion"
-        val LOGGER = LoggerFactory.getLogger(MOD_ID)
+        val LOGGER = LoggerFactory.getLogger(MOD_ID)!!
         const val DEBUG_MODE = false
     }
     override fun onInitialize() {
@@ -23,9 +35,20 @@ class MaceCompanion : ModInitializer {
         }
         if (!Config.loadFromFile()) Config.saveToFile()
         CustomKeybinds.registerKeybinds()
-        OnMaceRoulette.fillPlotIds(Config.plotIds.value.toSet())
-        OnMaceRoulette.registerServerAndPlotListeners()
-        StateManager.registerListeners()
+        PlotManager.fillPlotIds(Config.plotIds.value.toSet())
+        PlotManager.registerServerAndPlotListeners()
+        BountyManager.registerBountyListeners()
+        EliminationManager.registerEliminationListeners()
+        EventManager.registerEventListeners()
+        StarFragmentManager.registerStarFragmentListeners()
+        ConsumableManager.registerConsumableListeners()
+        PerformanceStatsManager.registerPerformanceStatsListeners()
+        ShowdownManager.registerShowdownListeners()
+        PlayersOnlineManager.registerPlayersOnlineListeners()
+        AccuracyManager.registerAccuracyListeners()
+        SummerPointsManager.registerSummerPointsListeners()
+        RoundManager.registerRoundListeners()
+        ModifierManager.registerModifierListeners()
         SendMessage.registerTickListener()
         HideGLGG.registerListener()
         RoundInfoHud.registerListener()

@@ -13,11 +13,29 @@ import dev.isxander.yacl3.api.controller.ColorControllerBuilder
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder
 import dev.isxander.yacl3.config.v3.value
-import moe.pxe.macecompanion.StateManager
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
-import moe.pxe.macecompanion.util.OnMaceRoulette
-import moe.pxe.macecompanion.util.PlayerHead
+import moe.pxe.macecompanion.stateManagers.AccuracyManager.maceAttempts
+import moe.pxe.macecompanion.stateManagers.BountyManager
+import moe.pxe.macecompanion.stateManagers.EliminationManager
+import moe.pxe.macecompanion.stateManagers.EliminationManager.playersAlive
+import moe.pxe.macecompanion.stateManagers.EliminationManager.playersTotal
+import moe.pxe.macecompanion.stateManagers.ModifierManager.eternalModifier
+import moe.pxe.macecompanion.stateManagers.ModifierManager.modifierBoosters
+import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
+import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.fps
+import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.tps
+import moe.pxe.macecompanion.stateManagers.PlotManager
+import moe.pxe.macecompanion.stateManagers.RoundManager.gameOngoing
+import moe.pxe.macecompanion.stateManagers.RoundManager.maceChance
+import moe.pxe.macecompanion.stateManagers.RoundManager.playtime
+import moe.pxe.macecompanion.stateManagers.RoundManager.round
+import moe.pxe.macecompanion.stateManagers.RoundManager.roundColor
+import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
+import moe.pxe.macecompanion.stateManagers.SummerPointsManager.summerColor
+import moe.pxe.macecompanion.stateManagers.SummerPointsManager.summerPoints
+import moe.pxe.macecompanion.util.PlayerProfile
+import moe.pxe.macecompanion.util.PlayerProfile.headFromProfile
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
@@ -39,13 +57,13 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (StateManager.round == -1) return 0
-            if (!StateManager.gameOngoing) return 0
+            if (round == -1) return 0
+            if (!gameOngoing) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val numberText = Component.literal("${StateManager.round}").setStyle(Config.getRoundNumberAccentStyle(StateManager.roundColor!!.color!!.value).withBold(true))
+            val numberText = Component.literal("$round").setStyle(Config.getRoundNumberAccentStyle(roundColor?.color?.value ?: 0x9ef6fc).withBold(true))
             val text = Component.translatable("mrc.roundhud.round", numberText)
-                .setStyle(Config.getRoundTextAccentStyle(StateManager.roundColor!!.color!!.value).withBold(true))
+                .setStyle(Config.getRoundTextAccentStyle(roundColor?.color?.value ?: 0x9ef6fc).withBold(true))
             val width = textRenderer.width(text)
             var xPos = 0
             if (rightAligned) xPos = -width
@@ -110,12 +128,12 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (StateManager.playersAlive == -1) return 0
-            if (!StateManager.gameOngoing) return 0
+            if (playersAlive == -1) return 0
+            if (!gameOngoing) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val countText = Component.literal("${StateManager.playersAlive}").setStyle(Config.getAlivePLayersAccentStyle(0xd5fcf5))
-            if (StateManager.playersTotal >= 0) countText.append(Component.literal("/${StateManager.playersTotal}").setStyle(Config.getTotalPLayersAccentStyle(0xd0d0d0)))
+            val countText = Component.literal("$playersAlive").setStyle(Config.getAlivePLayersAccentStyle(0xd5fcf5))
+            if (playersTotal >= 0) countText.append(Component.literal("/$playersTotal").setStyle(Config.getTotalPLayersAccentStyle(0xd0d0d0)))
             val text = Component.translatable("mrc.roundhud.alive", countText).setStyle(Config.getPlayerCountTextAccentStyle(CommonColors.WHITE))
             val width = textRenderer.width(text)
             var xPos = 0
@@ -191,12 +209,12 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (StateManager.maceAttempts.isEmpty()) return 0
-            if (!StateManager.gameOngoing) return 0
+            if (maceAttempts.isEmpty()) return 0
+            if (!gameOngoing) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val totalMaceAttempts = StateManager.maceAttempts.size
-            val successfulMaceAttempts = StateManager.maceAttempts.count { it.value }
+            val totalMaceAttempts = maceAttempts.size
+            val successfulMaceAttempts = maceAttempts.count { it.value }
             val accuracy = (successfulMaceAttempts.toFloat() / totalMaceAttempts.toFloat() * 100).roundToInt()
             var accuracyColorIdx = (accuracy / 7.7).toInt().absoluteValue
 
@@ -278,13 +296,13 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (StateManager.eliminations == -1) return 0
-            if (!StateManager.gameOngoing) return 0
-            if(Config.hideEliminationsWhenEliminated.value && StateManager.eliminated) return 0
+            if (EliminationManager.eliminations == -1) return 0
+            if (!gameOngoing) return 0
+            if(Config.hideEliminationsWhenEliminated.value && EliminationManager.eliminated) return 0
 
             val textRenderer = Minecraft.getInstance().font
             val textIcon = Component.literal("\uD83E\uDE93 ").setStyle(Config.getEliminationsIconAccentStyle(0xa63efc))
-            val text = textIcon.append(Component.translatable("mrc.roundhud.eliminations", Component.literal("${StateManager.eliminations}")
+            val text = textIcon.append(Component.translatable("mrc.roundhud.eliminations", Component.literal("${EliminationManager.eliminations}")
                 .setStyle(Config.getEliminationsNumberAccentStyle(0xa63efc)))
                 .setStyle(Config.getEliminationsTextAccentStyle(0xa63efc)))
             val width = textRenderer.width(text)
@@ -368,14 +386,14 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (StateManager.summerPoints == -1) return 0
-            if (!StateManager.gameOngoing) return 0
+            if (summerPoints == -1) return 0
+            if (!gameOngoing) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val textIcon = Component.literal("⚑ ").setStyle(Config.getSummerPointsIconAccentStyle(StateManager.summerColor))
-            val text = textIcon.append(Component.translatable("mrc.roundhud.summer_points", Component.literal("${StateManager.summerPoints}")
-                .setStyle(Config.getSummerPointsNumberAccentStyle(StateManager.summerColor)))
-                .setStyle(Config.getSummerPointsTextAccentStyle(StateManager.summerColor)))
+            val textIcon = Component.literal("⚑ ").setStyle(Config.getSummerPointsIconAccentStyle(summerColor))
+            val text = textIcon.append(Component.translatable("mrc.roundhud.summer_points", Component.literal("$summerPoints")
+                .setStyle(Config.getSummerPointsNumberAccentStyle(summerColor)))
+                .setStyle(Config.getSummerPointsTextAccentStyle(summerColor)))
             val width = textRenderer.width(text)
             var xPos = 0
             if (rightAligned) xPos = -width
@@ -383,8 +401,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (bottomAligned) yPos = -yOffset - 12
             context.drawString(textRenderer, text, xPos, yPos, -1)
             return 12
-        }
-    },
+            }
+        },
 
     STAR_FRAGMENTS {
         override fun render(
@@ -393,10 +411,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (StateManager.starFragments == -1) return 0
-            if (!StateManager.gameOngoing) return 0
-            if(OnMaceRoulette.isStatless) return 0
-            if(Config.hideStarFragmentsWhenEliminated.value && StateManager.eliminated) return 0
+            if (starFragments == -1) return 0
+            if (!gameOngoing) return 0
+            if(PlotManager.isStatless) return 0
+            if(Config.hideStarFragmentsWhenEliminated.value && EliminationManager.eliminated) return 0
 
             val textRenderer = Minecraft.getInstance().font
             val json = JsonObject()
@@ -404,7 +422,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             json.addProperty("sprite", "spark_2")
             val starFragment = ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
             val starFragmentIconText = Component.empty().append(starFragment).setStyle(Config.getStarFragmentsIconAccentStyle(0xa0f9ff))
-            var text = starFragmentIconText.append(Component.translatable("mrc.roundhud.starFragments", Component.literal(" ${StateManager.starFragments}")
+            var text = starFragmentIconText.append(Component.translatable("mrc.roundhud.starFragments", Component.literal(" $starFragments")
                 .setStyle(Config.getStarFragmentsNumberAccentStyle(0xa0f9ff)))
                 .setStyle(Config.getStarFragmentsTextAccentStyle(0xa0f9ff)))
             val width = textRenderer.width(text)
@@ -489,9 +507,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (!StateManager.gameOngoing) return 0
+            if (!gameOngoing) return 0
 
-            StateManager.playtime?.let {
+            playtime?.let {
                 val textRenderer = Minecraft.getInstance().font
                 val text = Component.literal("⌚ ").setStyle(Config.getPlaytimeIconAccentStyle(0x3efca1)).append(Component.translatable("mrc.roundhud.playtime", Component.literal(it.elapsedNow().toLong(DurationUnit.SECONDS).toDuration(DurationUnit.SECONDS).toString()).setStyle(Config.getPlaytimeNumberAccentStyle(0x3efca1)))
                     .setStyle(Config.getPlaytimeTextAccentStyle(0x3efca1)))
@@ -569,12 +587,12 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (StateManager.modifiers.isEmpty()) return 0
-            if (!StateManager.gameOngoing) return 0
+            if (!gameOngoing) return 0
+            if (modifiers.isEmpty()) return 0
 
             val textRenderer = Minecraft.getInstance().font
             var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12 - (StateManager.modifiers.size*20)
+            if (bottomAligned) yPos = -yOffset - 12 - (modifiers.size*20)
 
             val headerText = Component.translatable("mrc.roundhud.modifiers")
                 .setStyle(Config.getModifiersTextAccentStyle(0xa63efc))
@@ -584,37 +602,32 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             context.drawString(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
 
-            StateManager.modifiers.forEach {
+            modifiers.forEach { (modifier, isCharged) ->
                 var xPos = 0
                 if (rightAligned) xPos = -16
                 if(!Config.customModifierIcons.value) {
-                    context.renderItem(it.icon, xPos, yPos)
-                    context.renderItemDecorations(textRenderer, it.icon, xPos, yPos)
+                    context.renderItem(modifier.icon, xPos, yPos)
+                    context.renderItemDecorations(textRenderer, modifier.icon, xPos, yPos)
                 }else {
-                    context.renderItem(it.customIcon, xPos, yPos)
-                    context.renderItemDecorations(textRenderer, it.customIcon, xPos, yPos)
+                    context.renderItem(modifier.customIcon, xPos, yPos)
+                    context.renderItemDecorations(textRenderer, modifier.customIcon, xPos, yPos)
                 }
-                var modifierText = it.translatable.copy().setStyle(Config.getNormalModifierTextAccentStyle(CommonColors.YELLOW))
-                if (Config.showMysteryModifiers.value && StateManager.mysteryModifiers.contains(it)){
-                    modifierText.style = Config.getMysteryModifierTextAccentStyle(0xD2B5FF)
-                    if(!rightAligned) modifierText.append(Component.literal(" ???").setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF)))
-                    if(rightAligned) modifierText = Component.literal("??? ").setStyle(Config.getMysteryModifierTextAccentStyle(0xD2B5FF)).append(modifierText)
-                }
-                if (StateManager.eternalModifier == it && StateManager.chargedModifiers.contains(it)) {
+                var modifierText = modifier.translatable.copy().setStyle(Config.getNormalModifierTextAccentStyle(CommonColors.YELLOW))
+                if (eternalModifier == modifier && isCharged) {
                     modifierText.style = Config.getChargedModifierTextAccentStyle(0x0786FF)
                     if(!rightAligned) modifierText.append(Component.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))).append(Component.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)))
                     if(rightAligned) modifierText = Component.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)).append(Component.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF).withShadowColor(-16777216)).append(modifierText))
-                }else if (StateManager.eternalModifier == it) {
+                }else if (eternalModifier == modifier) {
                     modifierText.style = Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)
                     if(!rightAligned) modifierText.append(Component.literal(" ∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)))
                     if(rightAligned) modifierText = Component.literal("∞ ").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)).append(modifierText)
-                }else if (StateManager.chargedModifiers.contains(it)) {
+                }else if (isCharged) {
                     modifierText.style = Config.getChargedModifierTextAccentStyle(0x0786FF)
                     if(!rightAligned) modifierText.append(Component.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)))
                     if(rightAligned) modifierText = Component.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)).append(modifierText)
                 }
-                var headText2d = if (Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
-                    PlayerHead.player2dHeadTextComponentList(playerList, Config.boosterListMax.value, rightAligned)
+                var headText2d = if (Config.use2dHeads.value) modifierBoosters[modifier]?.let { playerList ->
+                    PlayerProfile.player2dHeadTextComponentList(playerList, Config.boosterListMax.value, rightAligned)
                 } ?: Component.literal("") else Component.literal("")
                 val finalText = if (rightAligned) Component.empty().append(headText2d).append(modifierText)
                 else Component.empty().append(modifierText).append(headText2d)
@@ -623,13 +636,13 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 if (rightAligned) xPos = -22 - modifierWidth
                 context.drawString(textRenderer, finalText, xPos, yPos+4, -1)
 
-                if (!Config.use2dHeads.value) StateManager.modifierBoosters[it]?.let { playerList ->
+                if (!Config.use2dHeads.value) modifierBoosters[modifier]?.let { playerList ->
                     val bonusBoostersAmount = playerList.size - Config.boosterListMax.value
                     playerList.forEachIndexed { index, profile ->
                         if(index < Config.boosterListMax.value) {
                             xPos = 28 + modifierWidth + (index * 15)
                             if (rightAligned) xPos = -44 - modifierWidth - (index * 15)
-                            context.renderItem(PlayerHead.fromProfile(profile), xPos, yPos)
+                            context.renderItem(headFromProfile(profile), xPos, yPos)
                         }
                     }
                     if (rightAligned) xPos -= 15
@@ -640,7 +653,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 yPos += 20
             }
 
-            return 12+(StateManager.modifiers.size*20)
+            return 12+(modifiers.size*20)
         }
 
         override fun generateConfig(parent: Screen): Screen? {
@@ -657,12 +670,6 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                                 .range(0, 15)
                                 .step(1)
                         }
-                        .build())
-                    .option(Option.createBuilder<Boolean>()
-                        .name(Component.translatable("mrc.config.modifiersConfig.category.misc.option.showMysteryModifiers"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.misc.option.showMysteryModifiers.description")))
-                        .binding(Config.showMysteryModifiers.asBinding())
-                        .controller(TickBoxControllerBuilder::create)
                         .build())
                     .build())
                 .category(ConfigCategory.createBuilder()
@@ -782,16 +789,16 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (!StateManager.gameOngoing) return 0
-            if (StateManager.maceChance < 0f) return 0
-            if(Config.hideMaceChanceWhenEliminated.value && StateManager.eliminated) return 0
+            if (!gameOngoing) return 0
+            if (maceChance < 0f) return 0
+            if(Config.hideMaceChanceWhenEliminated.value && EliminationManager.eliminated) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            var maceChanceColorIdx = (StateManager.maceChance / 7.7).toInt().absoluteValue
+            var maceChanceColorIdx = (maceChance / 7.7).toInt().absoluteValue
             if (maceChanceColorIdx > 12) maceChanceColorIdx = 12
             val text = Component.literal("⚄ ").setStyle(Config.getMaceChanceIconAccentStyle(0x42C1FF))
                 .append(Component.translatable("mrc.roundhud.mace_chance",
-                Component.literal("%.2f%%".format(StateManager.maceChance))
+                Component.literal("%.2f%%".format(maceChance))
                     .setStyle(Config.getMaceChanceNumberAccentStyle(textColors[maceChanceColorIdx])))
                 .setStyle(Config.getMaceChanceTextAccentStyle(0x42C1FF)))
 
@@ -876,13 +883,13 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (!StateManager.gameOngoing) return 0
-            if (StateManager.bounties.isEmpty()) return 0
-            if (StateManager.eliminated) return 0
+            if (!gameOngoing) return 0
+            if (BountyManager.bounties.isEmpty()) return 0
+            if (EliminationManager.eliminated) return 0
 
             val textRenderer = Minecraft.getInstance().font
             var yPos = yOffset
-            val sortedBounties = StateManager.bounties.entries
+            val sortedBounties = BountyManager.bounties.entries
                 .sortedByDescending { it.value }
                 .associate { it.key to it.value }
             if (bottomAligned) yPos = -yOffset - 12 - (sortedBounties.size * 20)
@@ -901,7 +908,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                     val playerUsername = profile.name
                     var xPos = 0
                     if (rightAligned) xPos = -16
-                    context.renderItem(PlayerHead.fromProfile(profile), xPos, yPos)
+                    context.renderItem(headFromProfile(profile), xPos, yPos)
                     val playerText =
                         Component.literal("$playerUsername").setStyle(Config.getBountyBoardPlayerAccentStyle(CommonColors.YELLOW))
                     val bountyText =
@@ -1035,10 +1042,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (StateManager.fps == -1) return 0
+            if (fps == -1) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val text = Component.translatable("mrc.roundhud.fps", Component.literal("${StateManager.fps}").setStyle(Config.getFpsNumberAccentStyle(CommonColors.WHITE))).setStyle(Config.getFpsTextAccentStyle(CommonColors.WHITE))
+            val text = Component.translatable("mrc.roundhud.fps", Component.literal("$fps").setStyle(Config.getFpsNumberAccentStyle(CommonColors.WHITE))).setStyle(Config.getFpsTextAccentStyle(CommonColors.WHITE))
             val width = textRenderer.width(text)
             var xPos = 0
             if (rightAligned) xPos = -width
@@ -1099,7 +1106,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             bottomAligned: Boolean
         ): Int {
             val networkHandler = Minecraft.getInstance().connection
-            val ping = networkHandler?.getPlayerInfo(StateManager.client.user.name)?.latency ?: return 0
+            val client = Minecraft.getInstance()
+            val ping = networkHandler?.getPlayerInfo(client.user.name)?.latency ?: return 0
             if (ping <= 0) return 0
             val pingColor = if (ping < 50) 0x1eff00 else if (ping < 100) 0xfff100 else if (ping < 200) 0xff9500 else 0xff3b3b
             val textRenderer = Minecraft.getInstance().font
@@ -1163,10 +1171,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             rightAligned: Boolean,
             bottomAligned: Boolean
         ): Int {
-            if (StateManager.tps == -1f) return 0
+            if (tps == -1f) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val text = Component.translatable("mrc.roundhud.tps", Component.literal("${StateManager.tps}").setStyle(Config.getTpsNumberAccentStyle(0xbfff00))).setStyle(Config.getTpsTextAccentStyle(0xbfff00))
+            val text = Component.translatable("mrc.roundhud.tps", Component.literal("$tps").setStyle(Config.getTpsNumberAccentStyle(0xbfff00))).setStyle(Config.getTpsTextAccentStyle(0xbfff00))
             val width = textRenderer.width(text)
             var xPos = 0
             if (rightAligned) xPos = -width
