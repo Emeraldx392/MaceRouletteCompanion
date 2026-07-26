@@ -4,7 +4,7 @@ import net.minecraft.network.chat.Component
 
 object ContainsText {
     fun strict(text: Component, subtext: Component): Boolean {
-        if (text.string.contains(subtext.string) && text.style.equals(subtext.style)) {
+        if (text.string.contains(subtext.string) && text.style == subtext.style) {
             return true
         }
         for (child in text.siblings) {

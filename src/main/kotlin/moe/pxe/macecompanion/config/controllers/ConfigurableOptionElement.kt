@@ -49,7 +49,7 @@ class ConfigurableOptionElement : AbstractWidget, ContainerEventHandler {
             20,
             Component.literal("\u2630"),
             Component.translatable("yacl.configurable.configure")
-        ) { button ->
+        ) { _ ->
             configureScreen()?.let { Minecraft.getInstance().setScreen(it) }
             updateButtonStates()
         }

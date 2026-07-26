@@ -6,8 +6,6 @@ import net.minecraft.network.chat.Component
 
 class FormattedStringController(val opt: Option<String>, val formatter: (String) -> Component) : IStringController<String> {
 
-    constructor(opt: Option<String>) : this(opt, DEFAULT_FORMATTER)
-
     override fun getString(): String {
         return opt.pendingValue()
     }
