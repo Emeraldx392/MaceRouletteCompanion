@@ -1,31 +1,27 @@
 package moe.pxe.macecompanion.enums
 
-import com.google.gson.JsonObject
-import com.mojang.serialization.JsonOps
+import com.mojang.authlib.GameProfile
 import dev.isxander.yacl3.api.ConfigCategory
 import dev.isxander.yacl3.api.NameableEnum
-import dev.isxander.yacl3.api.Option
 import dev.isxander.yacl3.api.OptionDescription
-import dev.isxander.yacl3.api.OptionEventListener
 import dev.isxander.yacl3.api.OptionGroup
 import dev.isxander.yacl3.api.YetAnotherConfigLib
-import dev.isxander.yacl3.api.controller.ColorControllerBuilder
-import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
-import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
 import moe.pxe.macecompanion.stateManagers.AccuracyManager.maceAttempts
-import moe.pxe.macecompanion.stateManagers.BountyManager
-import moe.pxe.macecompanion.stateManagers.EliminationManager
+import moe.pxe.macecompanion.stateManagers.BountyManager.bounties
+import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminated
+import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminations
 import moe.pxe.macecompanion.stateManagers.EliminationManager.playersAlive
 import moe.pxe.macecompanion.stateManagers.EliminationManager.playersTotal
 import moe.pxe.macecompanion.stateManagers.ModifierManager.eternalModifier
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifierBoosters
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.fps
+import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.ping
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.tps
-import moe.pxe.macecompanion.stateManagers.PlotManager
+import moe.pxe.macecompanion.stateManagers.PlotManager.isStatless
 import moe.pxe.macecompanion.stateManagers.RoundManager.gameOngoing
 import moe.pxe.macecompanion.stateManagers.RoundManager.maceChance
 import moe.pxe.macecompanion.stateManagers.RoundManager.playtime
@@ -34,366 +30,309 @@ import moe.pxe.macecompanion.stateManagers.RoundManager.roundColor
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
 import moe.pxe.macecompanion.stateManagers.SummerPointsManager.summerColor
 import moe.pxe.macecompanion.stateManagers.SummerPointsManager.summerPoints
-import moe.pxe.macecompanion.util.PlayerProfile
+import moe.pxe.macecompanion.util.OptionUtils.overrideColorOption
+import moe.pxe.macecompanion.util.OptionUtils.overrideColorsOption
+import moe.pxe.macecompanion.util.OptionUtils.addColorOptionDependency
+import moe.pxe.macecompanion.util.OptionUtils.hideWhenEliminatedOption
+import moe.pxe.macecompanion.util.OptionUtils.iconBooleanOption
+import moe.pxe.macecompanion.util.OptionUtils.sliderOption
 import moe.pxe.macecompanion.util.PlayerProfile.headFromProfile
+import moe.pxe.macecompanion.util.TextUtils.buildModifierTextWith2dBoosters
+import moe.pxe.macecompanion.util.TextUtils.getStarFragmentIcon
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.util.CommonColors
 import net.minecraft.util.StringRepresentable
-import java.awt.Color
-import kotlin.math.absoluteValue
+import net.minecraft.world.item.ItemStack
 import kotlin.math.roundToInt
 import kotlin.time.DurationUnit
-import kotlin.time.toDuration
 
 enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
     ROUND_NUMBER {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
-            if (round == -1) return 0
-            if (!gameOngoing) return 0
+        private var cachedRound: Int = -2
+        private var cachedColor: Int = -1
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
+            if (round == -1 || !gameOngoing) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val numberText = Component.literal("$round").setStyle(Config.getRoundNumberAccentStyle(roundColor?.color?.value ?: 0x9ef6fc).withBold(true))
-            val text = Component.translatable("mrc.roundhud.round", numberText)
-                .setStyle(Config.getRoundTextAccentStyle(roundColor?.color?.value ?: 0x9ef6fc).withBold(true))
-            val width = textRenderer.width(text)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset/2f
-            if (bottomAligned) yPos = (-yOffset/2f) - 12
+            val currentColor = roundColor?.color?.value ?: 0x9ef6fc
+
+            if (round != cachedRound || currentColor != cachedColor || cachedText == null) {
+                cachedRound = round
+                cachedColor = currentColor
+
+                val numberText = Component.literal("$round")
+                    .setStyle(Config.getRoundNumberAccentStyle(currentColor).withBold(true))
+
+                val newText = Component.translatable("mrc.roundhud.round", numberText)
+                    .setStyle(Config.getRoundTextAccentStyle(currentColor).withBold(true))
+
+                cachedText = newText
+                cachedTextWidth = textRenderer.width(newText)
+            }
+
+            val text = cachedText!!
+            val xPos = if (rightAligned) -cachedTextWidth.toFloat() else 0f
+            val yPos = if (bottomAligned) (-yOffset shr 1).toFloat() - 12f else (yOffset shr 1).toFloat()
+
             context.pose().pushMatrix()
             context.pose().scale(2f)
-            context.pose().translate(xPos.toFloat(), yPos)
+            context.pose().translate(xPos, yPos)
             context.drawString(textRenderer, text, 0, 0, -1)
             context.pose().popMatrix()
             return 24
         }
+
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.roundNumberConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.roundNumberConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.roundNumberConfig.category.styling.group.colors.description"))).also {
-                    val overrideRoundColors = Option.createBuilder<Boolean>()
-                        .name(Component.translatable("mrc.config.roundNumberConfig.category.styling.group.colors.option.overrideRoundColors"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.roundNumberConfig.category.styling.group.colors.option.overrideRoundColors.description")))
-                        .binding(Config.overrideRoundColors.asBinding())
-                        .controller(TickBoxControllerBuilder::create)
-                        .build()
-                    val roundTextColor = Option.createBuilder<Color>()
-                        .name(Component.translatable("mrc.config.roundNumberConfig.category.styling.group.colors.option.roundTextColor"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.roundNumberConfig.category.styling.group.colors.option.roundTextColor.description")))
-                        .binding(Config.roundTextColor.asBinding())
-                        .controller(ColorControllerBuilder::create)
-                        .build()
-                    roundTextColor.setAvailable(overrideRoundColors.pendingValue())
-                        overrideRoundColors.addEventListener { option, event ->
-                        if (event == OptionEventListener.Event.INITIAL) roundTextColor.setAvailable(option.pendingValue())
-                        if (event == OptionEventListener.Event.STATE_CHANGE) roundTextColor.setAvailable(option.pendingValue( ))
-                    }
-                    val roundNumberColor = Option.createBuilder<Color>()
-                        .name(Component.translatable("mrc.config.roundNumberConfig.category.styling.group.colors.option.roundNumberColor"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.roundNumberConfig.category.styling.group.colors.option.roundNumberColor.description")))
-                        .binding(Config.roundNumberColor.asBinding())
-                        .controller(ColorControllerBuilder::create)
-                        .build()
-                    roundNumberColor.setAvailable(overrideRoundColors.pendingValue())
-                        overrideRoundColors.addEventListener { option, event ->
-                        if (event == OptionEventListener.Event.INITIAL) roundNumberColor.setAvailable(option.pendingValue())
-                        if (event == OptionEventListener.Event.STATE_CHANGE) roundNumberColor.setAvailable(option.pendingValue( ))
-                    }
-                    it.option(overrideRoundColors)
-                    it.option(roundTextColor)
-                    it.option(roundNumberColor)
-                }
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                            .also {
+                                val overrideRoundColors = overrideColorsOption(name.lowercase(), Config.overrideRoundColors.asBinding())
+
+                                val roundTextColor = overrideColorOption(name.lowercase(), Config.roundTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(roundTextColor, overrideRoundColors)
+
+                                val roundNumberColor = overrideColorOption(name.lowercase(), Config.roundNumberColor.asBinding(), "number_color")
+                                addColorOptionDependency(roundNumberColor, overrideRoundColors)
+
+                                it.option(overrideRoundColors)
+                                it.option(roundTextColor)
+                                it.option(roundNumberColor)
+                            }
+                            .build())
                     .build())
-                .build())
             .build()
             .generateScreen(parent)
     },
-
     PLAYERS_ALIVE {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
-            if (playersAlive == -1) return 0
-            if (!gameOngoing) return 0
+        private var cachedAlive: Int = -2
+        private var cachedTotal: Int = -2
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
+            if (playersAlive == -1 || !gameOngoing) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val countText = Component.literal("$playersAlive").setStyle(Config.getAlivePLayersAccentStyle(0xd5fcf5))
-            if (playersTotal >= 0) countText.append(Component.literal("/$playersTotal").setStyle(Config.getTotalPLayersAccentStyle(0xd0d0d0)))
-            val text = Component.translatable("mrc.roundhud.alive", countText).setStyle(Config.getPlayerCountTextAccentStyle(CommonColors.WHITE))
-            val width = textRenderer.width(text)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12
+
+            if (playersAlive != cachedAlive || playersTotal != cachedTotal || cachedText == null) {
+                cachedAlive = playersAlive
+                cachedTotal = playersTotal
+                val countText = Component.literal("$playersAlive")
+                    .setStyle(Config.getAlivePLayersAccentStyle(0xd5fcf5))
+                if (playersTotal >= 0) {
+                    countText.append(
+                        Component.literal("/$playersTotal")
+                            .setStyle(Config.getTotalPLayersAccentStyle(0xd0d0d0))
+                    )
+                }
+                val newText = Component.translatable("mrc.roundhud.alive", countText)
+                    .setStyle(Config.getPlayerCountTextAccentStyle(CommonColors.WHITE))
+                cachedText = newText
+                cachedTextWidth = textRenderer.width(newText)
+            }
+            val text = cachedText!!
+            val xPos = if (rightAligned) -cachedTextWidth else 0
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
+
             context.drawString(textRenderer, text, xPos, yPos, -1)
             return 12
         }
+
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.playersAliveConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors.description"))).also {
-                        val overridePlayerCountColors = Option.createBuilder<Boolean>()
-                            .name(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors.option.overridePlayerCountColors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors.option.overridePlayerCountColors.description")))
-                            .binding(Config.overridePlayerCountColors.asBinding())
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                        val playerCountTextColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors.option.playerCountTextColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors.option.playerCountTextColor.description")))
-                            .binding(Config.playerCountTextColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        playerCountTextColor.setAvailable(overridePlayerCountColors.pendingValue())
-                        overridePlayerCountColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) playerCountTextColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) playerCountTextColor.setAvailable(option.pendingValue( ))
-                        }
-                        val alivePlayersColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors.option.alivePlayersColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors.option.alivePlayersColor.description")))
-                            .binding(Config.alivePlayersColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        alivePlayersColor.setAvailable(overridePlayerCountColors.pendingValue())
-                        overridePlayerCountColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) alivePlayersColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) alivePlayersColor.setAvailable(option.pendingValue( ))
-                        }
-                        val totalPlayersColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors.option.totalPlayersColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.playersAliveConfig.category.styling.group.colors.option.totalPlayersColor.description")))
-                            .binding(Config.totalPlayersColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        totalPlayersColor.setAvailable(overridePlayerCountColors.pendingValue())
-                        overridePlayerCountColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) totalPlayersColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) totalPlayersColor.setAvailable(option.pendingValue( ))
-                        }
-                        it.option(overridePlayerCountColors)
-                        it.option(playerCountTextColor)
-                        it.option(alivePlayersColor)
-                        it.option(totalPlayersColor)
-                    }
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                            .also {
+                                val overridePlayerCountColors = overrideColorsOption(name.lowercase(), Config.overridePlayerCountColors.asBinding())
+
+                                val playerCountTextColor = overrideColorOption(name.lowercase(), Config.playerCountTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(playerCountTextColor, overridePlayerCountColors)
+
+                                val alivePlayersColor = overrideColorOption(name.lowercase(), Config.alivePlayersColor.asBinding(), "number_color.alive")
+                                addColorOptionDependency(alivePlayersColor, overridePlayerCountColors)
+
+                                val totalPlayersColor = overrideColorOption(name.lowercase(), Config.totalPlayersColor.asBinding(), "number_color.total")
+                                addColorOptionDependency(totalPlayersColor, overridePlayerCountColors)
+
+                                it.option(overridePlayerCountColors)
+                                it.option(playerCountTextColor)
+                                it.option(alivePlayersColor)
+                                it.option(totalPlayersColor)
+                            }
+                            .build())
                     .build())
-                .build())
             .build()
             .generateScreen(parent)
     },
-
     ACCURACY {
+        private var cachedMaceAttempts = mutableMapOf<Int, Boolean>()
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+
         val textColors = arrayOf(0xff2c01, 0xff5500, 0xff8400, 0xffa503, 0xffd202, 0xfff400, 0xe6ff01, 0xc0ff03, 0x92ff00, 0x74ff02, 0x3cff01, 0x13ff00, 0x01ff00)
 
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
-            if (maceAttempts.isEmpty()) return 0
-            if (!gameOngoing) return 0
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
+            if (maceAttempts.isEmpty() || !gameOngoing) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val totalMaceAttempts = maceAttempts.size
-            val successfulMaceAttempts = maceAttempts.count { it.value }
-            val accuracy = (successfulMaceAttempts.toFloat() / totalMaceAttempts.toFloat() * 100).roundToInt()
-            var accuracyColorIdx = (accuracy / 7.7).toInt().absoluteValue
+            if (cachedMaceAttempts != maceAttempts || cachedText == null) {
+                cachedMaceAttempts = maceAttempts.toMutableMap()
+                val totalMaceAttempts = maceAttempts.size
+                var successCount = 0
+                for (attempt in maceAttempts) {
+                    if (attempt.value) successCount++
+                }
+                val accuracy = ((successCount.toFloat() / totalMaceAttempts) * 100f).roundToInt()
+                val accuracyColorIdx = (accuracy / 7.7).toInt().coerceIn(0, textColors.lastIndex)
+                val iconText = Component.literal("\uD83C\uDFF9 ")
+                    .setStyle(Config.getAccuracyIconAccentStyle(0x79fc00))
+                val countText = Component.literal("$successCount/$totalMaceAttempts")
+                    .setStyle(Config.getAccuracyTextAccentStyle(0x79fc00))
+                val percentageText = Component.literal("$accuracy%")
+                    .setStyle(Config.getAccuracyAccentStyle(textColors[accuracyColorIdx]))
+                val text = Component.translatable("mrc.roundhud.accuracy", percentageText, countText)
+                    .setStyle(Config.getAccuracyTextAccentStyle(0x79fc00))
+                val finalText = iconText.append(text)
 
-            val iconText = Component.literal("\uD83C\uDFF9 ").setStyle(Config.getAccuracyIconAccentStyle(0x79fc00))
-            val countText = Component.literal("$successfulMaceAttempts/$totalMaceAttempts").setStyle(Config.getAccuracyTextAccentStyle(0x79fc00))
-            val percentageText = Component.literal("$accuracy%").setStyle(Config.getAccuracyAccentStyle(textColors[accuracyColorIdx]))
-            val text = Component.translatable("mrc.roundhud.accuracy", percentageText, countText).setStyle(Config.getAccuracyTextAccentStyle(0x79fc00))
-            val finalText = iconText.append(text)
-            val width = textRenderer.width(finalText)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, finalText, xPos, yPos, -1)
-            return 12
-        }
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.accuracyConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.description"))).also {
-                        val overrideAccuracyColors = Option.createBuilder<Boolean>()
-                            .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.overrideAccuracyColors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.overrideAccuracyColors.description")))
-                            .binding(Config.overrideAccuracyColors.asBinding())
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                        val accuracyTextColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyTextColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyTextColor.description")))
-                            .binding(Config.accuracyTextColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        accuracyTextColor.setAvailable(overrideAccuracyColors.pendingValue())
-                        overrideAccuracyColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) accuracyTextColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) accuracyTextColor.setAvailable(option.pendingValue( ))
-                        }
-                        val accuracyColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyColor.description")))
-                            .binding(Config.accuracyColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        accuracyColor.setAvailable(overrideAccuracyColors.pendingValue())
-                        overrideAccuracyColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) accuracyColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) accuracyColor.setAvailable(option.pendingValue( ))
-                        }
-                        val accuracyIconColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyIconColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.accuracyConfig.category.styling.group.colors.option.accuracyIconColor.description")))
-                            .binding(Config.accuracyIconColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        accuracyIconColor.setAvailable(overrideAccuracyColors.pendingValue())
-                        overrideAccuracyColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) accuracyIconColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) accuracyIconColor.setAvailable(option.pendingValue( ))
-                        }
-                        it.option(overrideAccuracyColors)
-                        it.option(accuracyTextColor)
-                        it.option(accuracyColor)
-                        it.option(accuracyIconColor)
-                    }
-                    .build())
-                .build())
-            .build()
-            .generateScreen(parent)
-    },
+                cachedText = finalText
+                cachedTextWidth = textRenderer.width(finalText)
+            }
+            val text = cachedText!!
+            val xPos = if (rightAligned) -cachedTextWidth else 0
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
 
-
-    ELIMINATIONS {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
-            if (EliminationManager.eliminations == -1) return 0
-            if (!gameOngoing) return 0
-            if(Config.hideEliminationsWhenEliminated.value && EliminationManager.eliminated) return 0
-
-            val textRenderer = Minecraft.getInstance().font
-            val textIcon = Component.literal("\uD83E\uDE93 ").setStyle(Config.getEliminationsIconAccentStyle(0xa63efc))
-            val text = textIcon.append(Component.translatable("mrc.roundhud.eliminations", Component.literal("${EliminationManager.eliminations}")
-                .setStyle(Config.getEliminationsNumberAccentStyle(0xa63efc)))
-                .setStyle(Config.getEliminationsTextAccentStyle(0xa63efc)))
-            val width = textRenderer.width(text)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12
             context.drawString(textRenderer, text, xPos, yPos, -1)
             return 12
         }
 
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.eliminationsConfig.category.misc"))
-                .option(Option.createBuilder<Boolean>()
-                    .name(Component.translatable("mrc.config.eliminationsConfig.category.misc.option.hideEliminationsWhenEliminated"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.eliminationsConfig.category.misc.option.hideEliminationsWhenEliminated.description")))
-                    .binding(Config.hideEliminationsWhenEliminated.asBinding())
-                    .controller(TickBoxControllerBuilder::create)
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                            .also {
+                                val overrideAccuracyColors = overrideColorsOption(name.lowercase(), Config.overrideAccuracyColors.asBinding())
+
+                                val accuracyTextColor = overrideColorOption(name.lowercase(), Config.accuracyTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(accuracyTextColor, overrideAccuracyColors)
+
+                                val accuracyColor = overrideColorOption(name.lowercase(), Config.accuracyColor.asBinding(), "number_color")
+                                addColorOptionDependency(accuracyColor, overrideAccuracyColors)
+
+                                val accuracyIconColor = overrideColorOption(name.lowercase(), Config.accuracyIconColor.asBinding(), "icon_color")
+                                addColorOptionDependency(accuracyIconColor, overrideAccuracyColors)
+
+                                it.option(overrideAccuracyColors)
+                                it.option(accuracyTextColor)
+                                it.option(accuracyColor)
+                                it.option(accuracyIconColor)
+                            }
+                            .build())
                     .build())
-                .build())
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.eliminationsConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors.description"))).also {
-                        val overrideEliminationsColors = Option.createBuilder<Boolean>()
-                            .name(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors.option.overrideEliminationsColors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors.option.overrideEliminationsColors.description")))
-                            .binding(Config.overrideEliminationsColors.asBinding())
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                        val eliminationsTextColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsTextColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsTextColor.description")))
-                            .binding(Config.eliminationsTextColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        eliminationsTextColor.setAvailable(overrideEliminationsColors.pendingValue())
-                        overrideEliminationsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) eliminationsTextColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) eliminationsTextColor.setAvailable(option.pendingValue( ))
-                        }
-                        val eliminationsNumberColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsNumberColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsNumberColor.description")))
-                            .binding(Config.eliminationsNumberColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        eliminationsNumberColor.setAvailable(overrideEliminationsColors.pendingValue())
-                        overrideEliminationsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) eliminationsNumberColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) eliminationsNumberColor.setAvailable(option.pendingValue( ))
-                        }
-                        val eliminationsIconColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsIconColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.eliminationsConfig.category.styling.group.colors.option.eliminationsIconColor.description")))
-                            .binding(Config.eliminationsIconColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        eliminationsIconColor.setAvailable(overrideEliminationsColors.pendingValue())
-                        overrideEliminationsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) eliminationsIconColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) eliminationsIconColor.setAvailable(option.pendingValue( ))
-                        }
-                        it.option(overrideEliminationsColors)
-                        it.option(eliminationsTextColor)
-                        it.option(eliminationsNumberColor)
-                        it.option(eliminationsIconColor)
-                    }
+            .build()
+            .generateScreen(parent)
+    },
+    ELIMINATIONS {
+        private var cachedEliminations: Int = -2
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
+            if (eliminations == -1 || !gameOngoing || (Config.hideEliminationsWhenEliminated.value && eliminated)) return 0
+
+            val textRenderer = Minecraft.getInstance().font
+
+            if (eliminations != cachedEliminations || cachedText == null) {
+                val iconText = Component.literal("\uD83E\uDE93 ")
+                    .setStyle(Config.getEliminationsIconAccentStyle(0xa63efc))
+                val numberText = Component.literal("$eliminations")
+                    .setStyle(Config.getEliminationsNumberAccentStyle(0xa63efc))
+                val text = Component.translatable("mrc.roundhud.eliminations", numberText)
+                    .setStyle(Config.getEliminationsTextAccentStyle(0xa63efc))
+                val finalText = iconText.append(text)
+                cachedEliminations = eliminations
+                cachedText = finalText
+                cachedTextWidth = textRenderer.width(finalText)
+            }
+            val text = cachedText!!
+            var xPos = if (rightAligned) -cachedTextWidth else 0
+            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
+            context.drawString(textRenderer, text, xPos, yPos, -1)
+            return 12
+        }
+
+        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
+            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
+                    .option(hideWhenEliminatedOption(name.lowercase(), Config.hideEliminationsWhenEliminated.asBinding()))
+                    .build()
+            )
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                            .also {
+                                val overrideEliminationsColors = overrideColorsOption(name.lowercase(), Config.overrideEliminationsColors.asBinding())
+
+                                val eliminationsTextColor = overrideColorOption(name.lowercase(), Config.eliminationsTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(eliminationsTextColor, overrideEliminationsColors)
+
+                                val eliminationsNumberColor = overrideColorOption(name.lowercase(), Config.eliminationsNumberColor.asBinding(), "number_color")
+                                addColorOptionDependency(eliminationsNumberColor, overrideEliminationsColors)
+
+                                val eliminationsIconColor = overrideColorOption(name.lowercase(), Config.eliminationsIconColor.asBinding(), "icon_color")
+                                addColorOptionDependency(eliminationsIconColor, overrideEliminationsColors)
+
+                                it.option(overrideEliminationsColors)
+                                it.option(eliminationsTextColor)
+                                it.option(eliminationsNumberColor)
+                                it.option(eliminationsIconColor)
+                            }
+                            .build())
                     .build())
-                .build())
             .build()
             .generateScreen(parent)
     },
     SUMMER_POINTS {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (summerPoints == -1) return 0
             if (!gameOngoing) return 0
 
             val textRenderer = Minecraft.getInstance().font
             val textIcon = Component.literal("⚑ ").setStyle(Config.getSummerPointsIconAccentStyle(summerColor))
-            val text = textIcon.append(Component.translatable("mrc.roundhud.summer_points", Component.literal("$summerPoints")
-                .setStyle(Config.getSummerPointsNumberAccentStyle(summerColor)))
-                .setStyle(Config.getSummerPointsTextAccentStyle(summerColor)))
+            val text = textIcon.append(
+                Component.translatable(
+                    "mrc.roundhud.summer_points", Component.literal("$summerPoints")
+                        .setStyle(Config.getSummerPointsNumberAccentStyle(summerColor))
+                )
+                    .setStyle(Config.getSummerPointsTextAccentStyle(summerColor))
+            )
             val width = textRenderer.width(text)
             var xPos = 0
             if (rightAligned) xPos = -width
@@ -401,533 +340,403 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (bottomAligned) yPos = -yOffset - 12
             context.drawString(textRenderer, text, xPos, yPos, -1)
             return 12
-            }
-        },
-
+        }
+    },
     STAR_FRAGMENTS {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
-            if (starFragments == -1) return 0
-            if (!gameOngoing) return 0
-            if(PlotManager.isStatless) return 0
-            if(Config.hideStarFragmentsWhenEliminated.value && EliminationManager.eliminated) return 0
+        private val starFragmentIcon = getStarFragmentIcon()
+        private var cachedStarFragments: Int = 0
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
+            if (starFragments == -1 || !gameOngoing || isStatless || (Config.hideStarFragmentsWhenEliminated.value && eliminated)) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val json = JsonObject()
-            json.addProperty("atlas", "minecraft:particles")
-            json.addProperty("sprite", "spark_2")
-            val starFragment = ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
-            val starFragmentIconText = Component.empty().append(starFragment).setStyle(Config.getStarFragmentsIconAccentStyle(0xa0f9ff))
-            var text = starFragmentIconText.append(Component.translatable("mrc.roundhud.starFragments", Component.literal(" $starFragments")
-                .setStyle(Config.getStarFragmentsNumberAccentStyle(0xa0f9ff)))
-                .setStyle(Config.getStarFragmentsTextAccentStyle(0xa0f9ff)))
-            val width = textRenderer.width(text)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12
+            if (cachedStarFragments != starFragments || cachedText == null) {
+                val starFragmentIconText = Component.empty().append(starFragmentIcon)
+                    .setStyle(Config.getStarFragmentsIconAccentStyle(0xa0f9ff))
+                val numberText = Component.literal(" $starFragments")
+                    .setStyle(Config.getStarFragmentsNumberAccentStyle(0xa0f9ff))
+                val text = Component.translatable("mrc.roundhud.starFragments", numberText)
+                    .setStyle(Config.getStarFragmentsTextAccentStyle(0xa0f9ff))
+                val finalText = starFragmentIconText.append(text)
+                cachedStarFragments = starFragments
+                cachedText = finalText
+                cachedTextWidth = textRenderer.width(finalText)
+            }
+            val text = cachedText!!
+            var xPos = if (rightAligned) -cachedTextWidth else 0
+            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.drawString(textRenderer, text, xPos, yPos, -1)
             return 12
         }
 
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.starFragmentsConfig.category.misc"))
-                .option(Option.createBuilder<Boolean>()
-                    .name(Component.translatable("mrc.config.starFragmentsConfig.category.misc.option.hideStarFragmentsWhenEliminated"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.starFragmentsConfig.category.misc.option.hideStarFragmentsWhenEliminated.description")))
-                    .binding(Config.hideStarFragmentsWhenEliminated.asBinding())
-                    .controller(TickBoxControllerBuilder::create)
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
+                    .option(hideWhenEliminatedOption(name.lowercase(), Config.hideStarFragmentsWhenEliminated.asBinding()))
+                    .build()
+            )
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                            .also {
+                                val overrideStarFragmentsColors = overrideColorsOption(name.lowercase(), Config.overrideStarFragmentsColors.asBinding())
+
+                                val starFragmentsTextColor = overrideColorOption(name.lowercase(), Config.starFragmentsTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(starFragmentsTextColor, overrideStarFragmentsColors)
+
+                                val starFragmentsNumberColor = overrideColorOption(name.lowercase(), Config.starFragmentsNumberColor.asBinding(), "number_color")
+                                addColorOptionDependency(starFragmentsNumberColor, overrideStarFragmentsColors)
+
+                                val starFragmentsIconColor = overrideColorOption(name.lowercase(), Config.starFragmentsIconColor.asBinding(), "icon_color")
+                                addColorOptionDependency(starFragmentsIconColor, overrideStarFragmentsColors)
+
+                                it.option(overrideStarFragmentsColors)
+                                it.option(starFragmentsTextColor)
+                                it.option(starFragmentsNumberColor)
+                                it.option(starFragmentsIconColor)
+                            }
+                            .build())
                     .build())
-                .build())
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.starFragmentsConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors.description"))).also {
-                        val overrideStarFragmentsColors = Option.createBuilder<Boolean>()
-                            .name(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors.option.overrideStarFragmentsColors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors.option.overrideStarFragmentsColors.description")))
-                            .binding(Config.overrideStarFragmentsColors.asBinding())
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                        val starFragmentsTextColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsTextColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsTextColor.description")))
-                            .binding(Config.starFragmentsTextColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        starFragmentsTextColor.setAvailable(overrideStarFragmentsColors.pendingValue())
-                        overrideStarFragmentsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) starFragmentsTextColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) starFragmentsTextColor.setAvailable(option.pendingValue( ))
-                        }
-                        val starFragmentsNumberColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsNumberColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsNumberColor.description")))
-                            .binding(Config.starFragmentsNumberColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        starFragmentsNumberColor.setAvailable(overrideStarFragmentsColors.pendingValue())
-                        overrideStarFragmentsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) starFragmentsNumberColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) starFragmentsNumberColor.setAvailable(option.pendingValue( ))
-                        }
-                        val starFragmentsIconColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsIconColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.starFragmentsConfig.category.styling.group.colors.option.starFragmentsIconColor.description")))
-                            .binding(Config.starFragmentsIconColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        starFragmentsIconColor.setAvailable(overrideStarFragmentsColors.pendingValue())
-                        overrideStarFragmentsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) starFragmentsIconColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) starFragmentsIconColor.setAvailable(option.pendingValue( ))
-                        }
-                        it.option(overrideStarFragmentsColors)
-                        it.option(starFragmentsTextColor)
-                        it.option(starFragmentsNumberColor)
-                        it.option(starFragmentsIconColor)
-                    }
-                    .build())
-                .build())
             .build()
             .generateScreen(parent)
     },
-
     PLAYTIME {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
+        private var lastCachedSecond: Long = -1L
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (!gameOngoing) return 0
+            val currentPlaytime = playtime ?: return 0
 
-            playtime?.let {
-                val textRenderer = Minecraft.getInstance().font
-                val text = Component.literal("⌚ ").setStyle(Config.getPlaytimeIconAccentStyle(0x3efca1)).append(Component.translatable("mrc.roundhud.playtime", Component.literal(it.elapsedNow().toLong(DurationUnit.SECONDS).toDuration(DurationUnit.SECONDS).toString()).setStyle(Config.getPlaytimeNumberAccentStyle(0x3efca1)))
-                    .setStyle(Config.getPlaytimeTextAccentStyle(0x3efca1)))
-                val width = textRenderer.width(text)
-                var xPos = 0
-                if (rightAligned) xPos = -width
-                var yPos = yOffset
-                if (bottomAligned) yPos = -yOffset - 12
-                context.drawString(textRenderer, text, xPos, yPos, -1)
-                return 12
+            val currentSecond = currentPlaytime.elapsedNow().toLong(DurationUnit.SECONDS)
+            val textRenderer = Minecraft.getInstance().font
+
+            if (currentSecond != lastCachedSecond || cachedText == null) {
+                lastCachedSecond = currentSecond
+
+                val minutes = currentSecond / 60
+                val seconds = currentSecond % 60
+
+                val timeString = if (minutes > 0) "${minutes}m ${seconds}s" else "${seconds}s"
+
+                val iconText = Component.literal("⌚ ")
+                    .setStyle(Config.getPlaytimeIconAccentStyle(0x3efca1))
+
+                val numberText = Component.literal(timeString)
+                    .setStyle(Config.getPlaytimeNumberAccentStyle(0x3efca1))
+
+                val text = Component.translatable("mrc.roundhud.playtime", numberText)
+                    .setStyle(Config.getPlaytimeTextAccentStyle(0x3efca1))
+
+                val finalText = iconText.append(text)
+
+                cachedText = finalText
+                cachedTextWidth = textRenderer.width(finalText)
             }
-            return 0
+            val text = cachedText!!
+            val xPos = if (rightAligned) -cachedTextWidth else 0
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
+
+            context.drawString(textRenderer, text, xPos, yPos, -1)
+            return 12
+
         }
+
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.playtimeConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors.description"))).also {
-                        val overridePlaytimeColors = Option.createBuilder<Boolean>()
-                            .name(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors.option.overridePlaytimeColors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors.option.overridePlaytimeColors.description")))
-                            .binding(Config.overridePlaytimeColors.asBinding())
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                        val playtimeTextColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeTextColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeTextColor.description")))
-                            .binding(Config.playtimeTextColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        playtimeTextColor.setAvailable(overridePlaytimeColors.pendingValue())
-                        overridePlaytimeColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) playtimeTextColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) playtimeTextColor.setAvailable(option.pendingValue( ))
-                        }
-                        val playtimeColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeColor.description")))
-                            .binding(Config.playtimeColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        playtimeColor.setAvailable(overridePlaytimeColors.pendingValue())
-                        overridePlaytimeColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) playtimeColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) playtimeColor.setAvailable(option.pendingValue( ))
-                        }
-                        val playtimeIconColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeIconColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.playtimeConfig.category.styling.group.colors.option.playtimeIconColor.description")))
-                            .binding(Config.playtimeIconColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        playtimeIconColor.setAvailable(overridePlaytimeColors.pendingValue())
-                        overridePlaytimeColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) playtimeIconColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) playtimeIconColor.setAvailable(option.pendingValue( ))
-                        }
-                        it.option(overridePlaytimeColors)
-                        it.option(playtimeTextColor)
-                        it.option(playtimeColor)
-                        it.option(playtimeIconColor)
-                    }
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                            .also {
+                                val overridePlaytimeColors = overrideColorsOption(name.lowercase(), Config.overridePlaytimeColors.asBinding())
+
+                                val playtimeTextColor = overrideColorOption(name.lowercase(), Config.playtimeTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(playtimeTextColor, overridePlaytimeColors)
+
+                                val playtimeColor = overrideColorOption(name.lowercase(), Config.playtimeColor.asBinding(), "number_color")
+                                addColorOptionDependency(playtimeColor, overridePlaytimeColors)
+
+                                val playtimeIconColor = overrideColorOption(name.lowercase(), Config.playtimeIconColor.asBinding(), "icon_color")
+                                addColorOptionDependency(playtimeIconColor, overridePlaytimeColors)
+
+                                it.option(overridePlaytimeColors)
+                                it.option(playtimeTextColor)
+                                it.option(playtimeColor)
+                                it.option(playtimeIconColor)
+                            }
+                            .build())
                     .build())
-                .build())
             .build()
             .generateScreen(parent)
     },
-
     MODIFIERS {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
-            if (!gameOngoing) return 0
-            if (modifiers.isEmpty()) return 0
+        private var cachedModifiers = mutableMapOf<Modifiers, Boolean>()
+        private var cachedHeaderText: Component? = null
+        private var cachedHeaderTextWidth: Int = 0
+        private var cachedUse2dHeads: Boolean? = null
+        private var cachedModifierIcons = mutableMapOf<Modifiers, ItemStack>()
+        private var cachedRightModifierTexts = mutableMapOf<Modifiers, Component>()
+        private var cachedLeftModifierTexts = mutableMapOf<Modifiers, Component>()
+        private var cachedModifierTextWidths = mutableMapOf<Modifiers, Int>()
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
+            if (!gameOngoing || modifiers.isEmpty()) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12 - (modifiers.size*20)
 
-            val headerText = Component.translatable("mrc.roundhud.modifiers")
-                .setStyle(Config.getModifiersTextAccentStyle(0xa63efc))
-            val headerWidth = textRenderer.width(headerText)
-            var xPos = 0
-            if (rightAligned) xPos = -headerWidth
+            if (cachedHeaderText == null) {
+                val headerText = Component.translatable("mrc.roundhud.modifiers")
+                    .setStyle(Config.getModifiersTextAccentStyle(0xa63efc))
+                cachedHeaderText = headerText
+                cachedHeaderTextWidth = textRenderer.width(headerText)
+            }
+
+            val headerText = cachedHeaderText!!
+            var yPos = if (bottomAligned) -yOffset - 12 - (modifiers.size * 20) else yOffset
+            var xPos = if (rightAligned) -cachedHeaderTextWidth else 0
             context.drawString(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
-
+            val use2dHeads = Config.use2dHeads.value
+            val modifiersChanged = (cachedModifiers != modifiers)
+            if (modifiersChanged) cachedModifiers = modifiers.toMutableMap()
             modifiers.forEach { (modifier, isCharged) ->
-                var xPos = 0
-                if (rightAligned) xPos = -16
-                if(!Config.customModifierIcons.value) {
-                    context.renderItem(modifier.icon, xPos, yPos)
-                    context.renderItemDecorations(textRenderer, modifier.icon, xPos, yPos)
-                }else {
-                    context.renderItem(modifier.customIcon, xPos, yPos)
-                    context.renderItemDecorations(textRenderer, modifier.customIcon, xPos, yPos)
+                var xPos = if (rightAligned) -16 else 0
+                if (modifiersChanged || cachedModifierIcons[modifier] == null) cachedModifierIcons[modifier] =
+                    if (!Config.customModifierIcons.value) modifier.icon else modifier.customIcon
+                val icon = cachedModifierIcons[modifier]!!
+                context.renderItem(icon, xPos, yPos)
+                context.renderItemDecorations(textRenderer, icon, xPos, yPos)
+                val isEternal = eternalModifier == modifier
+                if (modifiersChanged || (rightAligned && cachedRightModifierTexts[modifier] == null) || (!rightAligned && cachedLeftModifierTexts[modifier] == null) || cachedUse2dHeads != use2dHeads) {
+                    cachedUse2dHeads = use2dHeads
+                    val finalText = buildModifierTextWith2dBoosters(modifier, isEternal, isCharged, rightAligned, use2dHeads, modifierBoosters[modifier])
+                    if (rightAligned) cachedRightModifierTexts[modifier] = finalText
+                    else cachedLeftModifierTexts[modifier] = finalText
+                    cachedModifierTextWidths[modifier] = textRenderer.width(finalText)
                 }
-                var modifierText = modifier.translatable.copy().setStyle(Config.getNormalModifierTextAccentStyle(CommonColors.YELLOW))
-                if (eternalModifier == modifier && isCharged) {
-                    modifierText.style = Config.getChargedModifierTextAccentStyle(0x0786FF)
-                    if(!rightAligned) modifierText.append(Component.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))).append(Component.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)))
-                    if(rightAligned) modifierText = Component.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)).append(Component.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF).withShadowColor(-16777216)).append(modifierText))
-                }else if (eternalModifier == modifier) {
-                    modifierText.style = Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)
-                    if(!rightAligned) modifierText.append(Component.literal(" ∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)))
-                    if(rightAligned) modifierText = Component.literal("∞ ").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)).append(modifierText)
-                }else if (isCharged) {
-                    modifierText.style = Config.getChargedModifierTextAccentStyle(0x0786FF)
-                    if(!rightAligned) modifierText.append(Component.literal(" ⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)))
-                    if(rightAligned) modifierText = Component.literal("⚡ ").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF)).append(modifierText)
-                }
-                var headText2d = if (Config.use2dHeads.value) modifierBoosters[modifier]?.let { playerList ->
-                    PlayerProfile.player2dHeadTextComponentList(playerList, Config.boosterListMax.value, rightAligned)
-                } ?: Component.literal("") else Component.literal("")
-                val finalText = if (rightAligned) Component.empty().append(headText2d).append(modifierText)
-                else Component.empty().append(modifierText).append(headText2d)
-                val modifierWidth = textRenderer.width(finalText)
-                xPos = 22
-                if (rightAligned) xPos = -22 - modifierWidth
-                context.drawString(textRenderer, finalText, xPos, yPos+4, -1)
+                val text = if (rightAligned) cachedRightModifierTexts[modifier]!! else cachedLeftModifierTexts[modifier]!!
+                val width = cachedModifierTextWidths[modifier] ?: 0
+                xPos = if (rightAligned) -22 - width else 22
+                context.drawString(textRenderer, text, xPos, yPos + 4, -1)
 
-                if (!Config.use2dHeads.value) modifierBoosters[modifier]?.let { playerList ->
-                    val bonusBoostersAmount = playerList.size - Config.boosterListMax.value
-                    playerList.forEachIndexed { index, profile ->
-                        if(index < Config.boosterListMax.value) {
-                            xPos = 28 + modifierWidth + (index * 15)
-                            if (rightAligned) xPos = -44 - modifierWidth - (index * 15)
-                            context.renderItem(headFromProfile(profile), xPos, yPos)
-                        }
+                if (!use2dHeads) modifierBoosters[modifier]?.let { playerList ->
+                    val maxBoosters = Config.boosterListMax.value
+                    val visibleBoosters = playerList.take(maxBoosters)
+                    val bonusBoostersAmount = playerList.size - maxBoosters
+
+                    val direction = if (rightAligned) -1 else 1
+                    val stepSize = 15 * direction
+                    val baseStart = if (rightAligned) -44 - width else 28 + width
+
+                    visibleBoosters.forEachIndexed { index, profile ->
+                        val currentX = baseStart + (index * stepSize)
+                        context.renderItem(headFromProfile(profile), currentX, yPos)
                     }
-                    if (rightAligned) xPos -= 15
-                    else xPos += 15
-                    if(bonusBoostersAmount > 0) context.drawString(textRenderer, Component.literal("+${bonusBoostersAmount}").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)), xPos, yPos + 4, -1)
-                }
 
+                    if (bonusBoostersAmount > 0) {
+                        val textX = baseStart + (visibleBoosters.size * stepSize)
+                        context.drawString(textRenderer, Component.literal("+$bonusBoostersAmount").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)), textX, yPos + 4, -1)
+                    }
+                }
                 yPos += 20
             }
 
-            return 12+(modifiers.size*20)
+            return 12 + (modifiers.size * 20)
         }
 
         override fun generateConfig(parent: Screen): Screen? {
             return YetAnotherConfigLib.createBuilder()
                 .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-                .category(ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.modifiersConfig.category.misc"))
-                    .option(Option.createBuilder<Int>()
-                        .name(Component.translatable("mrc.config.modifiersConfig.category.misc.option.boosterListMax"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.misc.option.boosterListMax.description")))
-                        .binding(Config.boosterListMax.asBinding())
-                        .controller {
-                            IntegerSliderControllerBuilder.create(it)
-                                .range(0, 15)
-                                .step(1)
-                        }
+                .category(
+                    ConfigCategory.createBuilder()
+                        .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
+                        .option(sliderOption(name.lowercase(), Config.boosterListMax.asBinding(), 0, 15, 1, "max_boosters"))
+                        .build()
+                )
+                .category(
+                    ConfigCategory.createBuilder()
+                        .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                        .group(
+                            OptionGroup.createBuilder()
+                                .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                                .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                                .also {
+                                    val overrideModifiersColors = overrideColorsOption(name.lowercase(), Config.overrideModifiersColors.asBinding())
+
+                                    val modifiersTextColor = overrideColorOption(name.lowercase(), Config.modifiersTextColor.asBinding(), "text_color")
+                                    addColorOptionDependency(modifiersTextColor, overrideModifiersColors)
+
+                                    val normalModifierTextColor = overrideColorOption(name.lowercase(), Config.normalModifierTextColor.asBinding(), "text_color.regular_modifier")
+                                    addColorOptionDependency(normalModifierTextColor, overrideModifiersColors)
+
+                                    val eternalModifierTextColor = overrideColorOption(name.lowercase(), Config.eternalModifierTextColor.asBinding(), "text_color.eternal_modifier")
+                                    addColorOptionDependency(eternalModifierTextColor, overrideModifiersColors)
+
+                                    val eternalModifierTextShadowColor = overrideColorOption(name.lowercase(), Config.eternalModifierTextShadowColor.asBinding(), "shadow_color.eternal_modifier")
+                                    addColorOptionDependency(eternalModifierTextShadowColor, overrideModifiersColors)
+
+                                    val chargedModifierTextColor = overrideColorOption(name.lowercase(), Config.chargedModifierTextColor.asBinding(), "text_color.charged_modifier")
+                                    addColorOptionDependency(chargedModifierTextColor, overrideModifiersColors)
+
+                                    val mysteryModifierTextColor = overrideColorOption(name.lowercase(), Config.mysteryModifierTextColor.asBinding(), "text_color.mystery_modifier")
+                                    addColorOptionDependency(mysteryModifierTextColor, overrideModifiersColors)
+
+                                    it.option(overrideModifiersColors)
+                                    it.option(modifiersTextColor)
+                                    it.option(normalModifierTextColor)
+                                    it.option(eternalModifierTextColor)
+                                    it.option(eternalModifierTextShadowColor)
+                                    it.option(chargedModifierTextColor)
+                                    it.option(mysteryModifierTextColor)
+                                }
+                                .build())
+                        .group(
+                            OptionGroup.createBuilder()
+                                .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.icons"))
+                                .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.icons.description")))
+                                .option(iconBooleanOption(name.lowercase(), Config.customModifierIcons.asBinding(), "use_custom"))
+                                .option(iconBooleanOption(name.lowercase(), Config.use2dHeads.asBinding(), "use_2d_heads"))
+                                .build()
+                        )
                         .build())
-                    .build())
-                .category(ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.modifiersConfig.category.styling"))
-                    .group(OptionGroup.createBuilder()
-                        .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.description"))).also {
-                            val overrideModifiersColors = Option.createBuilder<Boolean>()
-                                .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.overrideModifiersColors"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.overrideModifiersColors.description")))
-                                .binding(Config.overrideModifiersColors.asBinding())
-                                .controller(TickBoxControllerBuilder::create)
-                                .build()
-                            val modifiersTextColor = Option.createBuilder<Color>()
-                                .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.modifiersTextColor"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.modifiersTextColor.description")))
-                                .binding(Config.modifiersTextColor.asBinding())
-                                .controller(ColorControllerBuilder::create)
-                                .build()
-                            modifiersTextColor.setAvailable(overrideModifiersColors.pendingValue())
-                            overrideModifiersColors.addEventListener { option, event ->
-                                if (event == OptionEventListener.Event.INITIAL) modifiersTextColor.setAvailable(option.pendingValue())
-                                if (event == OptionEventListener.Event.STATE_CHANGE) modifiersTextColor.setAvailable(option.pendingValue( ))
-                            }
-                            val normalModifierTextColor = Option.createBuilder<Color>()
-                                .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.normalModifierTextColor"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.normalModifierTextColor.description")))
-                                .binding(Config.normalModifierTextColor.asBinding())
-                                .controller(ColorControllerBuilder::create)
-                                .build()
-                            normalModifierTextColor.setAvailable(overrideModifiersColors.pendingValue())
-                            overrideModifiersColors.addEventListener { option, event ->
-                                if (event == OptionEventListener.Event.INITIAL) normalModifierTextColor.setAvailable(option.pendingValue())
-                                if (event == OptionEventListener.Event.STATE_CHANGE) normalModifierTextColor.setAvailable(option.pendingValue( ))
-                            }
-                            val eternalModifierTextColor = Option.createBuilder<Color>()
-                                .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.eternalModifierTextColor"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.eternalModifierTextColor.description")))
-                                .binding(Config.eternalModifierTextColor.asBinding())
-                                .controller(ColorControllerBuilder::create)
-                                .build()
-                            eternalModifierTextColor.setAvailable(overrideModifiersColors.pendingValue())
-                            overrideModifiersColors.addEventListener { option, event ->
-                                if (event == OptionEventListener.Event.INITIAL) eternalModifierTextColor.setAvailable(option.pendingValue())
-                                if (event == OptionEventListener.Event.STATE_CHANGE) eternalModifierTextColor.setAvailable(option.pendingValue( ))
-                            }
-                            val eternalModifierTextShadowColor = Option.createBuilder<Color>()
-                                .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.eternalModifierTextShadowColor"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.eternalModifierTextShadowColor.description")))
-                                .binding(Config.eternalModifierTextShadowColor.asBinding())
-                                .controller(ColorControllerBuilder::create)
-                                .build()
-                            eternalModifierTextShadowColor.setAvailable(overrideModifiersColors.pendingValue())
-                            overrideModifiersColors.addEventListener { option, event ->
-                                if (event == OptionEventListener.Event.INITIAL) eternalModifierTextShadowColor.setAvailable(option.pendingValue())
-                                if (event == OptionEventListener.Event.STATE_CHANGE) eternalModifierTextShadowColor.setAvailable(option.pendingValue( ))
-                            }
-                            val chargedModifierTextColor = Option.createBuilder<Color>()
-                                .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.chargedModifierTextColor"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.chargedModifierTextColor.description")))
-                                .binding(Config.chargedModifierTextColor.asBinding())
-                                .controller(ColorControllerBuilder::create)
-                                .build()
-                            chargedModifierTextColor.setAvailable(overrideModifiersColors.pendingValue())
-                            overrideModifiersColors.addEventListener { option, event ->
-                                if (event == OptionEventListener.Event.INITIAL) chargedModifierTextColor.setAvailable(option.pendingValue())
-                                if (event == OptionEventListener.Event.STATE_CHANGE) chargedModifierTextColor.setAvailable(option.pendingValue( ))
-                            }
-                            val mysteryModifierTextColor = Option.createBuilder<Color>()
-                                .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.mysteryModifierTextColor"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.colors.option.mysteryModifierTextColor.description")))
-                                .binding(Config.mysteryModifierTextColor.asBinding())
-                                .controller(ColorControllerBuilder::create)
-                                .build()
-                            mysteryModifierTextColor.setAvailable(overrideModifiersColors.pendingValue())
-                            overrideModifiersColors.addEventListener { option, event ->
-                                if (event == OptionEventListener.Event.INITIAL) mysteryModifierTextColor.setAvailable(option.pendingValue())
-                                if (event == OptionEventListener.Event.STATE_CHANGE) mysteryModifierTextColor.setAvailable(option.pendingValue( ))
-                            }
-                            it.option(overrideModifiersColors)
-                            it.option(modifiersTextColor)
-                            it.option(normalModifierTextColor)
-                            it.option(eternalModifierTextColor)
-                            it.option(eternalModifierTextShadowColor)
-                            it.option(chargedModifierTextColor)
-                            it.option(mysteryModifierTextColor)
-                        }
-                        .build())
-                    .group(OptionGroup.createBuilder()
-                        .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.icons"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.icons.description")))
-                    .option(Option.createBuilder<Boolean>()
-                        .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.icons.option.customModifierIcons"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.icons.option.customModifierIcons.description")))
-                        .binding(Config.customModifierIcons.asBinding())
-                        .controller(TickBoxControllerBuilder::create)
-                        .build())
-                    .option(Option.createBuilder<Boolean>()
-                        .name(Component.translatable("mrc.config.modifiersConfig.category.styling.group.icons.option.use2dHeads"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.modifiersConfig.category.styling.group.icons.option.use2dHeads.description")))
-                        .binding(Config.use2dHeads.asBinding())
-                        .controller(TickBoxControllerBuilder::create)
-                        .build())
-                    .build())
-                .build())
                 .save(Config::saveToFile)
                 .build()
                 .generateScreen(parent)
         }
     },
     MACE_CHANCE {
+        private var cachedMaceChance: Float = -2f
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+
         val textColors = arrayOf(0xff2c01, 0xff5500, 0xff8400, 0xffa503, 0xffd202, 0xfff400, 0xe6ff01, 0xc0ff03, 0x92ff00, 0x74ff02, 0x3cff01, 0x13ff00, 0x01ff00)
 
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
-            if (!gameOngoing) return 0
-            if (maceChance < 0f) return 0
-            if(Config.hideMaceChanceWhenEliminated.value && EliminationManager.eliminated) return 0
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
+            if (!gameOngoing || maceChance < 0f || (Config.hideMaceChanceWhenEliminated.value && eliminated)) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            var maceChanceColorIdx = (maceChance / 7.7).toInt().absoluteValue
-            if (maceChanceColorIdx > 12) maceChanceColorIdx = 12
-            val text = Component.literal("⚄ ").setStyle(Config.getMaceChanceIconAccentStyle(0x42C1FF))
-                .append(Component.translatable("mrc.roundhud.mace_chance",
-                Component.literal("%.2f%%".format(maceChance))
-                    .setStyle(Config.getMaceChanceNumberAccentStyle(textColors[maceChanceColorIdx])))
-                .setStyle(Config.getMaceChanceTextAccentStyle(0x42C1FF)))
 
-            val width = textRenderer.width(text)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12
+            if (cachedMaceChance != maceChance || cachedText == null) {
+                val maceChanceColorIdx = (maceChance / 7.7).toInt().coerceIn(0, textColors.lastIndex)
+                val iconText = Component.literal("⚄ ")
+                    .setStyle(Config.getMaceChanceIconAccentStyle(0x42C1FF))
+                val numberText = Component.literal("%.2f%%".format(maceChance))
+                    .setStyle(Config.getMaceChanceNumberAccentStyle(textColors[maceChanceColorIdx]))
+                val text = Component.translatable("mrc.roundhud.mace_chance", numberText)
+                    .setStyle(Config.getMaceChanceTextAccentStyle(0x42C1FF))
+                val finalText = iconText.append(text)
+
+                cachedMaceChance = maceChance
+                cachedText = finalText
+                cachedTextWidth = textRenderer.width(finalText)
+            }
+            val text = cachedText!!
+            var xPos = if (rightAligned) -cachedTextWidth else 0
+            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.drawString(textRenderer, text, xPos, yPos, -1)
             return 12
         }
 
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.maceChanceConfig.category.misc"))
-                .option(Option.createBuilder<Boolean>()
-                    .name(Component.translatable("mrc.config.maceChanceConfig.category.misc.option.hideMaceChanceWhenEliminated"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.maceChanceConfig.category.misc.option.hideMaceChanceWhenEliminated.description")))
-                    .binding(Config.hideMaceChanceWhenEliminated.asBinding())
-                    .controller(TickBoxControllerBuilder::create)
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
+                    .option(hideWhenEliminatedOption(name.lowercase(), Config.hideMaceChanceWhenEliminated.asBinding()))
+                    .build()
+            )
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                            .also {
+                                val overrideMaceChanceColors = overrideColorsOption(name.lowercase(), Config.overrideMaceChanceColors.asBinding())
+
+                                val maceChanceTextColor = overrideColorOption(name.lowercase(), Config.maceChanceTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(maceChanceTextColor, overrideMaceChanceColors)
+
+                                val maceChanceNumberColor = overrideColorOption(name.lowercase(), Config.maceChanceNumberColor.asBinding(), "number_color")
+                                addColorOptionDependency(maceChanceNumberColor, overrideMaceChanceColors)
+
+                                val maceChanceIconColor = overrideColorOption(name.lowercase(), Config.maceChanceIconColor.asBinding(), "icon_color")
+                                addColorOptionDependency(maceChanceIconColor, overrideMaceChanceColors)
+
+                                it.option(overrideMaceChanceColors)
+                                it.option(maceChanceTextColor)
+                                it.option(maceChanceNumberColor)
+                                it.option(maceChanceIconColor)
+                            }
+                            .build())
                     .build())
-                .build())
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.maceChanceConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors.description"))).also {
-                        val overrideMaceChanceColors = Option.createBuilder<Boolean>()
-                            .name(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors.option.overrideMaceChanceColors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors.option.overrideMaceChanceColors.description")))
-                            .binding(Config.overrideMaceChanceColors.asBinding())
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                        val maceChanceTextColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceTextColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceTextColor.description")))
-                            .binding(Config.maceChanceTextColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        maceChanceTextColor.setAvailable(overrideMaceChanceColors.pendingValue())
-                        overrideMaceChanceColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) maceChanceTextColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) maceChanceTextColor.setAvailable(option.pendingValue( ))
-                        }
-                        val maceChanceNumberColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceNumberColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceNumberColor.description")))
-                            .binding(Config.maceChanceNumberColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        maceChanceNumberColor.setAvailable(overrideMaceChanceColors.pendingValue())
-                        overrideMaceChanceColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) maceChanceNumberColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) maceChanceNumberColor.setAvailable(option.pendingValue( ))
-                        }
-                        val maceChanceIconColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceIconColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.maceChanceConfig.category.styling.group.colors.option.maceChanceIconColor.description")))
-                            .binding(Config.maceChanceIconColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        maceChanceIconColor.setAvailable(overrideMaceChanceColors.pendingValue())
-                        overrideMaceChanceColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) maceChanceIconColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) maceChanceIconColor.setAvailable(option.pendingValue( ))
-                        }
-                        it.option(overrideMaceChanceColors)
-                        it.option(maceChanceTextColor)
-                        it.option(maceChanceNumberColor)
-                        it.option(maceChanceIconColor)
-                    }
-                    .build())
-                .build())
             .build()
             .generateScreen(parent)
     },
     BOUNTY_BOARD {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
-            if (!gameOngoing) return 0
-            if (BountyManager.bounties.isEmpty()) return 0
-            if (EliminationManager.eliminated) return 0
+        private var cachedBounties: HashMap<GameProfile, Int> = HashMap()
+        private var cachedHeaderText: Component? = null
+        private var cachedHeaderTextWidth: Int = 0
+        private var cachedBountyTexts: HashMap<GameProfile, Component?> = HashMap()
+        private var cachedBountyTextWidths: HashMap<GameProfile, Int> = HashMap()
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
+            if (!gameOngoing || bounties.isEmpty() || eliminated) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            var yPos = yOffset
-            val sortedBounties = BountyManager.bounties.entries
-                .sortedByDescending { it.value }
-                .associate { it.key to it.value }
-            if (bottomAligned) yPos = -yOffset - 12 - (sortedBounties.size * 20)
 
-            val headerText = Component.translatable("mrc.roundhud.bounty_board")
-                .setStyle(Config.getBountyBoardTextAccentStyle(0xff7cf4))
-            val headerWidth = textRenderer.width(headerText)
-            var xPos = 0
-            if (rightAligned) xPos = -headerWidth
+            if (cachedHeaderText == null) {
+                val headerText = Component.translatable("mrc.roundhud.bounty_board")
+                    .setStyle(Config.getBountyBoardTextAccentStyle(0xff7cf4))
+                cachedHeaderText = headerText
+                cachedHeaderTextWidth = textRenderer.width(headerText)
+            }
+            val headerText = cachedHeaderText!!
+            val sortedBounties = bounties.entries.sortedByDescending { it.value }.associate { it.key to it.value }
+            var yPos = if (bottomAligned) -yOffset - 12 - (sortedBounties.size * 20) else yOffset
+            var xPos = if (rightAligned) -cachedHeaderTextWidth else 0
             context.drawString(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
             var index = 1
             var bountyCount = 0
+            val bountiesChanged = (cachedBounties != bounties)
             sortedBounties.forEach { (profile, bountyAmount) ->
-                if(bountyAmount >= Config.bountyBoardMinBounty.value && index <=  Config.bountyBoardMaxPlayers.value) {
+                if (bountyAmount >= Config.bountyBoardMinBounty.value && index <= Config.bountyBoardMaxPlayers.value) {
                     val playerUsername = profile.name
-                    var xPos = 0
-                    if (rightAligned) xPos = -16
+                    var xPos = if (rightAligned) -16 else 0
                     context.renderItem(headFromProfile(profile), xPos, yPos)
-                    val playerText =
-                        Component.literal("$playerUsername").setStyle(Config.getBountyBoardPlayerAccentStyle(CommonColors.YELLOW))
-                    val bountyText =
-                        Component.literal("$bountyAmount⛂").setStyle(Config.getBountyBoardAmountAccentStyle(0xff7cf4))
-                    val finalText = if (rightAligned) {
-                        Component.empty()
-                            .append(bountyText)
-                            .append(" ")
-                            .append(playerText)
-                    } else {
-                        Component.empty()
-                            .append(playerText)
-                            .append(" ")
-                            .append(bountyText)
+                    if (bountiesChanged || cachedBountyTexts[profile] == null) {
+                        val playerText = Component.literal("$playerUsername")
+                            .setStyle(Config.getBountyBoardPlayerAccentStyle(CommonColors.YELLOW))
+                        val bountyText = Component.literal("$bountyAmount⛂")
+                            .setStyle(Config.getBountyBoardAmountAccentStyle(0xff7cf4))
+                        val finalText = if (rightAligned) {
+                            Component.empty()
+                                .append(bountyText)
+                                .append(" ")
+                                .append(playerText)
+                        } else {
+                            Component.empty()
+                                .append(playerText)
+                                .append(" ")
+                                .append(bountyText)
+                        }
+                        cachedBountyTextWidths[profile] = textRenderer.width(finalText)
+                        cachedBountyTexts[profile] = finalText
                     }
-                    val modifierWidth = textRenderer.width(finalText)
-                    xPos = 22
-                    if (rightAligned) xPos = -22 - modifierWidth
-                    context.drawString(textRenderer, finalText, xPos, yPos + 4, -1)
+                    val text = cachedBountyTexts[profile]!!
+                    xPos = if (rightAligned) -22 - cachedBountyTextWidths[profile]!! else 22
+                    context.drawString(textRenderer, text, xPos, yPos + 4, -1)
                     yPos += 20
                     bountyCount++
                     index++
@@ -935,298 +744,206 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             }
             return 12 + (bountyCount * 20)
         }
+
         override fun generateConfig(parent: Screen): Screen? {
             return YetAnotherConfigLib.createBuilder()
                 .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
                 .category(
                     ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.bountyBoardConfig.category.misc"))
-                    .option(
-                        Option.createBuilder<Int>()
-                        .name(Component.translatable("mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMaxPlayers"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMaxPlayers.description")))
-                        .binding(Config.bountyBoardMaxPlayers.asBinding())
-                        .controller {
-                            IntegerSliderControllerBuilder.create(it)
-                                .range(1, 15)
-                                .step(1)
-                        }
-                        .build())
-                        .option(
-                            Option.createBuilder<Int>()
-                                .name(Component.translatable("mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMinBounty"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.bountyBoardConfig.category.misc.option.bountyBoardMinBounty.description")))
-                                .binding(Config.bountyBoardMinBounty.asBinding())
-                                .controller {
-                                    IntegerSliderControllerBuilder.create(it)
-                                        .range(1, 10)
-                                        .step(1)
-                                }
-                                .build())
-                    .build())
+                        .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
+                        .option(sliderOption(name.lowercase(), Config.bountyBoardMaxPlayers.asBinding(), 1, 15, 1, "max_players"))
+                        .option(sliderOption(name.lowercase(), Config.bountyBoardMinBounty.asBinding(), 1, 10, 1, "min_bounty"))
+                        .build()
+                )
                 .category(
                     ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.bountyBoardConfig.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                        .name(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors"))
-                        .description(OptionDescription.of(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.description")))
-                        .also {
-                            val overrideBountyBoardColors = Option.createBuilder<Boolean>()
-                                .name(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.overrideBountyBoardColors"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.overrideBountyBoardColors.description")))
-                                .binding(Config.overrideBountyBoardColors.asBinding())
-                                .controller(TickBoxControllerBuilder::create)
-                                .build()
-                            val bountyBoardTextColor = Option.createBuilder<Color>()
-                                .name(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardTextColor"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardTextColor.description")))
-                                .binding(Config.bountyBoardTextColor.asBinding())
-                                .controller(ColorControllerBuilder::create)
-                                .build()
-                            bountyBoardTextColor.setAvailable(overrideBountyBoardColors.pendingValue())
-                            overrideBountyBoardColors.addEventListener { option, event ->
-                                if (event == OptionEventListener.Event.INITIAL) bountyBoardTextColor.setAvailable(
-                                    option.pendingValue()
-                                )
-                                if (event == OptionEventListener.Event.STATE_CHANGE) bountyBoardTextColor.setAvailable(
-                                    option.pendingValue()
-                                )
-                            }
-                            val bountyBoardPlayerColor = Option.createBuilder<Color>()
-                                .name(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardPlayerColor"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardPlayerColor.description")))
-                                .binding(Config.bountyBoardPlayerColor.asBinding())
-                                .controller(ColorControllerBuilder::create)
-                                .build()
-                            bountyBoardPlayerColor.setAvailable(overrideBountyBoardColors.pendingValue())
-                            overrideBountyBoardColors.addEventListener { option, event ->
-                                if (event == OptionEventListener.Event.INITIAL) bountyBoardPlayerColor.setAvailable(
-                                    option.pendingValue()
-                                )
-                                if (event == OptionEventListener.Event.STATE_CHANGE) bountyBoardPlayerColor.setAvailable(
-                                    option.pendingValue()
-                                )
-                            }
-                            val bountyBoardNumberColor = Option.createBuilder<Color>()
-                                .name(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardNumberColor"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.bountyBoardConfig.category.styling.group.colors.option.bountyBoardNumberColor.description")))
-                                .binding(Config.bountyBoardNumberColor.asBinding())
-                                .controller(ColorControllerBuilder::create)
-                                .build()
-                            bountyBoardNumberColor.setAvailable(overrideBountyBoardColors.pendingValue())
-                            overrideBountyBoardColors.addEventListener { option, event ->
-                                if (event == OptionEventListener.Event.INITIAL) bountyBoardNumberColor.setAvailable(
-                                    option.pendingValue()
-                                )
-                                if (event == OptionEventListener.Event.STATE_CHANGE) bountyBoardNumberColor.setAvailable(
-                                    option.pendingValue()
-                                )
-                            }
-                            it.option(overrideBountyBoardColors)
-                            it.option(bountyBoardTextColor)
-                            it.option(bountyBoardPlayerColor)
-                            it.option(bountyBoardNumberColor)
-                        }
+                        .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                        .group(
+                            OptionGroup.createBuilder()
+                                .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                                .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                                .also {
+                                    val overrideBountyBoardColors = overrideColorsOption(name.lowercase(), Config.overrideBountyBoardColors.asBinding())
+
+                                    val bountyBoardTextColor = overrideColorOption(name.lowercase(), Config.bountyBoardTextColor.asBinding(), "text_color")
+                                    addColorOptionDependency(bountyBoardTextColor, overrideBountyBoardColors)
+
+                                    val bountyBoardPlayerColor = overrideColorOption(name.lowercase(), Config.bountyBoardPlayerColor.asBinding(), "text_color.player")
+                                    addColorOptionDependency(bountyBoardPlayerColor, overrideBountyBoardColors)
+
+                                    val bountyBoardNumberColor = overrideColorOption(name.lowercase(), Config.bountyBoardNumberColor.asBinding(), "number_color")
+                                    addColorOptionDependency(bountyBoardNumberColor, overrideBountyBoardColors)
+
+                                    it.option(overrideBountyBoardColors)
+                                    it.option(bountyBoardTextColor)
+                                    it.option(bountyBoardPlayerColor)
+                                    it.option(bountyBoardNumberColor)
+                                }
+                                .build())
                         .build())
-                    .build())
                 .save(Config::saveToFile)
                 .build()
                 .generateScreen(parent)
         }
     },
     FPS {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
+        private var cachedFps: Int = -2
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (fps == -1) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val text = Component.translatable("mrc.roundhud.fps", Component.literal("$fps").setStyle(Config.getFpsNumberAccentStyle(CommonColors.WHITE))).setStyle(Config.getFpsTextAccentStyle(CommonColors.WHITE))
-            val width = textRenderer.width(text)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12
+
+            if (cachedFps != fps || cachedText == null) {
+                cachedFps = fps
+                val numberText = Component.literal("$fps")
+                    .setStyle(Config.getFpsNumberAccentStyle(CommonColors.WHITE))
+                val finalText = Component.translatable("mrc.roundhud.fps", numberText)
+                    .setStyle(Config.getFpsTextAccentStyle(CommonColors.WHITE))
+                cachedText = finalText
+                cachedTextWidth = textRenderer.width(finalText)
+            }
+            val text = cachedText!!
+            var xPos = if (rightAligned) -cachedTextWidth else 0
+            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.drawString(textRenderer, text, xPos, yPos, -1)
             return 12
         }
+
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.fpsConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.fpsConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.fpsConfig.category.styling.group.colors.description"))).also {
-                        val overrideFpsColors = Option.createBuilder<Boolean>()
-                            .name(Component.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.overrideFpsColors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.overrideFpsColors.description")))
-                            .binding(Config.overrideFpsColors.asBinding())
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                        val fpsTextColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.fpsTextColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.fpsTextColor.description")))
-                            .binding(Config.fpsTextColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        fpsTextColor.setAvailable(overrideFpsColors.pendingValue())
-                        overrideFpsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) fpsTextColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) fpsTextColor.setAvailable(option.pendingValue( ))
-                        }
-                        val fpsNumberColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.fpsNumberColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.fpsConfig.category.styling.group.colors.option.fpsNumberColor.description")))
-                            .binding(Config.fpsNumberColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        fpsNumberColor.setAvailable(overrideFpsColors.pendingValue())
-                        overrideFpsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) fpsNumberColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) fpsNumberColor.setAvailable(option.pendingValue( ))
-                        }
-                        it.option(overrideFpsColors)
-                        it.option(fpsTextColor)
-                        it.option(fpsNumberColor)
-                    }
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                            .also {
+                                val overrideFpsColors = overrideColorsOption(name.lowercase(), Config.overrideFpsColors.asBinding())
+
+                                val fpsTextColor = overrideColorOption(name.lowercase(), Config.fpsTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(fpsTextColor, overrideFpsColors)
+
+                                val fpsNumberColor = overrideColorOption(name.lowercase(), Config.fpsNumberColor.asBinding(), "number_color")
+                                addColorOptionDependency(fpsNumberColor, overrideFpsColors)
+
+                                it.option(overrideFpsColors)
+                                it.option(fpsTextColor)
+                                it.option(fpsNumberColor)
+                            }
+                            .build())
                     .build())
-                .build())
             .build()
             .generateScreen(parent)
     },
     PING {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
-            val networkHandler = Minecraft.getInstance().connection
-            val client = Minecraft.getInstance()
-            val ping = networkHandler?.getPlayerInfo(client.user.name)?.latency ?: return 0
+        private var cachedPing: Int = -2
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (ping <= 0) return 0
-            val pingColor = if (ping < 50) 0x1eff00 else if (ping < 100) 0xfff100 else if (ping < 200) 0xff9500 else 0xff3b3b
+
             val textRenderer = Minecraft.getInstance().font
-            val text = Component.translatable("mrc.roundhud.ping", Component.literal("$ping").setStyle(Config.getPingNumberAccentStyle(pingColor))).setStyle(Config.getPingTextAccentStyle(pingColor))
-            val width = textRenderer.width(text)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12
+
+            if (cachedPing != ping || cachedText == null) {
+                cachedPing = ping
+                val pingColor =
+                    if (ping < 50) 0x1eff00 else if (ping < 100) 0xfff100 else if (ping < 200) 0xff9500 else 0xff3b3b
+                val numberText = Component.literal("$ping")
+                    .setStyle(Config.getPingNumberAccentStyle(pingColor))
+                val finalText = Component.translatable("mrc.roundhud.ping", numberText)
+                    .setStyle(Config.getPingTextAccentStyle(pingColor))
+                cachedText = finalText
+                cachedTextWidth = textRenderer.width(finalText)
+            }
+            val text = cachedText!!
+            var xPos = if (rightAligned) -cachedTextWidth else 0
+            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.drawString(textRenderer, text, xPos, yPos, -1)
             return 12
         }
+
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.pingConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.pingConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.pingConfig.category.styling.group.colors.description"))).also {
-                        val overridePingColors = Option.createBuilder<Boolean>()
-                            .name(Component.translatable("mrc.config.pingConfig.category.styling.group.colors.option.overridePingColors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.pingConfig.category.styling.group.colors.option.overridePingColors.description")))
-                            .binding(Config.overridePingColors.asBinding())
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                        val pingTextColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.pingConfig.category.styling.group.colors.option.pingTextColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.pingConfig.category.styling.group.colors.option.pingTextColor.description")))
-                            .binding(Config.pingTextColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        pingTextColor.setAvailable(overridePingColors.pendingValue())
-                        overridePingColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) pingTextColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) pingTextColor.setAvailable(option.pendingValue( ))
-                        }
-                        val pingNumberColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.pingConfig.category.styling.group.colors.option.pingNumberColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.pingConfig.category.styling.group.colors.option.pingNumberColor.description")))
-                            .binding(Config.pingNumberColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        pingNumberColor.setAvailable(overridePingColors.pendingValue())
-                        overridePingColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) pingNumberColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) pingNumberColor.setAvailable(option.pendingValue( ))
-                        }
-                        it.option(overridePingColors)
-                        it.option(pingTextColor)
-                        it.option(pingNumberColor)
-                    }
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
+                            .also {
+                                val overridePingColors = overrideColorsOption(name.lowercase(), Config.overridePingColors.asBinding())
+
+                                val pingTextColor = overrideColorOption(name.lowercase(), Config.pingTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(pingTextColor, overridePingColors)
+
+                                val pingNumberColor = overrideColorOption(name.lowercase(), Config.pingNumberColor.asBinding(), "number_color")
+                                addColorOptionDependency(pingNumberColor, overridePingColors)
+
+                                it.option(overridePingColors)
+                                it.option(pingTextColor)
+                                it.option(pingNumberColor)
+                            }
+                            .build())
                     .build())
-                .build())
             .build()
             .generateScreen(parent)
     },
     TPS {
-        override fun render(
-            context: GuiGraphics,
-            yOffset: Int,
-            rightAligned: Boolean,
-            bottomAligned: Boolean
-        ): Int {
+        private var cachedTps: Float = -2f
+        private var cachedText: Component? = null
+        private var cachedTextWidth: Int = 0
+        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (tps == -1f) return 0
 
             val textRenderer = Minecraft.getInstance().font
-            val text = Component.translatable("mrc.roundhud.tps", Component.literal("$tps").setStyle(Config.getTpsNumberAccentStyle(0xbfff00))).setStyle(Config.getTpsTextAccentStyle(0xbfff00))
-            val width = textRenderer.width(text)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12
+
+            if (cachedTps != tps || cachedText == null) {
+                cachedTps = tps
+                val numberText = Component.literal("$tps")
+                    .setStyle(Config.getTpsNumberAccentStyle(0xbfff00))
+                val finalText = Component.translatable("mrc.roundhud.tps", numberText)
+                    .setStyle(Config.getTpsTextAccentStyle(0xbfff00))
+                cachedText = finalText
+                cachedTextWidth = textRenderer.width(finalText)
+            }
+            val text = cachedText!!
+            var xPos = if (rightAligned) -cachedTextWidth else 0
+            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.drawString(textRenderer, text, xPos, yPos, -1)
             return 12
         }
+
         override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
             .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(ConfigCategory.createBuilder()
-                .name(Component.translatable("mrc.config.tpsConfig.category.styling"))
-                .group(OptionGroup.createBuilder()
-                    .name(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors"))
-                    .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.description"))).also {
-                        val overrideTpsColors = Option.createBuilder<Boolean>()
-                            .name(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.overrideTpsColors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.overrideTpsColors.description")))
-                            .binding(Config.overrideTpsColors.asBinding())
-                            .controller(TickBoxControllerBuilder::create)
-                            .build()
-                        val tpsTextColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.tpsTextColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.tpsTextColor.description")))
-                            .binding(Config.tpsTextColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        tpsTextColor.setAvailable(overrideTpsColors.pendingValue())
-                        overrideTpsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) tpsTextColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) tpsTextColor.setAvailable(option.pendingValue( ))
-                        }
-                        val tpsNumberColor = Option.createBuilder<Color>()
-                            .name(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.tpsNumberColor"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.option.tpsNumberColor.description")))
-                            .binding(Config.tpsNumberColor.asBinding())
-                            .controller(ColorControllerBuilder::create)
-                            .build()
-                        tpsNumberColor.setAvailable(overrideTpsColors.pendingValue())
-                        overrideTpsColors.addEventListener { option, event ->
-                            if (event == OptionEventListener.Event.INITIAL) tpsNumberColor.setAvailable(option.pendingValue())
-                            if (event == OptionEventListener.Event.STATE_CHANGE) tpsNumberColor.setAvailable(option.pendingValue( ))
-                        }
-                        it.option(overrideTpsColors)
-                        it.option(tpsTextColor)
-                        it.option(tpsNumberColor)
-                    }
+            .category(
+                ConfigCategory.createBuilder()
+                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
+                    .group(
+                        OptionGroup.createBuilder()
+                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
+                            .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.description")))
+                            .also {
+                                val overrideTpsColors = overrideColorsOption(name.lowercase(), Config.overrideTpsColors.asBinding())
+
+                                val tpsTextColor = overrideColorOption(name.lowercase(), Config.tpsTextColor.asBinding(), "text_color")
+                                addColorOptionDependency(tpsTextColor, overrideTpsColors)
+
+                                val tpsNumberColor = overrideColorOption(name.lowercase(), Config.tpsNumberColor.asBinding(), "number_color")
+                                addColorOptionDependency(tpsNumberColor, overrideTpsColors)
+
+                                it.option(overrideTpsColors)
+                                it.option(tpsTextColor)
+                                it.option(tpsNumberColor)
+                            }
+                            .build())
                     .build())
-                .build())
             .build()
             .generateScreen(parent)
-    },;
+    }, ;
 
     abstract fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int
     override fun generateConfig(parent: Screen): Screen? = null
@@ -1234,6 +951,6 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
     override fun getDisplayName(): Component = Component.translatable("mrc.hudelement.${name.lowercase()}")
 
     companion object {
-            val CODEC = StringRepresentable.fromEnum(::values)
+        val CODEC = StringRepresentable.fromEnum(::values)
     }
 }
