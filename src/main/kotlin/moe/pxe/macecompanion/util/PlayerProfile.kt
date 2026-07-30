@@ -58,29 +58,28 @@ object PlayerProfile {
         val playerComponent = ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
         return playerComponent
     }
-    fun player2dHeadTextComponentList(profileList:  MutableList<GameProfile>, maxProfiles: Int, rightAligned: Boolean): Component {
-        val visibleProfiles = profileList.take(maxProfiles)
-        val extraProfiles = profileList.size - maxProfiles
-        val extraProfilesText = if(extraProfiles > 0) Component.literal("+$extraProfiles").setStyle(Config.getModifiersTextAccentStyle(0xa63efc))
-        else Component.empty()
-        if(visibleProfiles.isEmpty() && extraProfiles > 0) {
-            return if (rightAligned) Component.empty().append(extraProfilesText).append(" ")
-            else Component.empty().append(" ").append(extraProfilesText)
+    fun player2dHeadTextComponentList(profileList:  List<GameProfile>, maxProfiles: Int, rightAligned: Boolean): Component {
+        if(profileList.isEmpty()) return Component.empty()
+        val visibleCount = maxProfiles.coerceAtMost(profileList.size).coerceAtLeast(0)
+        val extraCount = profileList.size - visibleCount
+        val headsComponent = Component.empty().apply {
+            profileList.subList(0, visibleCount).forEachIndexed { index, profile ->
+                if (index > 0) append(" ")
+                append(player2dHeadTextComponent(profile))
+            }
+        }.setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE))
+
+        val extraText = if (extraCount > 0) Component.literal("+$extraCount").setStyle(Config.getModifiersTextAccentStyle(0xa63efc))
+        else null
+        if(visibleCount < 1) return if(rightAligned) extraText!!.append(" ") else Component.literal(" ").append(extraText!!)
+        return Component.empty().apply {
+            if (rightAligned) {
+                extraText?.let { append(it).append(" ") }
+                append(headsComponent).append("  ")
+            } else {
+                append("  ").append(headsComponent)
+                extraText?.let { append(" ").append(it) }
+            }
         }
-        val headsComponent = Component.empty()
-        visibleProfiles.forEachIndexed { index, profile ->
-            if (index > 0) headsComponent.append(" ")
-            headsComponent.append(player2dHeadTextComponent(profile))
-        }
-        val final2dHeadText = headsComponent.setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE))
-        val finalText = Component.empty()
-        if (rightAligned) {
-            if (extraProfiles > 0) finalText.append(extraProfilesText).append(" ")
-            finalText.append(final2dHeadText).append(" ")
-        } else {
-            finalText.append(" ").append(final2dHeadText)
-            if (extraProfiles > 0) finalText.append(" ").append(extraProfilesText)
-        }
-        return finalText
     }
 }

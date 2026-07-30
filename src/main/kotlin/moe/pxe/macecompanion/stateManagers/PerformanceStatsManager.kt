@@ -5,11 +5,13 @@ import net.minecraft.client.Minecraft
 
 object PerformanceStatsManager {
     var fps: Int = -1
+    var ping: Int = -1
     var tps: Float = -1f
 
     fun registerPerformanceStatsListeners(){
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { client: Minecraft ->
             fps = client.fps
+            ping = client.connection?.getPlayerInfo(client.user.name)?.latency ?: -1
             tps = client.level?.tickRateManager()?.tickrate() ?: -1f
         })
     }

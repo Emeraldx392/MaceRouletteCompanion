@@ -11,7 +11,7 @@ object EventManager {
 
     val newEventRegex = Regex("""⏵ New Event Started! \(by (.+)\)""")
     val newEventTypeRegex = Regex("""\s+⏵ Type: (.+)""")
-    val newEventDurationRegex = Regex("""\s+⏵ Length: (\d+)""")
+    val newEventDurationRegex = Regex("""\s+⏵ Length: (\d+)h""")
 
     fun resetEventData() {
         doubleXp = false
@@ -34,12 +34,12 @@ object EventManager {
             }
             newEventTypeRegex.matchEntire(text)?.groups[1]?.let {
                 newEventType = it.value
-                if(newEventType == "Double XP") doubleXp = true
+                if (newEventType == "Double XP") doubleXp = true
             }
             newEventDurationRegex.matchEntire(text)?.groups[1]?.let {
-                val eventDurationString = it.value
+                val eventDuration = it.value.toInt()
                 if (newEvent) {
-                    CustomToasts.sendNewEventToast(newEventType, eventDurationString, newEventStarter)
+                    CustomToasts.sendNewEventToast(newEventType, eventDuration, newEventStarter)
                     newEvent = false
                     newEventStarter = ""
                     newEventType = ""

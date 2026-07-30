@@ -29,7 +29,7 @@ object ConsumableManager {
 
             modifierChargerRegex.matchEntire(text)?.groups?.let {
                 val player = it[1]?.value.toString()
-                val modifier = getModifierFromMessage(message).toString()
+                val modifier = getModifierFromMessage(message).translatable.string
                 val queueLength = it[3]?.value?.toIntOrNull() ?: 0
                 sendModifierChargerToast(modifier, queueLength, player)
             }
@@ -39,7 +39,7 @@ object ConsumableManager {
             }
             eternalElectorRegex.matchEntire(text)?.groups?.let {
                 eternalElectorPlayer = it[1]?.value.toString()
-                eternalElectorModifier = getModifierFromMessage(message).toString()
+                eternalElectorModifier = getModifierFromMessage(message).translatable.string
             }
             eternalElectorPositionRegex.matchEntire(text)?.groups?.let {
                 val queuePosition = it[1]?.value!!.toInt()
