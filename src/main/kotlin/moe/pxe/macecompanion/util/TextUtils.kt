@@ -34,41 +34,26 @@ object TextUtils {
         else if (eternal) Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)
         else Config.getNormalModifierTextAccentStyle(CommonColors.YELLOW)
 
-        val eternalText = Component.literal("∞")
-            .setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549))
-        val chargedText = Component.literal("⚡")
-            .setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))
+        val eternalText = Component.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549))
+        val chargedText = Component.literal("⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))
 
         val extraText = when {
-            eternal && charged -> if (rightAligned) eternalText.append(chargedText)
-                .append(" ") else Component.literal(" ").append(chargedText).append(eternalText)
-
-            eternal && !charged -> if (rightAligned) eternalText.append(" ") else Component.literal(" ")
-                .append(eternalText)
-
-            !eternal && charged -> if (rightAligned) chargedText.append(" ") else Component.literal(" ")
-                .append(chargedText)
-
+            eternal && charged -> if (rightAligned) Component.empty().append(eternalText).append(chargedText).append(" ") else Component.literal(" ").append(chargedText).append(eternalText)
+            eternal && !charged -> if (rightAligned) Component.empty().append(eternalText).append(" ") else Component.literal(" ").append(eternalText)
+            !eternal && charged -> if (rightAligned) Component.empty().append(chargedText).append(" ") else Component.literal(" ").append(chargedText)
             else -> Component.empty()
         }
 
         val baseText = modifier.translatable.copy().setStyle(textStyle)
 
         val modifierText =
-            if (!rightAligned) baseText.append(extraText)
-            else extraText.append(baseText)
+            if (!rightAligned) Component.empty().append(baseText).append(extraText)
+            else Component.empty().append(extraText).append(baseText)
 
         return modifierText
     }
 
-    fun buildModifierTextWith2dBoosters(
-        modifier: Modifiers,
-        eternal: Boolean,
-        charged: Boolean,
-        rightAligned: Boolean,
-        use2dHeads: Boolean,
-        boosters: MutableList<GameProfile>?
-    ): Component {
+    fun buildModifierTextWith2dBoosters(modifier: Modifiers, eternal: Boolean, charged: Boolean, rightAligned: Boolean, use2dHeads: Boolean, boosters: MutableList<GameProfile>?): Component {
         val startingText = buildModifierText(modifier, eternal, charged, rightAligned)
         if (!use2dHeads || boosters == null) return startingText
         val boosterText = player2dHeadTextComponentList(boosters, Config.boosterListMax.value, rightAligned)
