@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.Minecraft
-
 object PlotManager {
 
     val patchPlotRegex = Regex("""⏵ Current Patch""")
@@ -27,12 +26,10 @@ object PlotManager {
 
     val client: Minecraft = Minecraft.getInstance()
 
-    fun isOnDiamondfire(): Boolean{
+    fun isOnDiamondfire(): Boolean {
         val serverEntry = client.currentServer ?: return false
         val address = serverEntry.ip.lowercase()
-        return address.endsWith("diamondfire.games") ||
-                address == "mcdiamondfire.com"
-                || address.contains("148.113.223.138")
+        return address.endsWith("diamondfire.games") || address == "mcdiamondfire.com" || address.contains("148.113.223.138")
     }
 
     fun fillPlotIds(ids: Set<String>) {
@@ -43,12 +40,12 @@ object PlotManager {
         }
     }
     fun requestPlotId() {
-        if(onDiamondfire) {
+        if (onDiamondfire) {
             hidePlotRegex = true
             SendMessage.sendCommand("find ${client.user.name}")
         }
     }
-    fun registerServerAndPlotListeners(){
+    fun registerServerAndPlotListeners() {
         ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
             onDiamondfire = isOnDiamondfire()
             tps = -1f
@@ -59,7 +56,6 @@ object PlotManager {
             ConsumableManager.resetConsumableData()
             ShowdownManager.resetShowdownData()
             AccuracyManager.resetAccuracyData()
-            SummerPointsManager.resetSummerPointsData()
             RoundManager.resetRoundData()
             ModifierManager.resetModifierData()
         }
@@ -69,7 +65,7 @@ object PlotManager {
             isStatless = false
         }
         ClientSendMessageEvents.ALLOW_CHAT.register { message ->
-            if (onDiamondfire && message.contains("/play") || message.startsWith("/join $plotHandle") ||message.startsWith("/join $plotId")) {
+            if (onDiamondfire && message.contains("/play") || message.startsWith("/join $plotHandle") || message.startsWith("/join $plotId")) {
                 BountyManager.resetBountyData()
                 EliminationManager.resetEliminationData()
                 EventManager.resetEventData()
@@ -86,7 +82,7 @@ object PlotManager {
             if (overlay) return@register true
             if (!text.contains('⏵') && !text.contains('→')) return@register true
 
-            if(patchPlotRegex.containsMatchIn(text)) requestPlotId()
+            if (patchPlotRegex.containsMatchIn(text)) requestPlotId()
 
             plotRegex.find(text)?.groups?.let {
                 plotId = it[1]?.value?.toIntOrNull()
@@ -98,7 +94,7 @@ object PlotManager {
                     val totalPlayersFound = it[1]?.value?.toIntOrNull() ?: -1
                     playersTotal = totalPlayersFound
                 }
-                if(hidePlotRegex) {
+                if (hidePlotRegex) {
                     hidePlotRegex = false
                     return@register false
                 }

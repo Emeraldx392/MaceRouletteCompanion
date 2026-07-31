@@ -14,7 +14,6 @@ import moe.pxe.macecompanion.stateManagers.ModifierManager.modifierBoosters
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiersToCheck
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
-import moe.pxe.macecompanion.stateManagers.SummerPointsManager.summerPoints
 import moe.pxe.macecompanion.util.TitleCallback
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.network.chat.Style
@@ -60,7 +59,6 @@ object RoundManager {
             resetAccuracyData()
             eliminations = if (eliminated) -1 else 0
             starFragments = if (eliminated) -1 else 0
-            summerPoints = -1
             AutoGL.sendGlMessage()
             BountyManager.getBountyData()
         }
