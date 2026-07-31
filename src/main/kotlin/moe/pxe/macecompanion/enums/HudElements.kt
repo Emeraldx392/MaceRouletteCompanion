@@ -28,8 +28,6 @@ import moe.pxe.macecompanion.stateManagers.RoundManager.playtime
 import moe.pxe.macecompanion.stateManagers.RoundManager.round
 import moe.pxe.macecompanion.stateManagers.RoundManager.roundColor
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
-import moe.pxe.macecompanion.stateManagers.SummerPointsManager.summerColor
-import moe.pxe.macecompanion.stateManagers.SummerPointsManager.summerPoints
 import moe.pxe.macecompanion.util.OptionUtils.overrideColorOption
 import moe.pxe.macecompanion.util.OptionUtils.overrideColorsOption
 import moe.pxe.macecompanion.util.OptionUtils.addColorOptionDependency
@@ -318,29 +316,6 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                     .build())
             .build()
             .generateScreen(parent)
-    },
-    SUMMER_POINTS {
-        override fun render(context: GuiGraphics, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
-            if (summerPoints == -1) return 0
-            if (!gameOngoing) return 0
-
-            val textRenderer = Minecraft.getInstance().font
-            val textIcon = Component.literal("⚑ ").setStyle(Config.getSummerPointsIconAccentStyle(summerColor))
-            val text = textIcon.append(
-                Component.translatable(
-                    "mrc.roundhud.summer_points", Component.literal("$summerPoints")
-                        .setStyle(Config.getSummerPointsNumberAccentStyle(summerColor))
-                )
-                    .setStyle(Config.getSummerPointsTextAccentStyle(summerColor))
-            )
-            val width = textRenderer.width(text)
-            var xPos = 0
-            if (rightAligned) xPos = -width
-            var yPos = yOffset
-            if (bottomAligned) yPos = -yOffset - 12
-            context.drawString(textRenderer, text, xPos, yPos, -1)
-            return 12
-        }
     },
     STAR_FRAGMENTS {
         private val starFragmentIcon = getStarFragmentIcon()

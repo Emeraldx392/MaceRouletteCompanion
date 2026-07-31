@@ -20,8 +20,6 @@ object CustomKeybinds {
         private set
     lateinit var openEventsKeyBinding: KeyMapping
         private set
-    lateinit var openSummerKeyBinding: KeyMapping
-        private set
     lateinit var openModOptionsKeyBinding: KeyMapping
         private set
     lateinit var toggleHudKeyBinding: KeyMapping
@@ -55,14 +53,6 @@ object CustomKeybinds {
         openEventsKeyBinding = KeyBindingHelper.registerKeyBinding(
             KeyMapping(
                 "key.macecompanion.open_events",
-                InputConstants.Type.KEYSYM,
-                InputConstants.UNKNOWN.value,
-                maceRouletteCategory
-            )
-        )
-        openSummerKeyBinding = KeyBindingHelper.registerKeyBinding(
-            KeyMapping(
-                "key.macecompanion.open_summer",
                 InputConstants.Type.KEYSYM,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
@@ -110,9 +100,6 @@ object CustomKeybinds {
             }
             while (openEventsKeyBinding.consumeClick()) {
                 if(PlotManager.onMaceRoulette) SendMessage.sendMessage("@events")
-            }
-            while (openSummerKeyBinding.consumeClick()) {
-                if(PlotManager.onMaceRoulette) SendMessage.sendMessage("@summer")
             }
             while (openModOptionsKeyBinding.consumeClick()) {
                 if (client.screen == null) {
