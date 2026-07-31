@@ -14,7 +14,6 @@ import moe.pxe.macecompanion.stateManagers.PlotManager
 import moe.pxe.macecompanion.stateManagers.RoundManager
 import moe.pxe.macecompanion.stateManagers.ShowdownManager
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager
-import moe.pxe.macecompanion.stateManagers.SummerPointsManager
 import moe.pxe.macecompanion.util.SendMessage
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.ModInitializer
@@ -46,7 +45,6 @@ class MaceCompanion : ModInitializer {
         ShowdownManager.registerShowdownListeners()
         PlayersOnlineManager.registerPlayersOnlineListeners()
         AccuracyManager.registerAccuracyListeners()
-        SummerPointsManager.registerSummerPointsListeners()
         RoundManager.registerRoundListeners()
         ModifierManager.registerModifierListeners()
         SendMessage.registerTickListener()

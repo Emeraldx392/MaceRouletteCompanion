@@ -6,7 +6,7 @@ import dev.isxander.yacl3.gui.AbstractWidget
 import dev.isxander.yacl3.gui.YACLScreen
 import dev.isxander.yacl3.gui.controllers.cycling.EnumController
 
-class EnumWithConfigController<T>(val opt: Option<T>, val cls: Class<T>) : EnumController<T>(opt, cls) where T : Enum<T>, T: ConfigurableEnum {
+class EnumWithConfigController<T>(val opt: Option<T>, cls: Class<T>) : EnumController<T>(opt, cls) where T : Enum<T>, T: ConfigurableEnum {
     override fun provideWidget(screen: YACLScreen, widgetDimension: Dimension<Int>): AbstractWidget {
         return ConfigurableOptionElement(
             screen,
