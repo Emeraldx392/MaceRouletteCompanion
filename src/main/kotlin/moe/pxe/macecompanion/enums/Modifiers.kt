@@ -530,8 +530,10 @@ enum class Modifiers {
     },
 
     MYSTERY {
-        override val matchName = "???"
-        override val icon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance
+        override val matchName = "Mystery!"
+        override val icon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance.apply {
+            set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+        }
         override val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(getMysteryModifierTextAccentStyle(0xD2B5FF)).withStyle(ChatFormatting.ITALIC)
         override val customIcon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/mystery"))

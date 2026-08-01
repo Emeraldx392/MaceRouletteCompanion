@@ -32,7 +32,7 @@ object TextUtils {
     fun buildModifierText(modifier: Modifiers, eternal: Boolean, charged: Boolean, rightAligned: Boolean): Component {
         val textStyle = if (charged) Config.getChargedModifierTextAccentStyle(0x0786FF)
         else if (eternal) Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549)
-        else Config.getNormalModifierTextAccentStyle(CommonColors.YELLOW)
+        else modifier.translatable.copy().style
 
         val eternalText = Component.literal("∞").setStyle(Config.getEternalModifierTextWithShadowAccentStyle(CommonColors.WHITE, -10071549))
         val chargedText = Component.literal("⚡").setStyle(Config.getChargedModifierTextAccentStyle(0x0786FF))
