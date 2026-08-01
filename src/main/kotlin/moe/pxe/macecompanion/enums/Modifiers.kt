@@ -2,6 +2,7 @@ package moe.pxe.macecompanion.enums
 
 import com.mojang.authlib.properties.Property
 import moe.pxe.macecompanion.MaceCompanion
+import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.config.Config.getMysteryModifierTextAccentStyle
 import moe.pxe.macecompanion.util.PlayerProfile.headFromProperty
 import net.minecraft.client.Minecraft
@@ -16,6 +17,7 @@ import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.ChatFormatting
 import net.minecraft.resources.Identifier
+import net.minecraft.util.CommonColors
 import java.util.Optional
 
 enum class Modifiers {
@@ -530,8 +532,10 @@ enum class Modifiers {
     },
 
     MYSTERY {
-        override val matchName = "???"
-        override val icon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance
+        override val matchName = "Mystery!"
+        override val icon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance.apply {
+            set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+        }
         override val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(getMysteryModifierTextAccentStyle(0xD2B5FF)).withStyle(ChatFormatting.ITALIC)
         override val customIcon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/mystery"))
@@ -540,7 +544,7 @@ enum class Modifiers {
 
 
     abstract val matchName: String
-    open val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withColor(0xfcfc54)
+    open val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(Config.getNormalModifierTextAccentStyle(CommonColors.YELLOW))
     abstract val icon: ItemStack
     abstract val customIcon: ItemStack
 }

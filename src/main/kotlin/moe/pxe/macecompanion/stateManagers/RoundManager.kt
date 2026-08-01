@@ -13,6 +13,7 @@ import moe.pxe.macecompanion.stateManagers.ModifierManager.eternalModifier
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifierBoosters
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiersToCheck
+import moe.pxe.macecompanion.stateManagers.ModifierManager.mysteryAmount
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
 import moe.pxe.macecompanion.util.TitleCallback
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
@@ -68,6 +69,7 @@ object RoundManager {
         modifierBoosters.clear()
         eternalModifier = null
         modifiersToCheck = -1
+        mysteryAmount = -1
         maceChance = 100f / playersAlive
     }
 
