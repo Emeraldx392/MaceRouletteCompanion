@@ -18,6 +18,7 @@ import moe.pxe.macecompanion.stateManagers.EliminationManager.playersTotal
 import moe.pxe.macecompanion.stateManagers.ModifierManager.eternalModifier
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifierBoosters
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
+import moe.pxe.macecompanion.stateManagers.ModifierManager.mysteryAmount
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.fps
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.ping
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.tps
@@ -486,8 +487,12 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (modifiersChanged) cachedModifiers = modifiers.toMutableMap()
             modifiers.forEach { (modifier, isCharged) ->
                 var xPos = if (rightAligned) -16 else 0
-                if (modifiersChanged || cachedModifierIcons[modifier] == null) cachedModifierIcons[modifier] =
-                    if (!Config.customModifierIcons.value) modifier.icon else modifier.customIcon
+                if (modifiersChanged || cachedModifierIcons[modifier] == null){
+                    val baseIcon = if (!Config.customModifierIcons.value) modifier.icon else modifier.customIcon
+                    cachedModifierIcons[modifier] = baseIcon.copy().apply {
+                        if (modifier == Modifiers.MYSTERY) count = mysteryAmount
+                    }
+                }
                 val icon = cachedModifierIcons[modifier]!!
                 context.item(icon, xPos, yPos)
                 context.itemDecorations(textRenderer, icon, xPos, yPos)

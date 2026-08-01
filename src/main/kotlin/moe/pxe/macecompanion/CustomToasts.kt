@@ -32,13 +32,15 @@ object CustomToasts {
         sendCustomToast(Component.literal("$playerName used a Modifier Charger!"), description)
     }
 
-    fun sendChaosStarterToast(player: String) {
+    fun sendChaosDustToast(player: String, amount: Int) {
         if (!Config.showConsumableToasts.value) return
         val client: Minecraft = Minecraft.getInstance()
         var playerName = player
         if (player == client.user.name) playerName = "You"
-        val description = Component.literal("The next round will have five modifiers!")
-        sendCustomToast(Component.literal("$playerName used a Chaos Starter!"), description)
+        val numberString = if(amount == 5) "five" else "seven"
+        val modString = if(amount == 5) "Chaos" else "Mayhem"
+        val description = Component.literal("The next round will have $numberString modifiers!")
+        sendCustomToast(Component.literal("$playerName activated $modString!"), description)
     }
 
     fun sendEternalElectorToast(modifier: String?, player: String?, queuePosition: Int) {

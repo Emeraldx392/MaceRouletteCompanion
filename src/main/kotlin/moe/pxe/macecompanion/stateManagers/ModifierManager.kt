@@ -14,27 +14,25 @@ import kotlin.text.Regex
 
 object ModifierManager {
     var modifiersToCheck = -1
+    var mysteryAmount = -1
     var modifiers = mutableMapOf<Modifiers, Boolean>()
     var eternalModifier: Modifiers? = null
     var modifierBoosters = mutableMapOf<Modifiers, MutableList<GameProfile>>()
-
 
     val chatModifierHeaderRegex = Regex("""⏵(.+)ᴍᴏᴅɪꜰɪᴇʀ:""")
     val chatModifierItemRegex = Regex("""\s+◇ .+""")
     val chatModifierBoostedRegex = Regex("""\s+◇ .+ \(☁ Boosted by (.+)\)""")
     val chatModifierReallyBoostedRegex = Regex("""\s+◇ .+ \(☁ Boosted by .+, .+, and .+ others\)""")
 
-    const val ETERNAL_MODIFIER_TEXTURE =
-        "eyJ0ZXh0dXJlcyI6IHsiU0tJTiI6IHsidXJsIjogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjFjNWQ3NjZjODQwMWM5NTY2Y2E1MDhhYTNkMjU0NDQwYjg4YjIxZjU5MGI1MWVjMTVjNGE5ZDk4YjE4OWMzZiJ9fX0="
-    const val CHARGED_MODIFIER_TEXTURE =
-        "eyJ0ZXh0dXJlcyI6IHsiU0tJTiI6IHsidXJsIjogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDc1Mzg2MDAwNWQzNGRkNTMwMmRhNWVmOTA1Y2Q3ODFhYzcxNDFkMjJhYmMxZGIzOWMzMWJhMmZlM2M2ODRiZCJ9fX0="
-    const val MYSTERY_MODIFIER_TEXTURE =
-        "eyJ0ZXh0dXJlcyI6IHsiU0tJTiI6IHsidXJsIjogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzlkODliMGJmNmY2NjU1YWJjMGFlY2NjY2Q2YTE4OGQwZWNjMzY2YTRiNWU2ZDFmZTJhM2ExY2U1MWYzMGU4YSJ9fX0="
+    const val ETERNAL_MODIFIER_TEXTURE = "eyJ0ZXh0dXJlcyI6IHsiU0tJTiI6IHsidXJsIjogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjFjNWQ3NjZjODQwMWM5NTY2Y2E1MDhhYTNkMjU0NDQwYjg4YjIxZjU5MGI1MWVjMTVjNGE5ZDk4YjE4OWMzZiJ9fX0="
+    const val CHARGED_MODIFIER_TEXTURE = "eyJ0ZXh0dXJlcyI6IHsiU0tJTiI6IHsidXJsIjogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDc1Mzg2MDAwNWQzNGRkNTMwMmRhNWVmOTA1Y2Q3ODFhYzcxNDFkMjJhYmMxZGIzOWMzMWJhMmZlM2M2ODRiZCJ9fX0="
+    const val MYSTERY_MODIFIER_TEXTURE = "eyJ0ZXh0dXJlcyI6IHsiU0tJTiI6IHsidXJsIjogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzlkODliMGJmNmY2NjU1YWJjMGFlY2NjY2Q2YTE4OGQwZWNjMzY2YTRiNWU2ZDFmZTJhM2ExY2U1MWYzMGU4YSJ9fX0="
 
     val client: Minecraft = Minecraft.getInstance()
 
     fun resetModifierData() {
         modifiersToCheck = -1
+        mysteryAmount = -1
         modifiers.clear()
         eternalModifier = null
         modifierBoosters.clear()
@@ -77,7 +75,10 @@ object ModifierManager {
 
     fun getModifierFromMessage(message: Component): Modifiers {
         val jsonString = messageToJsonString(message)
-        if (jsonString.contains(MYSTERY_MODIFIER_TEXTURE)) return Modifiers.MYSTERY
+        if (jsonString.contains(MYSTERY_MODIFIER_TEXTURE)){
+            mysteryAmount = if(mysteryAmount == -1) 1 else mysteryAmount + 1
+            return Modifiers.MYSTERY
+        }
         Modifiers.entries.forEach { modifier ->
             if (jsonString.contains(modifier.matchName)) return modifier
         }
@@ -102,6 +103,7 @@ object ModifierManager {
                     " ᴅᴏᴜʙʟᴇ " -> modifiersToCheck = 2
                     " ᴛʀɪᴘʟᴇ " -> modifiersToCheck = 3
                     " ᴄʜᴀᴏꜱ " -> modifiersToCheck = 5
+                    " ᴍᴀʏʜᴇᴍ " -> modifiersToCheck = 7
                 }
             }
             if (modifiersToCheck > 0) {
