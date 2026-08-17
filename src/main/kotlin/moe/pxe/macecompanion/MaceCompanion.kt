@@ -2,6 +2,7 @@ package moe.pxe.macecompanion
 
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.config.Config
+import moe.pxe.macecompanion.config.ConfigUpdater
 import moe.pxe.macecompanion.stateManagers.AccuracyManager
 import moe.pxe.macecompanion.stateManagers.BountyManager
 import moe.pxe.macecompanion.stateManagers.ConsumableManager
@@ -32,6 +33,7 @@ class MaceCompanion : ModInitializer {
             LOGGER.error("Mace Roulette Companion is not a server-side mod!")
             return
         }
+        ConfigUpdater.updateConfig()
         if (!Config.loadFromFile()) Config.saveToFile()
         CustomKeybinds.registerKeybinds()
         PlotManager.fillPlotIds(Config.plotIds.value.toSet())

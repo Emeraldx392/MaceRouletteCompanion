@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "SubtitlePacketMixin",
-    "TitlePacketMixin"
+    "TitlePacketMixin",
+    "ScoreboardMixin"
   ],
   "injectors": {
     "defaultRequire": 1

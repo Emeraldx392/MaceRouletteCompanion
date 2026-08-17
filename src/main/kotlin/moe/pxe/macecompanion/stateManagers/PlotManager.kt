@@ -40,7 +40,7 @@ object PlotManager {
         }
     }
     fun requestPlotId() {
-        if (onDiamondfire) {
+        if (onDiamondfire && !hidePlotRegex) {
             hidePlotRegex = true
             SendMessage.sendCommand("find ${client.user.name}")
         }
