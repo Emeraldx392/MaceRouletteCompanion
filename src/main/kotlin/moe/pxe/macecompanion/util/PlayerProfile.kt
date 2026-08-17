@@ -6,7 +6,7 @@ import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
 import com.mojang.serialization.JsonOps
-import moe.pxe.macecompanion.config.Config
+import moe.pxe.macecompanion.config.Config.getAccentColor
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.core.component.DataComponents
@@ -69,7 +69,7 @@ object PlayerProfile {
             }
         }.setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE))
 
-        val extraText = if (extraCount > 0) Component.literal("+$extraCount").setStyle(Config.getModifiersTextAccentStyle(0xa63efc))
+        val extraText = if (extraCount > 0) Component.literal("+$extraCount").withColor(getAccentColor("modifiers", "text_color", 0xa63efc))
         else null
         if(visibleCount < 1) return if(rightAligned) extraText!!.append(" ") else Component.literal(" ").append(extraText!!)
         return Component.empty().apply {

@@ -2,8 +2,7 @@ package moe.pxe.macecompanion.enums
 
 import com.mojang.authlib.properties.Property
 import moe.pxe.macecompanion.MaceCompanion
-import moe.pxe.macecompanion.config.Config
-import moe.pxe.macecompanion.config.Config.getMysteryModifierTextAccentStyle
+import moe.pxe.macecompanion.config.Config.getAccentColor
 import moe.pxe.macecompanion.util.PlayerProfile.headFromProperty
 import net.minecraft.client.Minecraft
 import net.minecraft.core.component.DataComponents
@@ -14,10 +13,11 @@ import net.minecraft.world.item.enchantment.Enchantments
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.core.registries.Registries
-import net.minecraft.network.chat.Component
 import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import net.minecraft.util.CommonColors
+import net.minecraft.world.item.component.ChargedProjectiles
 import java.util.Optional
 
 enum class Modifiers {
@@ -336,7 +336,7 @@ enum class Modifiers {
     },
 
     RODS {
-        override val matchName = "Fishing Rods"
+        override val matchName = "Fishing Rod"
         override val icon: ItemStack = Items.FISHING_ROD.defaultInstance
         override val customIcon: ItemStack = Items.FISHING_ROD.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/fishing_rods"))
@@ -439,7 +439,7 @@ enum class Modifiers {
     },
 
     BOUNCY_CHARGES {
-        override val matchName = "Bouncy Charges"
+        override val matchName = "Bouncy Burst"
         override val icon: ItemStack = Items.SLIME_BALL.defaultInstance
         override val customIcon: ItemStack = Items.SLIME_BALL.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/bouncy_charges"))
@@ -518,13 +518,36 @@ enum class Modifiers {
         }
     },
 
+    BANNED_KEY {
+        override val matchName = "Banned Key"
+        override val icon: ItemStack = Items.TRIAL_KEY.defaultInstance
+        override val customIcon: ItemStack = Items.TRIAL_KEY.defaultInstance.apply {
+            set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/banned_key"))
+        }
+    },
+
+    SHERIFF {
+        override val matchName = "Sheriff"
+        override val icon: ItemStack = Items.CROSSBOW.defaultInstance.apply {
+            set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(Items.FIREWORK_ROCKET.defaultInstance))
+        }
+        override val customIcon: ItemStack = Items.CROSSBOW.defaultInstance.apply {
+            set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(Items.FIREWORK_ROCKET.defaultInstance))
+            set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/sheriff"))
+        }
+    },
+
     UNKNOWN {
         override val matchName = "\uE024"
         override val icon: ItemStack = Items.MACE.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "glitched_mace"))
             set(DataComponents.USE_COOLDOWN, UseCooldown(0f, Optional.of(Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifier_icon"))))
         }
-        override val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+        override var translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+        override fun refreshTranslatable() {
+            translatable = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+        }
+
         override val customIcon: ItemStack = Items.MACE.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/unknown"))
             set(DataComponents.USE_COOLDOWN, UseCooldown(0f, Optional.of(Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifier_icon"))))
@@ -536,15 +559,22 @@ enum class Modifiers {
         override val icon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance.apply {
             set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
         }
-        override val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(getMysteryModifierTextAccentStyle(0xD2B5FF)).withStyle(ChatFormatting.ITALIC)
+        override var translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(ChatFormatting.ITALIC).withColor(getAccentColor("modifiers", "text_color.mystery_modifier", 0xD2B5FF))
+        override fun refreshTranslatable() {
+            translatable = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(ChatFormatting.ITALIC).withColor(getAccentColor("modifiers", "text_color.mystery_modifier", 0xD2B5FF))
+        }
+
         override val customIcon: ItemStack = Items.LIGHT_GRAY_CANDLE.defaultInstance.apply {
             set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MaceCompanion.MOD_ID, "modifiers/mystery"))
         }
     };
 
+    open fun refreshTranslatable() {
+        translatable = Component.translatable("mrc.modifier.${name.lowercase()}").withColor(getAccentColor("modifiers", "text_color.regular_modifier", CommonColors.YELLOW))
+    }
 
     abstract val matchName: String
-    open val translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withStyle(Config.getNormalModifierTextAccentStyle(CommonColors.YELLOW))
+    open var translatable: Component = Component.translatable("mrc.modifier.${name.lowercase()}").withColor(getAccentColor("modifiers", "text_color.regular_modifier", CommonColors.YELLOW))
     abstract val icon: ItemStack
     abstract val customIcon: ItemStack
 }
