@@ -15,8 +15,11 @@ import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiersToCheck
 import moe.pxe.macecompanion.stateManagers.ModifierManager.mysteryAmount
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
+import moe.pxe.macecompanion.util.TextUtils.hideNewRoundOrGameTextMessage
 import moe.pxe.macecompanion.util.TitleCallback
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
+import net.minecraft.client.Minecraft
+import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
 import net.minecraft.world.InteractionResult
@@ -34,7 +37,7 @@ object RoundManager {
     val titleRoundNumberRegex = Regex("""ʀᴏᴜɴᴅ (\d+)""")
     val chatLeaderboardHeaderRegex = Regex("""\s+‌‌ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ:""")
 
-    fun resetRoundData(){
+    fun resetRoundData() {
         gameOngoing = false
         round = -1
         roundColor = Style.EMPTY.withColor(0x9ef6fc)
@@ -44,10 +47,10 @@ object RoundManager {
 
     fun updateMaceChance() {
         maceChance = when {
-            Modifiers.VICTIM in modifiers ->  (100f * (playersAlive - 1)) / playersAlive
-            Modifiers.DOUBLE in modifiers ->  200f / playersAlive
-            Modifiers.TRIPLE in modifiers ->  300f / playersAlive
-            Modifiers.QUADRUPLE in modifiers ->  400f / playersAlive
+            Modifiers.VICTIM in modifiers -> (100f * (playersAlive - 1)) / playersAlive
+            Modifiers.DOUBLE in modifiers -> 200f / playersAlive
+            Modifiers.TRIPLE in modifiers -> 300f / playersAlive
+            Modifiers.QUADRUPLE in modifiers -> 400f / playersAlive
             else -> 100f / playersAlive
         }
     }
@@ -69,8 +72,9 @@ object RoundManager {
         modifierBoosters.clear()
         eternalModifier = null
         modifiersToCheck = -1
-        mysteryAmount = -1
+        mysteryAmount = 0
         maceChance = 100f / playersAlive
+        hideNewRoundOrGameTextMessage = false
     }
 
     fun registerRoundListeners() {
@@ -96,6 +100,8 @@ object RoundManager {
                     if (!PlotManager.onMaceRoulette) return InteractionResult.PASS
                     titleRoundNumberRegex.matchEntire(packet.text.string)?.let { roundNumberMatch ->
                         roundNumberMatch.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
+                        hideNewRoundOrGameTextMessage = true
+                        if (!eliminated) Minecraft.getInstance().player?.sendOverlayMessage(Component.empty())
                         roundColor = packet.text.siblings[0].style
                     }
                     return InteractionResult.PASS

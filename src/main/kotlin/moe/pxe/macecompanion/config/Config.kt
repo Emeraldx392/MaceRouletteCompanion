@@ -9,12 +9,20 @@ import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.enums.BetConditions
 import moe.pxe.macecompanion.enums.HudElements
 import moe.pxe.macecompanion.enums.HudLocation
+import moe.pxe.macecompanion.enums.Modifiers
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.chat.Style
 import net.minecraft.util.CommonColors
 import java.awt.Color
 
 object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir.resolve("mrc.json")) {
+
+    override fun saveToFile() {
+        rightHudElements.value.forEach { it.refreshRendering() }
+        leftHudElements.value.forEach { it.refreshRendering() }
+        Modifiers.entries.forEach { it.refreshTranslatable() }
+        super.saveToFile()
+    }
 
     val RGB_COLOR_CODEC = object : PrimitiveCodec<Color>{
         override fun <T : Any> read(ops: DynamicOps<T>, input: T): DataResult<Color> {
@@ -54,9 +62,9 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
 
     val useAccentColors by register<Boolean>(false, BOOL)
     val accentColorNumber by register<Int>(1, INT)
-    val mainAccentColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
-    val secondAccentColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
-    val thirdAccentColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
+    val mainAccentColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+    val secondAccentColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+    val thirdAccentColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
     val leftHudElements by register<List<HudElements>>(listOf(
         HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,HudElements.ACCURACY,
@@ -75,13 +83,13 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
 
     // NESTED CONFIG ===========================================================
     val overrideRoundColors by register<Boolean>(false, BOOL)
-    val roundNumberColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
-    val roundTextColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
+    val roundNumberColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+    val roundTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
     val overridePlayerCountColors by register<Boolean>(false, BOOL)
     val alivePlayersColor by register<Color>(Color(0xd5fcf5), RGB_COLOR_CODEC)
     val totalPlayersColor by register<Color>(Color(0xd0d0d0), RGB_COLOR_CODEC)
-    val playerCountTextColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
+    val playerCountTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
     val overrideAccuracyColors by register<Boolean>(false, BOOL)
     val accuracyColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
@@ -108,8 +116,8 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
 
     val overrideModifiersColors by register<Boolean>(false, BOOL)
     val modifiersTextColor by register<Color>(Color(0xa63efc), RGB_COLOR_CODEC)
-    val normalModifierTextColor by register<Color>(Color.YELLOW, RGB_COLOR_CODEC)
-    val eternalModifierTextColor by register<Color>(Color.WHITE, RGB_COLOR_CODEC)
+    val normalModifierTextColor by register<Color>(Color(CommonColors.YELLOW), RGB_COLOR_CODEC)
+    val eternalModifierTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
     val eternalModifierTextShadowColor by register<Color>(Color(-10071549), RGB_COLOR_CODEC)
     val chargedModifierTextColor by register<Color>(Color(0x0786FF), RGB_COLOR_CODEC)
     val mysteryModifierTextColor by register<Color>(Color(0xD2B5FF), RGB_COLOR_CODEC)

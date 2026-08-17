@@ -12,6 +12,9 @@ import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.util.CommonColors
 
 object TextUtils {
+
+    var hideNewRoundOrGameTextMessage: Boolean = false
+
     fun boldString(text: Component, subtext: String): Boolean {
         if (text.string.contains(subtext) && text.style.isBold) {
             return true
@@ -59,5 +62,16 @@ object TextUtils {
         val boosterText = player2dHeadTextComponentList(boosters, Config.boosterListMax.value, rightAligned)
         return if (rightAligned) Component.empty().append(boosterText).append(startingText)
         else Component.empty().append(startingText).append(boosterText)
+    }
+
+    fun getNewRoundOrGameText(type: String, time: Int): Component {
+        if(hideNewRoundOrGameTextMessage) return Component.empty()
+        val firstText = when (type) {
+                "Round" -> Component.literal("Next round in ").withColor(CommonColors.HIGH_CONTRAST_DIAMOND)
+                "Game" -> Component.literal("Game starting in ").withColor(CommonColors.YELLOW)
+                else -> return Component.empty()
+            }
+        val timeLeft = Component.literal(time.toString()).withColor(CommonColors.YELLOW)
+        return firstText.append(timeLeft)
     }
 }

@@ -55,6 +55,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var cachedText: Component? = null
         private var cachedTextWidth: Int = 0
 
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (round == -1 || !gameOngoing) return 0
 
@@ -111,6 +114,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     },
@@ -120,6 +124,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var cachedText: Component? = null
         private var cachedTextWidth: Int = 0
 
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (playersAlive == -1 || !gameOngoing) return 0
 
@@ -177,6 +184,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     },
@@ -187,6 +195,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
         val textColors = arrayOf(0xff2c01, 0xff5500, 0xff8400, 0xffa503, 0xffd202, 0xfff400, 0xe6ff01, 0xc0ff03, 0x92ff00, 0x74ff02, 0x3cff01, 0x13ff00, 0x01ff00)
 
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (maceAttempts.isEmpty() || !gameOngoing) return 0
 
@@ -249,6 +260,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     },
@@ -257,6 +269,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var cachedText: Component? = null
         private var cachedTextWidth: Int = 0
 
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (eliminations == -1 || !gameOngoing || (Config.hideEliminationsWhenEliminated.value && eliminated)) return 0
 
@@ -315,6 +330,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     },
@@ -323,6 +339,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var cachedStarFragments: Int = 0
         private var cachedText: Component? = null
         private var cachedTextWidth: Int = 0
+
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (starFragments == -1 || !gameOngoing || isStatless || (Config.hideStarFragmentsWhenEliminated.value && eliminated)) return 0
 
@@ -380,6 +400,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     },
@@ -387,6 +408,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var lastCachedSecond: Long = -1L
         private var cachedText: Component? = null
         private var cachedTextWidth: Int = 0
+
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (!gameOngoing) return 0
             val currentPlaytime = playtime ?: return 0
@@ -453,6 +478,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     },
@@ -465,6 +491,14 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var cachedRightModifierTexts = mutableMapOf<Modifiers, Component>()
         private var cachedLeftModifierTexts = mutableMapOf<Modifiers, Component>()
         private var cachedModifierTextWidths = mutableMapOf<Modifiers, Int>()
+
+        override fun refreshRendering() {
+            cachedHeaderText = null
+            cachedModifierIcons.clear()
+            cachedLeftModifierTexts.clear()
+            cachedRightModifierTexts.clear()
+
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (!gameOngoing || modifiers.isEmpty()) return 0
 
@@ -601,6 +635,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
         val textColors = arrayOf(0xff2c01, 0xff5500, 0xff8400, 0xffa503, 0xffd202, 0xfff400, 0xe6ff01, 0xc0ff03, 0x92ff00, 0x74ff02, 0x3cff01, 0x13ff00, 0x01ff00)
 
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (!gameOngoing || maceChance < 0f || (Config.hideMaceChanceWhenEliminated.value && eliminated)) return 0
 
@@ -661,6 +698,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     },
@@ -668,8 +706,16 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var cachedBounties: HashMap<GameProfile, Int> = HashMap()
         private var cachedHeaderText: Component? = null
         private var cachedHeaderTextWidth: Int = 0
-        private var cachedBountyTexts: HashMap<GameProfile, Component?> = HashMap()
+        private var cachedRightBountyTexts: HashMap<GameProfile, Component?> = HashMap()
+        private var cachedLeftBountyTexts: HashMap<GameProfile, Component?> = HashMap()
         private var cachedBountyTextWidths: HashMap<GameProfile, Int> = HashMap()
+
+        override fun refreshRendering() {
+            cachedHeaderText = null
+            cachedRightBountyTexts.isEmpty()
+            cachedLeftBountyTexts.isEmpty()
+
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (!gameOngoing || bounties.isEmpty() || eliminated) return 0
 
@@ -695,7 +741,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                     val playerUsername = profile.name
                     var xPos = if (rightAligned) -16 else 0
                     context.item(headFromProfile(profile), xPos, yPos)
-                    if (bountiesChanged || cachedBountyTexts[profile] == null) {
+                    if (bountiesChanged || (rightAligned && cachedRightBountyTexts[profile] == null) || (!rightAligned && cachedLeftBountyTexts[profile] == null)) {
                         val playerText = Component.literal("$playerUsername")
                             .setStyle(Config.getBountyBoardPlayerAccentStyle(CommonColors.YELLOW))
                         val bountyText = Component.literal("$bountyAmount⛂")
@@ -712,9 +758,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                                 .append(bountyText)
                         }
                         cachedBountyTextWidths[profile] = textRenderer.width(finalText)
-                        cachedBountyTexts[profile] = finalText
+                        if (rightAligned) cachedRightBountyTexts[profile] = finalText
+                        else cachedLeftBountyTexts[profile] = finalText
                     }
-                    val text = cachedBountyTexts[profile]!!
+                    val text = if (rightAligned) cachedRightBountyTexts[profile]!! else cachedLeftBountyTexts[profile]!!
                     xPos = if (rightAligned) -22 - cachedBountyTextWidths[profile]!! else 22
                     context.text(textRenderer, text, xPos, yPos + 4, -1)
                     yPos += 20
@@ -770,6 +817,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var cachedFps: Int = -2
         private var cachedText: Component? = null
         private var cachedTextWidth: Int = 0
+
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (fps == -1) return 0
 
@@ -815,6 +866,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     },
@@ -822,6 +874,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var cachedPing: Int = -2
         private var cachedText: Component? = null
         private var cachedTextWidth: Int = 0
+
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (ping <= 0) return 0
 
@@ -869,6 +925,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     },
@@ -876,6 +933,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         private var cachedTps: Float = -2f
         private var cachedText: Component? = null
         private var cachedTextWidth: Int = 0
+
+        override fun refreshRendering() {
+            cachedText = null
+        }
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (tps == -1f) return 0
 
@@ -921,10 +982,11 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                             }
                             .build())
                     .build())
+            .save(Config::saveToFile)
             .build()
             .generateScreen(parent)
     }, ;
-
+    abstract fun refreshRendering()
     abstract fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int
     override fun generateConfig(parent: Screen): Screen? = null
     override fun getSerializedName(): String = name

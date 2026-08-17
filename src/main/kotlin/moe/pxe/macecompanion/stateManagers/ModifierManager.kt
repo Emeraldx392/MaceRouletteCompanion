@@ -14,7 +14,7 @@ import kotlin.text.Regex
 
 object ModifierManager {
     var modifiersToCheck = -1
-    var mysteryAmount = -1
+    var mysteryAmount = 0
     var modifiers = mutableMapOf<Modifiers, Boolean>()
     var eternalModifier: Modifiers? = null
     var modifierBoosters = mutableMapOf<Modifiers, MutableList<GameProfile>>()
@@ -32,7 +32,7 @@ object ModifierManager {
 
     fun resetModifierData() {
         modifiersToCheck = -1
-        mysteryAmount = -1
+        mysteryAmount = 0
         modifiers.clear()
         eternalModifier = null
         modifierBoosters.clear()
@@ -76,7 +76,7 @@ object ModifierManager {
     fun getModifierFromMessage(message: Component): Modifiers {
         val jsonString = messageToJsonString(message)
         if (jsonString.contains(MYSTERY_MODIFIER_TEXTURE)){
-            mysteryAmount = if(mysteryAmount == -1) 1 else mysteryAmount + 1
+            mysteryAmount++
             return Modifiers.MYSTERY
         }
         Modifiers.entries.forEach { modifier ->
