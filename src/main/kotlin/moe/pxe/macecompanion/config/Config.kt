@@ -11,7 +11,6 @@ import moe.pxe.macecompanion.enums.HudElements
 import moe.pxe.macecompanion.enums.HudLocation
 import moe.pxe.macecompanion.enums.Modifiers
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.network.chat.Style
 import net.minecraft.util.CommonColors
 import java.awt.Color
 
@@ -24,13 +23,13 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
         super.saveToFile()
     }
 
-    val RGB_COLOR_CODEC = object : PrimitiveCodec<Color>{
+    val RGB_COLOR_CODEC = object : PrimitiveCodec<Color> {
         override fun <T : Any> read(ops: DynamicOps<T>, input: T): DataResult<Color> {
             return ops.getStringValue(input).map(Color::decode)
         }
 
         override fun <T : Any> write(ops: DynamicOps<T>, value: Color): T {
-            return ops.createString("#"+Integer.toHexString(value.rgb).substring(2))
+            return ops.createString("#" + Integer.toHexString(value.rgb).substring(2))
         }
     }
 
@@ -66,10 +65,13 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val secondAccentColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
     val thirdAccentColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
-    val leftHudElements by register<List<HudElements>>(listOf(
-        HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE,HudElements.ACCURACY,
-        HudElements.ELIMINATIONS, HudElements.STAR_FRAGMENTS, HudElements.PLAYTIME, HudElements.MODIFIERS), HudElements.CODEC.listOf())
+    val leftHudElements by register<List<HudElements>>(
+        listOf(
+            HudElements.ROUND_NUMBER, HudElements.PLAYERS_ALIVE, HudElements.MACE_CHANCE, HudElements.ACCURACY, HudElements.ELIMINATIONS, HudElements.STAR_FRAGMENTS, HudElements.PLAYTIME, HudElements.MODIFIERS
+        ), HudElements.CODEC.listOf()
+    )
     val rightHudElements by register<List<HudElements>>(listOf(HudElements.PING, HudElements.FPS, HudElements.BOUNTY_BOARD), HudElements.CODEC.listOf())
+
     // Toasts
     val showNewEventToasts by register<Boolean>(true, BOOL)
     val showConsumableToasts by register<Boolean>(true, BOOL)
@@ -82,219 +84,302 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val plotIds by register<List<String>>(listOf("mace", "statless"), STRING.listOf())
 
     // NESTED CONFIG ===========================================================
-    val overrideRoundColors by register<Boolean>(false, BOOL)
-    val roundNumberColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
-    val roundTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
-    val overridePlayerCountColors by register<Boolean>(false, BOOL)
-    val alivePlayersColor by register<Color>(Color(0xd5fcf5), RGB_COLOR_CODEC)
-    val totalPlayersColor by register<Color>(Color(0xd0d0d0), RGB_COLOR_CODEC)
-    val playerCountTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+    //Round Number - Styling - Colors
+    val roundNumberOverrideColors by register<Boolean>(false, BOOL)
+    val roundNumberNumberColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+    val roundNumberTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
-    val overrideAccuracyColors by register<Boolean>(false, BOOL)
-    val accuracyColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
+    //Players Alive - Styling - Colors
+    val playersAliveOverrideColors by register<Boolean>(false, BOOL)
+    val playersAliveNumberColorAlive by register<Color>(Color(0xd5fcf5), RGB_COLOR_CODEC)
+    val playersAliveNumberColorTotal by register<Color>(Color(0xd0d0d0), RGB_COLOR_CODEC)
+    val playersAliveTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+
+    //Accuracy - Styling - Colors
+    val accuracyOverrideColors by register<Boolean>(false, BOOL)
+    val accuracyNumberColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
     val accuracyIconColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
     val accuracyTextColor by register<Color>(Color(0x79fc00), RGB_COLOR_CODEC)
 
-    val hideEliminationsWhenEliminated by register<Boolean>(false, BOOL)
-    val overrideEliminationsColors by register<Boolean>(false, BOOL)
+    //Eliminations - Misc
+    val eliminationsHideWhenEliminated by register<Boolean>(false, BOOL)
+
+    //Eliminations - Styling - Colors
+    val eliminationsOverrideColors by register<Boolean>(false, BOOL)
     val eliminationsNumberColor by register<Color>(Color(0xa63efc), RGB_COLOR_CODEC)
     val eliminationsIconColor by register<Color>(Color(0xa63efc), RGB_COLOR_CODEC)
     val eliminationsTextColor by register<Color>(Color(0xa63efc), RGB_COLOR_CODEC)
 
-    val hideStarFragmentsWhenEliminated by register<Boolean>(true, BOOL)
-    val overrideStarFragmentsColors by register<Boolean>(false, BOOL)
+    //Star Fragments - Misc
+    val starFragmentsHideWhenEliminated by register<Boolean>(true, BOOL)
+
+    //Star Fragments - Styling - Colors
+    val starFragmentsOverrideColors by register<Boolean>(false, BOOL)
     val starFragmentsNumberColor by register<Color>(Color(0xa0f9ff), RGB_COLOR_CODEC)
     val starFragmentsIconColor by register<Color>(Color(0xa0f9ff), RGB_COLOR_CODEC)
     val starFragmentsTextColor by register<Color>(Color(0xa0f9ff), RGB_COLOR_CODEC)
 
-    val overridePlaytimeColors by register<Boolean>(false, BOOL)
-    val playtimeColor by register<Color>(Color(0x3efca1), RGB_COLOR_CODEC)
+    //Playtime - Styling - Colors
+    val playtimeOverrideColors by register<Boolean>(false, BOOL)
+    val playtimeNumberColor by register<Color>(Color(0x3efca1), RGB_COLOR_CODEC)
     val playtimeIconColor by register<Color>(Color(0x3efca1), RGB_COLOR_CODEC)
     val playtimeTextColor by register<Color>(Color(0x3efca1), RGB_COLOR_CODEC)
 
+    //Modifiers - Misc
+    val modifiersMaxBoosters by register<Int>(5, INT)
 
-    val overrideModifiersColors by register<Boolean>(false, BOOL)
+    //Modifiers - Styling - Colors
+    val modifiersOverrideColors by register<Boolean>(false, BOOL)
     val modifiersTextColor by register<Color>(Color(0xa63efc), RGB_COLOR_CODEC)
-    val normalModifierTextColor by register<Color>(Color(CommonColors.YELLOW), RGB_COLOR_CODEC)
-    val eternalModifierTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
-    val eternalModifierTextShadowColor by register<Color>(Color(-10071549), RGB_COLOR_CODEC)
-    val chargedModifierTextColor by register<Color>(Color(0x0786FF), RGB_COLOR_CODEC)
-    val mysteryModifierTextColor by register<Color>(Color(0xD2B5FF), RGB_COLOR_CODEC)
-    val boosterListMax by register<Int>(5, INT)
-    val customModifierIcons by register<Boolean>(false, BOOL)
-    val use2dHeads by register<Boolean>(false, BOOL)
+    val modifiersTextColorRegularModifier by register<Color>(Color(CommonColors.YELLOW), RGB_COLOR_CODEC)
+    val modifiersTextColorEternalModifier by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
+    val modifiersShadowColorEternalModifier by register<Color>(Color(-10071549), RGB_COLOR_CODEC)
+    val modifiersTextColorChargedModifier by register<Color>(Color(0x0786FF), RGB_COLOR_CODEC)
+    val modifiersTextColorMysteryModifier by register<Color>(Color(0xD2B5FF), RGB_COLOR_CODEC)
 
-    val overrideMaceChanceColors by register<Boolean>(false, BOOL)
+    //Modifiers - Styling - Icons
+    val modifiersUseCustomModifierIcons by register<Boolean>(false, BOOL)
+    val modifiersUse2dHeadIcons by register<Boolean>(false, BOOL)
+
+    //Mace Chance - Misc
+    val maceChanceHideWhenEliminated by register<Boolean>(false, BOOL)
+
+    //Mace Chance - Styling - Colors
+    val maceChanceOverrideColors by register<Boolean>(false, BOOL)
     val maceChanceNumberColor by register<Color>(Color(0x42C1FF), RGB_COLOR_CODEC)
     val maceChanceIconColor by register<Color>(Color(0x42C1FF), RGB_COLOR_CODEC)
     val maceChanceTextColor by register<Color>(Color(0x42C1FF), RGB_COLOR_CODEC)
-    val hideMaceChanceWhenEliminated by register<Boolean>(false, BOOL)
 
-    val overrideBountyBoardColors by register<Boolean>(false, BOOL)
-    val bountyBoardNumberColor by register<Color>(Color(0xff7cf4), RGB_COLOR_CODEC)
-    val bountyBoardPlayerColor by register<Color>(Color(CommonColors.YELLOW), RGB_COLOR_CODEC)
-    val bountyBoardTextColor by register<Color>(Color(0xff7cf4), RGB_COLOR_CODEC)
+    //Bounty Board - Misc
     val bountyBoardMaxPlayers by register<Int>(3, INT)
     val bountyBoardMinBounty by register<Int>(1, INT)
 
-    val overrideFpsColors by register<Boolean>(false, BOOL)
+    //Bounty Board - Styling - Colors
+    val bountyBoardOverrideColors by register<Boolean>(false, BOOL)
+    val bountyBoardNumberColor by register<Color>(Color(0xff7cf4), RGB_COLOR_CODEC)
+    val bountyBoardTextColorPlayer by register<Color>(Color(CommonColors.YELLOW), RGB_COLOR_CODEC)
+    val bountyBoardTextColor by register<Color>(Color(0xff7cf4), RGB_COLOR_CODEC)
+
+    //Fps - Styling - Colors
+    val fpsOverrideColors by register<Boolean>(false, BOOL)
     val fpsNumberColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
     val fpsTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
-    val overridePingColors by register<Boolean>(false, BOOL)
+    //Ping - Styling - Colors
+    val pingOverrideColors by register<Boolean>(false, BOOL)
     val pingNumberColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
     val pingTextColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)
 
-    val overrideTpsColors by register<Boolean>(false, BOOL)
+    //Tps - Styling - Colors
+    val tpsOverrideColors by register<Boolean>(false, BOOL)
     val tpsNumberColor by register<Color>(Color(0xbfff00), RGB_COLOR_CODEC)
     val tpsTextColor by register<Color>(Color(0xbfff00), RGB_COLOR_CODEC)
 
-    fun getRoundTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideRoundColors.value) it.withColor(roundTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getRoundNumberAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideRoundColors.value) it.withColor(roundNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value){ if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-
-    fun getPlayerCountTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overridePlayerCountColors.value) it.withColor(playerCountTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getAlivePLayersAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overridePlayerCountColors.value) it.withColor(alivePlayersColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-    fun getTotalPLayersAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overridePlayerCountColors.value) it.withColor(totalPlayersColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    fun getOverrideColorsOption(category: String): Boolean {
+        return when (category) {
+            "round_number" -> roundNumberOverrideColors.value
+            "players_alive" -> playersAliveOverrideColors.value
+            "accuracy" -> accuracyOverrideColors.value
+            "eliminations" -> eliminationsOverrideColors.value
+            "star_fragments" -> starFragmentsOverrideColors.value
+            "playtime" -> playtimeOverrideColors.value
+            "modifiers" -> modifiersOverrideColors.value
+            "mace_chance" -> maceChanceOverrideColors.value
+            "bounty_board" -> bountyBoardOverrideColors.value
+            "fps" -> fpsOverrideColors.value
+            "ping" -> pingOverrideColors.value
+            "tps" -> tpsOverrideColors.value
+            else -> false
+        }
     }
 
-    fun getAccuracyTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideAccuracyColors.value) it.withColor(accuracyTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getAccuracyAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideAccuracyColors.value) it.withColor(accuracyColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-    fun getAccuracyIconAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideAccuracyColors.value) it.withColor(accuracyIconColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    fun getOptionValue(category: String, type: String): Int? {
+        return when (category) {
+            "round_number" -> when (type) {
+                "number_color" -> roundNumberNumberColor.value.rgb
+                "text_color" -> roundNumberTextColor.value.rgb
+                else -> null
+            }
+
+            "players_alive" -> when (type) {
+                "number_color.alive" -> playersAliveNumberColorAlive.value.rgb
+                "number_color.total" -> playersAliveNumberColorTotal.value.rgb
+                "text_color" -> playersAliveTextColor.value.rgb
+                else -> null
+            }
+
+            "accuracy" -> when (type) {
+                "number_color" -> accuracyNumberColor.value.rgb
+                "icon_color" -> accuracyIconColor.value.rgb
+                "text_color" -> accuracyTextColor.value.rgb
+                else -> null
+            }
+
+            "eliminations" -> when (type) {
+                "number_color" -> eliminationsNumberColor.value.rgb
+                "icon_color" -> eliminationsIconColor.value.rgb
+                "text_color" -> eliminationsTextColor.value.rgb
+                else -> null
+            }
+
+            "star_fragments" -> when (type) {
+                "number_color" -> starFragmentsNumberColor.value.rgb
+                "icon_color" -> starFragmentsIconColor.value.rgb
+                "text_color" -> starFragmentsTextColor.value.rgb
+                else -> null
+            }
+
+            "playtime" -> when (type) {
+                "number_color" -> playtimeNumberColor.value.rgb
+                "icon_color" -> playtimeIconColor.value.rgb
+                "text_color" -> playtimeTextColor.value.rgb
+                else -> null
+            }
+
+
+            "modifiers" -> when (type) {
+                "text_color" -> modifiersTextColor.value.rgb
+                "text_color.regular_modifier" -> modifiersTextColorRegularModifier.value.rgb
+                "text_color.eternal_modifier" -> modifiersTextColorEternalModifier.value.rgb
+                "shadow_color.eternal_modifier" -> modifiersShadowColorEternalModifier.value.rgb
+                "text_color.charged_modifier" -> modifiersTextColorChargedModifier.value.rgb
+                "text_color.mystery_modifier" -> modifiersTextColorMysteryModifier.value.rgb
+                else -> null
+            }
+
+            "mace_chance" -> when (type) {
+                "number_color" -> maceChanceNumberColor.value.rgb
+                "icon_color" -> maceChanceIconColor.value.rgb
+                "text_color" -> maceChanceTextColor.value.rgb
+                else -> null
+            }
+
+            "bounty_board" -> when (type) {
+                "number_color" -> bountyBoardNumberColor.value.rgb
+                "text_color" -> bountyBoardTextColor.value.rgb
+                "text_color.player" -> bountyBoardTextColorPlayer.value.rgb
+                else -> null
+            }
+
+            "fps" -> when (type) {
+                "number_color" -> fpsNumberColor.value.rgb
+                "text_color" -> fpsTextColor.value.rgb
+                else -> null
+            }
+
+            "ping" -> when (type) {
+                "number_color" -> pingNumberColor.value.rgb
+                "text_color" -> pingTextColor.value.rgb
+                else -> null
+            }
+
+            "tps" -> when (type) {
+                "number_color" -> tpsNumberColor.value.rgb
+                "text_color" -> tpsTextColor.value.rgb
+                else -> null
+            }
+
+            else -> null
+        }
     }
 
-    fun getEliminationsTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideEliminationsColors.value) it.withColor(eliminationsTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getEliminationsNumberAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideEliminationsColors.value) it.withColor(eliminationsNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-    fun getEliminationsIconAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideEliminationsColors.value) it.withColor(eliminationsIconColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
+    fun getFirstAvailableAccentColor(category: String, type: String): Int? {
+        val colorIds: List<Int> = when (category) {
+            "round_number" -> when (type) {
+                "number_color" -> kotlin.collections.listOf(2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "players_alive" -> when (type) {
+                "number_color.alive" -> kotlin.collections.listOf(2, 1)
+                "number_color.total" -> listOf(3, 2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "accuracy" -> when (type) {
+                "number_color" -> kotlin.collections.listOf(2, 1)
+                "icon_color" -> listOf(3, 2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "eliminations" -> when (type) {
+                "number_color" -> kotlin.collections.listOf(2, 1)
+                "icon_color" -> listOf(3, 2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "star_fragments" -> when (type) {
+                "number_color" -> kotlin.collections.listOf(2, 1)
+                "icon_color" -> listOf(3, 2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "playtime" -> when (type) {
+                "number_color" -> kotlin.collections.listOf(2, 1)
+                "icon_color" -> listOf(3, 2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "modifiers" -> when (type) {
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "mace_chance" -> when (type) {
+                "number_color" -> kotlin.collections.listOf(2, 1)
+                "icon_color" -> listOf(3, 2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "bounty_board" -> when (type) {
+                "number_color" -> listOf(3, 2, 1)
+                "text_color.player" -> kotlin.collections.listOf(2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "fps" -> when (type) {
+                "number_color" -> kotlin.collections.listOf(2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "ping" -> when (type) {
+                "number_color" -> kotlin.collections.listOf(2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            "tps" -> when (type) {
+                "number_color" -> kotlin.collections.listOf(2, 1)
+                "text_color" -> listOf(1)
+                else -> return null
+            }
+
+            else -> return null
+        }
+        val colorNumber = colorIds.firstOrNull { it <= accentColorNumber.value } ?: return null
+        return when (colorNumber) {
+            1 -> mainAccentColor.value.rgb
+            2 -> secondAccentColor.value.rgb
+            3 -> thirdAccentColor.value.rgb
+            else -> null
+        }
     }
 
-    fun getStarFragmentsTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideStarFragmentsColors.value) it.withColor(starFragmentsTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getStarFragmentsNumberAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideStarFragmentsColors.value) it.withColor(starFragmentsNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-    fun getStarFragmentsIconAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideStarFragmentsColors.value) it.withColor(starFragmentsIconColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
+    fun getAccentColor(category: String, type: String, defaultColor: Int): Int {
+        return if (getOverrideColorsOption(category.lowercase())) getOptionValue(category.lowercase(), type)
+            ?: defaultColor
+        else if (useAccentColors.value) getFirstAvailableAccentColor(category.lowercase(), type) ?: defaultColor
+        else defaultColor
 
-    fun getPlaytimeTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overridePlaytimeColors.value) it.withColor(playtimeTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getPlaytimeNumberAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overridePlaytimeColors.value) it.withColor(playtimeColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-    fun getPlaytimeIconAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overridePlaytimeColors.value) it.withColor(playtimeIconColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-
-    fun getModifiersTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideModifiersColors.value) it.withColor(modifiersTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getNormalModifierTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideModifiersColors.value) it.withColor(normalModifierTextColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getEternalModifierTextWithShadowAccentStyle(defaultColor: Int, defaultShadowColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor).withShadowColor(defaultShadowColor)
-        return defaultStyle.let { if (overrideModifiersColors.value) it.withColor(eternalModifierTextColor.value.rgb and 0x00ffffff).withShadowColor(eternalModifierTextShadowColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getChargedModifierTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideModifiersColors.value) it.withColor(chargedModifierTextColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getMysteryModifierTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideModifiersColors.value) it.withColor(mysteryModifierTextColor.value.rgb and 0x00ffffff) else it}
-    }
-
-    fun getMaceChanceTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideMaceChanceColors.value) it.withColor(maceChanceTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getMaceChanceNumberAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideMaceChanceColors.value) it.withColor(maceChanceNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-    fun getMaceChanceIconAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideMaceChanceColors.value) it.withColor(maceChanceIconColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-
-    fun getBountyBoardTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideBountyBoardColors.value) it.withColor(bountyBoardTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getBountyBoardAmountAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideBountyBoardColors.value) it.withColor(bountyBoardNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 2) it.withColor(thirdAccentColor.value.rgb and 0x00ffffff) else  it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-    fun getBountyBoardPlayerAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideBountyBoardColors.value) it.withColor(bountyBoardPlayerColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-
-    fun getFpsTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideFpsColors.value) it.withColor(fpsTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getFpsNumberAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideFpsColors.value) it.withColor(fpsNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-
-    fun getPingTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overridePingColors.value) it.withColor(pingTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getPingNumberAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overridePingColors.value) it.withColor(pingNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
-    }
-
-    fun getTpsTextAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideTpsColors.value) it.withColor(tpsTextColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) it.withColor(mainAccentColor.value.rgb and 0x00ffffff) else it}
-    }
-    fun getTpsNumberAccentStyle(defaultColor: Int) : Style {
-        val defaultStyle = Style.EMPTY.withColor(defaultColor)
-        return defaultStyle.let { if (overrideTpsColors.value) it.withColor(tpsNumberColor.value.rgb and 0x00ffffff) else if (useAccentColors.value) { if(accentColorNumber.value > 1) it.withColor(secondAccentColor.value.rgb and 0x00ffffff) else it.withColor(mainAccentColor.value.rgb and 0x00ffffff)} else it}
     }
 }

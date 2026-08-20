@@ -1,14 +1,29 @@
 package moe.pxe.macecompanion.enums
 
 import com.mojang.authlib.GameProfile
-import dev.isxander.yacl3.api.ConfigCategory
 import dev.isxander.yacl3.api.NameableEnum
-import dev.isxander.yacl3.api.OptionDescription
-import dev.isxander.yacl3.api.OptionGroup
-import dev.isxander.yacl3.api.YetAnotherConfigLib
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.config.Config
+import moe.pxe.macecompanion.config.Config.eliminationsHideWhenEliminated
+import moe.pxe.macecompanion.config.Config.getAccentColor
+import moe.pxe.macecompanion.config.Config.maceChanceHideWhenEliminated
+import moe.pxe.macecompanion.config.Config.modifiersMaxBoosters
+import moe.pxe.macecompanion.config.Config.modifiersUse2dHeadIcons
+import moe.pxe.macecompanion.config.Config.modifiersUseCustomModifierIcons
+import moe.pxe.macecompanion.config.Config.starFragmentsHideWhenEliminated
 import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
+import moe.pxe.macecompanion.config.hudElementConfigs.AccuracyConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.BountyBoardConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.EliminationsConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.FpsConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.MaceChanceConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.ModifiersConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.PingConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.PlayersAliveConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.PlaytimeConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.RoundNumberConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.StarFrgamentsConfig
+import moe.pxe.macecompanion.config.hudElementConfigs.TpsConfig
 import moe.pxe.macecompanion.stateManagers.AccuracyManager.maceAttempts
 import moe.pxe.macecompanion.stateManagers.BountyManager.bounties
 import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminated
@@ -29,12 +44,6 @@ import moe.pxe.macecompanion.stateManagers.RoundManager.playtime
 import moe.pxe.macecompanion.stateManagers.RoundManager.round
 import moe.pxe.macecompanion.stateManagers.RoundManager.roundColor
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
-import moe.pxe.macecompanion.util.OptionUtils.overrideColorOption
-import moe.pxe.macecompanion.util.OptionUtils.overrideColorsOption
-import moe.pxe.macecompanion.util.OptionUtils.addColorOptionDependency
-import moe.pxe.macecompanion.util.OptionUtils.hideWhenEliminatedOption
-import moe.pxe.macecompanion.util.OptionUtils.iconBooleanOption
-import moe.pxe.macecompanion.util.OptionUtils.sliderOption
 import moe.pxe.macecompanion.util.PlayerProfile.headFromProfile
 import moe.pxe.macecompanion.util.TextUtils.buildModifierTextWith2dBoosters
 import moe.pxe.macecompanion.util.TextUtils.getStarFragmentIcon
@@ -42,6 +51,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
 import net.minecraft.util.CommonColors
 import net.minecraft.util.StringRepresentable
 import net.minecraft.world.item.ItemStack
@@ -58,6 +68,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (round == -1 || !gameOngoing) return 0
 
@@ -68,11 +79,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 cachedRound = round
                 cachedColor = currentColor
 
-                val numberText = Component.literal("$round")
-                    .setStyle(Config.getRoundNumberAccentStyle(currentColor).withBold(true))
-
-                val newText = Component.translatable("mrc.roundhud.round", numberText)
-                    .setStyle(Config.getRoundTextAccentStyle(currentColor).withBold(true))
+                val numberText = Component.literal("$round").setStyle(Style.EMPTY.withBold(true)).withColor(getAccentColor(name, "number_color", currentColor))
+                val newText = Component.translatable("mrc.roundhud.round", numberText).setStyle(Style.EMPTY.withBold(true)).withColor(getAccentColor(name, "text_color", currentColor))
 
                 cachedText = newText
                 cachedTextWidth = textRenderer.width(newText)
@@ -90,33 +98,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 24
         }
 
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                            .also {
-                                val overrideRoundColors = overrideColorsOption(name.lowercase(), Config.overrideRoundColors.asBinding())
-
-                                val roundTextColor = overrideColorOption(name.lowercase(), Config.roundTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(roundTextColor, overrideRoundColors)
-
-                                val roundNumberColor = overrideColorOption(name.lowercase(), Config.roundNumberColor.asBinding(), "number_color")
-                                addColorOptionDependency(roundNumberColor, overrideRoundColors)
-
-                                it.option(overrideRoundColors)
-                                it.option(roundTextColor)
-                                it.option(roundNumberColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = RoundNumberConfig.generateConfig(parent)
     },
     PLAYERS_ALIVE {
         private var cachedAlive: Int = -2
@@ -127,6 +109,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (playersAlive == -1 || !gameOngoing) return 0
 
@@ -135,16 +118,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if (playersAlive != cachedAlive || playersTotal != cachedTotal || cachedText == null) {
                 cachedAlive = playersAlive
                 cachedTotal = playersTotal
-                val countText = Component.literal("$playersAlive")
-                    .setStyle(Config.getAlivePLayersAccentStyle(0xd5fcf5))
-                if (playersTotal >= 0) {
-                    countText.append(
-                        Component.literal("/$playersTotal")
-                            .setStyle(Config.getTotalPLayersAccentStyle(0xd0d0d0))
-                    )
-                }
-                val newText = Component.translatable("mrc.roundhud.alive", countText)
-                    .setStyle(Config.getPlayerCountTextAccentStyle(CommonColors.WHITE))
+                val countText = Component.literal("$playersAlive").withColor(getAccentColor(name, "number_color.alive", 0xd5fcf5))
+                if (playersTotal >= 0) countText.append(Component.literal("/$playersTotal").withColor(getAccentColor(name, "number_color.total", 0xd0d0d0)))
+                val newText = Component.translatable("mrc.roundhud.alive", countText).withColor(getAccentColor(name, "text_color", CommonColors.WHITE))
                 cachedText = newText
                 cachedTextWidth = textRenderer.width(newText)
             }
@@ -156,37 +132,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                            .also {
-                                val overridePlayerCountColors = overrideColorsOption(name.lowercase(), Config.overridePlayerCountColors.asBinding())
-
-                                val playerCountTextColor = overrideColorOption(name.lowercase(), Config.playerCountTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(playerCountTextColor, overridePlayerCountColors)
-
-                                val alivePlayersColor = overrideColorOption(name.lowercase(), Config.alivePlayersColor.asBinding(), "number_color.alive")
-                                addColorOptionDependency(alivePlayersColor, overridePlayerCountColors)
-
-                                val totalPlayersColor = overrideColorOption(name.lowercase(), Config.totalPlayersColor.asBinding(), "number_color.total")
-                                addColorOptionDependency(totalPlayersColor, overridePlayerCountColors)
-
-                                it.option(overridePlayerCountColors)
-                                it.option(playerCountTextColor)
-                                it.option(alivePlayersColor)
-                                it.option(totalPlayersColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = PlayersAliveConfig.generateConfig(parent)
     },
     ACCURACY {
         private var cachedMaceAttempts = mutableMapOf<Int, Boolean>()
@@ -198,6 +144,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (maceAttempts.isEmpty() || !gameOngoing) return 0
 
@@ -211,14 +158,10 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 }
                 val accuracy = ((successCount.toFloat() / totalMaceAttempts) * 100f).roundToInt()
                 val accuracyColorIdx = (accuracy / 7.7).toInt().coerceIn(0, textColors.lastIndex)
-                val iconText = Component.literal("\uD83C\uDFF9 ")
-                    .setStyle(Config.getAccuracyIconAccentStyle(0x79fc00))
-                val countText = Component.literal("$successCount/$totalMaceAttempts")
-                    .setStyle(Config.getAccuracyTextAccentStyle(0x79fc00))
-                val percentageText = Component.literal("$accuracy%")
-                    .setStyle(Config.getAccuracyAccentStyle(textColors[accuracyColorIdx]))
-                val text = Component.translatable("mrc.roundhud.accuracy", percentageText, countText)
-                    .setStyle(Config.getAccuracyTextAccentStyle(0x79fc00))
+                val iconText = Component.literal("\uD83C\uDFF9 ").withColor(getAccentColor(name, "icon_color", 0x79fc00))
+                val countText = Component.literal("$successCount/$totalMaceAttempts").withColor(getAccentColor(name, "text_color", 0x79fc00))
+                val percentageText = Component.literal("$accuracy%").withColor(getAccentColor(name, "number_color", textColors[accuracyColorIdx]))
+                val text = Component.translatable("mrc.roundhud.accuracy", percentageText, countText).withColor(getAccentColor(name, "text_color", 0x79fc00))
                 val finalText = iconText.append(text)
 
                 cachedText = finalText
@@ -232,37 +175,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                            .also {
-                                val overrideAccuracyColors = overrideColorsOption(name.lowercase(), Config.overrideAccuracyColors.asBinding())
-
-                                val accuracyTextColor = overrideColorOption(name.lowercase(), Config.accuracyTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(accuracyTextColor, overrideAccuracyColors)
-
-                                val accuracyColor = overrideColorOption(name.lowercase(), Config.accuracyColor.asBinding(), "number_color")
-                                addColorOptionDependency(accuracyColor, overrideAccuracyColors)
-
-                                val accuracyIconColor = overrideColorOption(name.lowercase(), Config.accuracyIconColor.asBinding(), "icon_color")
-                                addColorOptionDependency(accuracyIconColor, overrideAccuracyColors)
-
-                                it.option(overrideAccuracyColors)
-                                it.option(accuracyTextColor)
-                                it.option(accuracyColor)
-                                it.option(accuracyIconColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = AccuracyConfig.generateConfig(parent)
     },
     ELIMINATIONS {
         private var cachedEliminations: Int = -2
@@ -272,18 +185,16 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
-            if (eliminations == -1 || !gameOngoing || (Config.hideEliminationsWhenEliminated.value && eliminated)) return 0
+            if (eliminations == -1 || !gameOngoing || (eliminationsHideWhenEliminated.value && eliminated)) return 0
 
             val textRenderer = Minecraft.getInstance().font
 
             if (eliminations != cachedEliminations || cachedText == null) {
-                val iconText = Component.literal("\uD83E\uDE93 ")
-                    .setStyle(Config.getEliminationsIconAccentStyle(0xa63efc))
-                val numberText = Component.literal("$eliminations")
-                    .setStyle(Config.getEliminationsNumberAccentStyle(0xa63efc))
-                val text = Component.translatable("mrc.roundhud.eliminations", numberText)
-                    .setStyle(Config.getEliminationsTextAccentStyle(0xa63efc))
+                val iconText = Component.literal("\uD83E\uDE93 ").withColor(getAccentColor(name, "icon_color", 0xa63efc))
+                val numberText = Component.literal("$eliminations").withColor(getAccentColor(name, "number_color", 0xa63efc))
+                val text = Component.translatable("mrc.roundhud.eliminations", numberText).withColor(getAccentColor(name, "text_color", 0xa63efc))
                 val finalText = iconText.append(text)
                 cachedEliminations = eliminations
                 cachedText = finalText
@@ -296,43 +207,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
-                    .option(hideWhenEliminatedOption(name.lowercase(), Config.hideEliminationsWhenEliminated.asBinding()))
-                    .build()
-            )
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                            .also {
-                                val overrideEliminationsColors = overrideColorsOption(name.lowercase(), Config.overrideEliminationsColors.asBinding())
-
-                                val eliminationsTextColor = overrideColorOption(name.lowercase(), Config.eliminationsTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(eliminationsTextColor, overrideEliminationsColors)
-
-                                val eliminationsNumberColor = overrideColorOption(name.lowercase(), Config.eliminationsNumberColor.asBinding(), "number_color")
-                                addColorOptionDependency(eliminationsNumberColor, overrideEliminationsColors)
-
-                                val eliminationsIconColor = overrideColorOption(name.lowercase(), Config.eliminationsIconColor.asBinding(), "icon_color")
-                                addColorOptionDependency(eliminationsIconColor, overrideEliminationsColors)
-
-                                it.option(overrideEliminationsColors)
-                                it.option(eliminationsTextColor)
-                                it.option(eliminationsNumberColor)
-                                it.option(eliminationsIconColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = EliminationsConfig.generateConfig(parent)
     },
     STAR_FRAGMENTS {
         private val starFragmentIcon = getStarFragmentIcon()
@@ -343,17 +218,15 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
-            if (starFragments == -1 || !gameOngoing || isStatless || (Config.hideStarFragmentsWhenEliminated.value && eliminated)) return 0
+            if (starFragments == -1 || !gameOngoing || isStatless || (starFragmentsHideWhenEliminated.value && eliminated)) return 0
 
             val textRenderer = Minecraft.getInstance().font
             if (cachedStarFragments != starFragments || cachedText == null) {
-                val starFragmentIconText = Component.empty().append(starFragmentIcon)
-                    .setStyle(Config.getStarFragmentsIconAccentStyle(0xa0f9ff))
-                val numberText = Component.literal(" $starFragments")
-                    .setStyle(Config.getStarFragmentsNumberAccentStyle(0xa0f9ff))
-                val text = Component.translatable("mrc.roundhud.starFragments", numberText)
-                    .setStyle(Config.getStarFragmentsTextAccentStyle(0xa0f9ff))
+                val starFragmentIconText = Component.empty().append(starFragmentIcon).withColor(getAccentColor(name, "icon_color", 0xa0f9ff))
+                val numberText = Component.literal(" $starFragments").withColor(getAccentColor(name, "number_color", 0xa0f9ff))
+                val text = Component.translatable("mrc.roundhud.starFragments", numberText).withColor(getAccentColor(name, "text_color", 0xa0f9ff))
                 val finalText = starFragmentIconText.append(text)
                 cachedStarFragments = starFragments
                 cachedText = finalText
@@ -366,43 +239,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
-                    .option(hideWhenEliminatedOption(name.lowercase(), Config.hideStarFragmentsWhenEliminated.asBinding()))
-                    .build()
-            )
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                            .also {
-                                val overrideStarFragmentsColors = overrideColorsOption(name.lowercase(), Config.overrideStarFragmentsColors.asBinding())
-
-                                val starFragmentsTextColor = overrideColorOption(name.lowercase(), Config.starFragmentsTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(starFragmentsTextColor, overrideStarFragmentsColors)
-
-                                val starFragmentsNumberColor = overrideColorOption(name.lowercase(), Config.starFragmentsNumberColor.asBinding(), "number_color")
-                                addColorOptionDependency(starFragmentsNumberColor, overrideStarFragmentsColors)
-
-                                val starFragmentsIconColor = overrideColorOption(name.lowercase(), Config.starFragmentsIconColor.asBinding(), "icon_color")
-                                addColorOptionDependency(starFragmentsIconColor, overrideStarFragmentsColors)
-
-                                it.option(overrideStarFragmentsColors)
-                                it.option(starFragmentsTextColor)
-                                it.option(starFragmentsNumberColor)
-                                it.option(starFragmentsIconColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = StarFrgamentsConfig.generateConfig(parent)
     },
     PLAYTIME {
         private var lastCachedSecond: Long = -1L
@@ -412,6 +249,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (!gameOngoing) return 0
             val currentPlaytime = playtime ?: return 0
@@ -427,14 +265,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
                 val timeString = if (minutes > 0) "${minutes}m ${seconds}s" else "${seconds}s"
 
-                val iconText = Component.literal("⌚ ")
-                    .setStyle(Config.getPlaytimeIconAccentStyle(0x3efca1))
-
-                val numberText = Component.literal(timeString)
-                    .setStyle(Config.getPlaytimeNumberAccentStyle(0x3efca1))
-
-                val text = Component.translatable("mrc.roundhud.playtime", numberText)
-                    .setStyle(Config.getPlaytimeTextAccentStyle(0x3efca1))
+                val iconText = Component.literal("⌚ ").withColor(getAccentColor(name, "icon_color", 0x3efca1))
+                val numberText = Component.literal(timeString).withColor(getAccentColor(name, "number_color", 0x3efca1))
+                val text = Component.translatable("mrc.roundhud.playtime", numberText).withColor(getAccentColor(name, "text_color", 0x3efca1))
 
                 val finalText = iconText.append(text)
 
@@ -450,37 +283,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
         }
 
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                            .also {
-                                val overridePlaytimeColors = overrideColorsOption(name.lowercase(), Config.overridePlaytimeColors.asBinding())
-
-                                val playtimeTextColor = overrideColorOption(name.lowercase(), Config.playtimeTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(playtimeTextColor, overridePlaytimeColors)
-
-                                val playtimeColor = overrideColorOption(name.lowercase(), Config.playtimeColor.asBinding(), "number_color")
-                                addColorOptionDependency(playtimeColor, overridePlaytimeColors)
-
-                                val playtimeIconColor = overrideColorOption(name.lowercase(), Config.playtimeIconColor.asBinding(), "icon_color")
-                                addColorOptionDependency(playtimeIconColor, overridePlaytimeColors)
-
-                                it.option(overridePlaytimeColors)
-                                it.option(playtimeTextColor)
-                                it.option(playtimeColor)
-                                it.option(playtimeIconColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = PlaytimeConfig.generateConfig(parent)
     },
     MODIFIERS {
         private var cachedModifiers = mutableMapOf<Modifiers, Boolean>()
@@ -499,14 +302,14 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             cachedRightModifierTexts.clear()
 
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (!gameOngoing || modifiers.isEmpty()) return 0
 
             val textRenderer = Minecraft.getInstance().font
 
             if (cachedHeaderText == null) {
-                val headerText = Component.translatable("mrc.roundhud.modifiers")
-                    .setStyle(Config.getModifiersTextAccentStyle(0xa63efc))
+                val headerText = Component.translatable("mrc.roundhud.modifiers").withColor(getAccentColor(name, "text_color", 0xa63efc))
                 cachedHeaderText = headerText
                 cachedHeaderTextWidth = textRenderer.width(headerText)
             }
@@ -516,13 +319,13 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             var xPos = if (rightAligned) -cachedHeaderTextWidth else 0
             context.text(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
-            val use2dHeads = Config.use2dHeads.value
+            val use2dHeads = modifiersUse2dHeadIcons.value
             val modifiersChanged = (cachedModifiers != modifiers)
             if (modifiersChanged) cachedModifiers = modifiers.toMutableMap()
             modifiers.forEach { (modifier, isCharged) ->
                 var xPos = if (rightAligned) -16 else 0
-                if (modifiersChanged || cachedModifierIcons[modifier] == null){
-                    val baseIcon = if (!Config.customModifierIcons.value) modifier.icon else modifier.customIcon
+                if (modifiersChanged || cachedModifierIcons[modifier] == null) {
+                    val baseIcon = if (!modifiersUseCustomModifierIcons.value) modifier.icon else modifier.customIcon
                     cachedModifierIcons[modifier] = baseIcon.copy().apply {
                         if (modifier == Modifiers.MYSTERY) count = mysteryAmount
                     }
@@ -544,7 +347,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 context.text(textRenderer, text, xPos, yPos + 4, -1)
 
                 if (!use2dHeads) modifierBoosters[modifier]?.let { playerList ->
-                    val maxBoosters = Config.boosterListMax.value
+                    val maxBoosters = modifiersMaxBoosters.value
                     val visibleBoosters = playerList.take(maxBoosters)
                     val bonusBoostersAmount = playerList.size - maxBoosters
 
@@ -559,7 +362,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
                     if (bonusBoostersAmount > 0) {
                         val textX = baseStart + (visibleBoosters.size * stepSize)
-                        context.text(textRenderer, Component.literal("+$bonusBoostersAmount").setStyle(Config.getModifiersTextAccentStyle(0xa63efc)), textX, yPos + 4, -1)
+                        context.text(textRenderer, Component.literal("+$bonusBoostersAmount").withColor(getAccentColor(name, "text_color", 0xa63efc)), textX, yPos + 4, -1)
                     }
                 }
                 yPos += 20
@@ -568,65 +371,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 12 + (modifiers.size * 20)
         }
 
-        override fun generateConfig(parent: Screen): Screen? {
-            return YetAnotherConfigLib.createBuilder()
-                .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-                .category(
-                    ConfigCategory.createBuilder()
-                        .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
-                        .option(sliderOption(name.lowercase(), Config.boosterListMax.asBinding(), 0, 15, 1, "max_boosters"))
-                        .build()
-                )
-                .category(
-                    ConfigCategory.createBuilder()
-                        .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                        .group(
-                            OptionGroup.createBuilder()
-                                .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                                .also {
-                                    val overrideModifiersColors = overrideColorsOption(name.lowercase(), Config.overrideModifiersColors.asBinding())
-
-                                    val modifiersTextColor = overrideColorOption(name.lowercase(), Config.modifiersTextColor.asBinding(), "text_color")
-                                    addColorOptionDependency(modifiersTextColor, overrideModifiersColors)
-
-                                    val normalModifierTextColor = overrideColorOption(name.lowercase(), Config.normalModifierTextColor.asBinding(), "text_color.regular_modifier")
-                                    addColorOptionDependency(normalModifierTextColor, overrideModifiersColors)
-
-                                    val eternalModifierTextColor = overrideColorOption(name.lowercase(), Config.eternalModifierTextColor.asBinding(), "text_color.eternal_modifier")
-                                    addColorOptionDependency(eternalModifierTextColor, overrideModifiersColors)
-
-                                    val eternalModifierTextShadowColor = overrideColorOption(name.lowercase(), Config.eternalModifierTextShadowColor.asBinding(), "shadow_color.eternal_modifier")
-                                    addColorOptionDependency(eternalModifierTextShadowColor, overrideModifiersColors)
-
-                                    val chargedModifierTextColor = overrideColorOption(name.lowercase(), Config.chargedModifierTextColor.asBinding(), "text_color.charged_modifier")
-                                    addColorOptionDependency(chargedModifierTextColor, overrideModifiersColors)
-
-                                    val mysteryModifierTextColor = overrideColorOption(name.lowercase(), Config.mysteryModifierTextColor.asBinding(), "text_color.mystery_modifier")
-                                    addColorOptionDependency(mysteryModifierTextColor, overrideModifiersColors)
-
-                                    it.option(overrideModifiersColors)
-                                    it.option(modifiersTextColor)
-                                    it.option(normalModifierTextColor)
-                                    it.option(eternalModifierTextColor)
-                                    it.option(eternalModifierTextShadowColor)
-                                    it.option(chargedModifierTextColor)
-                                    it.option(mysteryModifierTextColor)
-                                }
-                                .build())
-                        .group(
-                            OptionGroup.createBuilder()
-                                .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.icons"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.icons.description")))
-                                .option(iconBooleanOption(name.lowercase(), Config.customModifierIcons.asBinding(), "use_custom"))
-                                .option(iconBooleanOption(name.lowercase(), Config.use2dHeads.asBinding(), "use_2d_heads"))
-                                .build()
-                        )
-                        .build())
-                .save(Config::saveToFile)
-                .build()
-                .generateScreen(parent)
-        }
+        override fun generateConfig(parent: Screen): Screen? = ModifiersConfig.generateConfig(parent)
     },
     MACE_CHANCE {
         private var cachedMaceChance: Float = -2f
@@ -638,19 +383,17 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
-            if (!gameOngoing || maceChance < 0f || (Config.hideMaceChanceWhenEliminated.value && eliminated)) return 0
+            if (!gameOngoing || maceChance < 0f || (maceChanceHideWhenEliminated.value && eliminated)) return 0
 
             val textRenderer = Minecraft.getInstance().font
 
             if (cachedMaceChance != maceChance || cachedText == null) {
                 val maceChanceColorIdx = (maceChance / 7.7).toInt().coerceIn(0, textColors.lastIndex)
-                val iconText = Component.literal("⚄ ")
-                    .setStyle(Config.getMaceChanceIconAccentStyle(0x42C1FF))
-                val numberText = Component.literal("%.2f%%".format(maceChance))
-                    .setStyle(Config.getMaceChanceNumberAccentStyle(textColors[maceChanceColorIdx]))
-                val text = Component.translatable("mrc.roundhud.mace_chance", numberText)
-                    .setStyle(Config.getMaceChanceTextAccentStyle(0x42C1FF))
+                val iconText = Component.literal("⚄ ").withColor(getAccentColor(name, "icon_color", 0x42C1FF))
+                val numberText = Component.literal("%.2f%%".format(maceChance)).withColor(getAccentColor(name, "number_color", textColors[maceChanceColorIdx]))
+                val text = Component.translatable("mrc.roundhud.mace_chance", numberText).withColor(getAccentColor(name, "text_color", 0x42C1FF))
                 val finalText = iconText.append(text)
 
                 cachedMaceChance = maceChance
@@ -664,43 +407,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
-                    .option(hideWhenEliminatedOption(name.lowercase(), Config.hideMaceChanceWhenEliminated.asBinding()))
-                    .build()
-            )
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                            .also {
-                                val overrideMaceChanceColors = overrideColorsOption(name.lowercase(), Config.overrideMaceChanceColors.asBinding())
-
-                                val maceChanceTextColor = overrideColorOption(name.lowercase(), Config.maceChanceTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(maceChanceTextColor, overrideMaceChanceColors)
-
-                                val maceChanceNumberColor = overrideColorOption(name.lowercase(), Config.maceChanceNumberColor.asBinding(), "number_color")
-                                addColorOptionDependency(maceChanceNumberColor, overrideMaceChanceColors)
-
-                                val maceChanceIconColor = overrideColorOption(name.lowercase(), Config.maceChanceIconColor.asBinding(), "icon_color")
-                                addColorOptionDependency(maceChanceIconColor, overrideMaceChanceColors)
-
-                                it.option(overrideMaceChanceColors)
-                                it.option(maceChanceTextColor)
-                                it.option(maceChanceNumberColor)
-                                it.option(maceChanceIconColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = MaceChanceConfig.generateConfig(parent)
     },
     BOUNTY_BOARD {
         private var cachedBounties: HashMap<GameProfile, Int> = HashMap()
@@ -716,14 +423,14 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             cachedLeftBountyTexts.isEmpty()
 
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (!gameOngoing || bounties.isEmpty() || eliminated) return 0
 
             val textRenderer = Minecraft.getInstance().font
 
             if (cachedHeaderText == null) {
-                val headerText = Component.translatable("mrc.roundhud.bounty_board")
-                    .setStyle(Config.getBountyBoardTextAccentStyle(0xff7cf4))
+                val headerText = Component.translatable("mrc.roundhud.bounty_board").withColor(getAccentColor(name, "text_color", 0xff7cf4))
                 cachedHeaderText = headerText
                 cachedHeaderTextWidth = textRenderer.width(headerText)
             }
@@ -742,20 +449,12 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                     var xPos = if (rightAligned) -16 else 0
                     context.item(headFromProfile(profile), xPos, yPos)
                     if (bountiesChanged || (rightAligned && cachedRightBountyTexts[profile] == null) || (!rightAligned && cachedLeftBountyTexts[profile] == null)) {
-                        val playerText = Component.literal("$playerUsername")
-                            .setStyle(Config.getBountyBoardPlayerAccentStyle(CommonColors.YELLOW))
-                        val bountyText = Component.literal("$bountyAmount⛂")
-                            .setStyle(Config.getBountyBoardAmountAccentStyle(0xff7cf4))
+                        val playerText = Component.literal("$playerUsername").withColor(getAccentColor(name, "text_color.player", CommonColors.YELLOW))
+                        val bountyText = Component.literal("$bountyAmount⛂").withColor(getAccentColor(name, "number_color", 0xff7cf4))
                         val finalText = if (rightAligned) {
-                            Component.empty()
-                                .append(bountyText)
-                                .append(" ")
-                                .append(playerText)
+                            Component.empty().append(bountyText).append(" ").append(playerText)
                         } else {
-                            Component.empty()
-                                .append(playerText)
-                                .append(" ")
-                                .append(bountyText)
+                            Component.empty().append(playerText).append(" ").append(bountyText)
                         }
                         cachedBountyTextWidths[profile] = textRenderer.width(finalText)
                         if (rightAligned) cachedRightBountyTexts[profile] = finalText
@@ -772,46 +471,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 12 + (bountyCount * 20)
         }
 
-        override fun generateConfig(parent: Screen): Screen? {
-            return YetAnotherConfigLib.createBuilder()
-                .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-                .category(
-                    ConfigCategory.createBuilder()
-                        .name(Component.translatable("mrc.config.${name.lowercase()}.category.misc"))
-                        .option(sliderOption(name.lowercase(), Config.bountyBoardMaxPlayers.asBinding(), 1, 15, 1, "max_players"))
-                        .option(sliderOption(name.lowercase(), Config.bountyBoardMinBounty.asBinding(), 1, 10, 1, "min_bounty"))
-                        .build()
-                )
-                .category(
-                    ConfigCategory.createBuilder()
-                        .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                        .group(
-                            OptionGroup.createBuilder()
-                                .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                                .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                                .also {
-                                    val overrideBountyBoardColors = overrideColorsOption(name.lowercase(), Config.overrideBountyBoardColors.asBinding())
-
-                                    val bountyBoardTextColor = overrideColorOption(name.lowercase(), Config.bountyBoardTextColor.asBinding(), "text_color")
-                                    addColorOptionDependency(bountyBoardTextColor, overrideBountyBoardColors)
-
-                                    val bountyBoardPlayerColor = overrideColorOption(name.lowercase(), Config.bountyBoardPlayerColor.asBinding(), "text_color.player")
-                                    addColorOptionDependency(bountyBoardPlayerColor, overrideBountyBoardColors)
-
-                                    val bountyBoardNumberColor = overrideColorOption(name.lowercase(), Config.bountyBoardNumberColor.asBinding(), "number_color")
-                                    addColorOptionDependency(bountyBoardNumberColor, overrideBountyBoardColors)
-
-                                    it.option(overrideBountyBoardColors)
-                                    it.option(bountyBoardTextColor)
-                                    it.option(bountyBoardPlayerColor)
-                                    it.option(bountyBoardNumberColor)
-                                }
-                                .build())
-                        .build())
-                .save(Config::saveToFile)
-                .build()
-                .generateScreen(parent)
-        }
+        override fun generateConfig(parent: Screen): Screen? = BountyBoardConfig.generateConfig(parent)
     },
     FPS {
         private var cachedFps: Int = -2
@@ -821,6 +481,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (fps == -1) return 0
 
@@ -828,10 +489,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
             if (cachedFps != fps || cachedText == null) {
                 cachedFps = fps
-                val numberText = Component.literal("$fps")
-                    .setStyle(Config.getFpsNumberAccentStyle(CommonColors.WHITE))
-                val finalText = Component.translatable("mrc.roundhud.fps", numberText)
-                    .setStyle(Config.getFpsTextAccentStyle(CommonColors.WHITE))
+                val numberText = Component.literal("$fps").withColor(getAccentColor(name, "number_color", CommonColors.WHITE))
+                val finalText = Component.translatable("mrc.roundhud.fps", numberText).withColor(getAccentColor(name, "text_color", CommonColors.WHITE))
                 cachedText = finalText
                 cachedTextWidth = textRenderer.width(finalText)
             }
@@ -841,34 +500,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
-
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                            .also {
-                                val overrideFpsColors = overrideColorsOption(name.lowercase(), Config.overrideFpsColors.asBinding())
-
-                                val fpsTextColor = overrideColorOption(name.lowercase(), Config.fpsTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(fpsTextColor, overrideFpsColors)
-
-                                val fpsNumberColor = overrideColorOption(name.lowercase(), Config.fpsNumberColor.asBinding(), "number_color")
-                                addColorOptionDependency(fpsNumberColor, overrideFpsColors)
-
-                                it.option(overrideFpsColors)
-                                it.option(fpsTextColor)
-                                it.option(fpsNumberColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = FpsConfig.generateConfig(parent)
     },
     PING {
         private var cachedPing: Int = -2
@@ -878,6 +510,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (ping <= 0) return 0
 
@@ -885,12 +518,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
             if (cachedPing != ping || cachedText == null) {
                 cachedPing = ping
-                val pingColor =
-                    if (ping < 50) 0x1eff00 else if (ping < 100) 0xfff100 else if (ping < 200) 0xff9500 else 0xff3b3b
-                val numberText = Component.literal("$ping")
-                    .setStyle(Config.getPingNumberAccentStyle(pingColor))
-                val finalText = Component.translatable("mrc.roundhud.ping", numberText)
-                    .setStyle(Config.getPingTextAccentStyle(pingColor))
+                val pingColor = if (ping < 50) 0x1eff00 else if (ping < 100) 0xfff100 else if (ping < 200) 0xff9500 else 0xff3b3b
+                val numberText = Component.literal("$ping").withColor(getAccentColor(name, "number_color", pingColor))
+                val finalText = Component.translatable("mrc.roundhud.ping", numberText).withColor(getAccentColor(name, "text_color", pingColor))
                 cachedText = finalText
                 cachedTextWidth = textRenderer.width(finalText)
             }
@@ -901,33 +531,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors.description")))
-                            .also {
-                                val overridePingColors = overrideColorsOption(name.lowercase(), Config.overridePingColors.asBinding())
-
-                                val pingTextColor = overrideColorOption(name.lowercase(), Config.pingTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(pingTextColor, overridePingColors)
-
-                                val pingNumberColor = overrideColorOption(name.lowercase(), Config.pingNumberColor.asBinding(), "number_color")
-                                addColorOptionDependency(pingNumberColor, overridePingColors)
-
-                                it.option(overridePingColors)
-                                it.option(pingTextColor)
-                                it.option(pingNumberColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = PingConfig.generateConfig(parent)
     },
     TPS {
         private var cachedTps: Float = -2f
@@ -937,6 +541,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun refreshRendering() {
             cachedText = null
         }
+
         override fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int {
             if (tps == -1f) return 0
 
@@ -944,10 +549,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
             if (cachedTps != tps || cachedText == null) {
                 cachedTps = tps
-                val numberText = Component.literal("$tps")
-                    .setStyle(Config.getTpsNumberAccentStyle(0xbfff00))
-                val finalText = Component.translatable("mrc.roundhud.tps", numberText)
-                    .setStyle(Config.getTpsTextAccentStyle(0xbfff00))
+                val numberText = Component.literal("$tps").withColor(getAccentColor(name, "number_color", 0xbfff00))
+                val finalText = Component.translatable("mrc.roundhud.tps", numberText).withColor(getAccentColor(name, "text_color", 0xbfff00))
                 cachedText = finalText
                 cachedTextWidth = textRenderer.width(finalText)
             }
@@ -958,34 +561,9 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             return 12
         }
 
-        override fun generateConfig(parent: Screen): Screen? = YetAnotherConfigLib.createBuilder()
-            .title(Component.translatable("mrc.hudelement.${name.lowercase()}"))
-            .category(
-                ConfigCategory.createBuilder()
-                    .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling"))
-                    .group(
-                        OptionGroup.createBuilder()
-                            .name(Component.translatable("mrc.config.${name.lowercase()}.category.styling.group.colors"))
-                            .description(OptionDescription.of(Component.translatable("mrc.config.tpsConfig.category.styling.group.colors.description")))
-                            .also {
-                                val overrideTpsColors = overrideColorsOption(name.lowercase(), Config.overrideTpsColors.asBinding())
-
-                                val tpsTextColor = overrideColorOption(name.lowercase(), Config.tpsTextColor.asBinding(), "text_color")
-                                addColorOptionDependency(tpsTextColor, overrideTpsColors)
-
-                                val tpsNumberColor = overrideColorOption(name.lowercase(), Config.tpsNumberColor.asBinding(), "number_color")
-                                addColorOptionDependency(tpsNumberColor, overrideTpsColors)
-
-                                it.option(overrideTpsColors)
-                                it.option(tpsTextColor)
-                                it.option(tpsNumberColor)
-                            }
-                            .build())
-                    .build())
-            .save(Config::saveToFile)
-            .build()
-            .generateScreen(parent)
+        override fun generateConfig(parent: Screen): Screen? = TpsConfig.generateConfig(parent)
     }, ;
+
     abstract fun refreshRendering()
     abstract fun render(context: GuiGraphicsExtractor, yOffset: Int, rightAligned: Boolean, bottomAligned: Boolean): Int
     override fun generateConfig(parent: Screen): Screen? = null

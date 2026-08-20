@@ -14,6 +14,7 @@ import moe.pxe.macecompanion.stateManagers.ModifierManager.modifierBoosters
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiersToCheck
 import moe.pxe.macecompanion.stateManagers.ModifierManager.mysteryAmount
+import moe.pxe.macecompanion.stateManagers.PlotManager.requestPlotId
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
 import moe.pxe.macecompanion.util.TextUtils.hideNewRoundOrGameTextMessage
 import moe.pxe.macecompanion.util.TitleCallback
@@ -75,6 +76,7 @@ object RoundManager {
         mysteryAmount = 0
         maceChance = 100f / playersAlive
         hideNewRoundOrGameTextMessage = false
+        if(playersTotal == -1) requestPlotId()
     }
 
     fun registerRoundListeners() {

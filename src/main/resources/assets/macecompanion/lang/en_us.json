@@ -249,7 +249,7 @@
     "mrc.config.modifiers.category.styling.group.colors.option.text_color": "ᴍᴏᴅɪꜰɪᴇʀꜱ text color",
     "mrc.config.modifiers.category.styling.group.colors.option.text_color.description": "The color of the ᴍᴏᴅɪꜰɪᴇʀꜱ text if \"Override colors\" is enabled.",
 
-    "mrc.config.modifiers.category.styling.group.colors.option.text_color.regular_modifier": "Normal modifier text color",
+    "mrc.config.modifiers.category.styling.group.colors.option.text_color.regular_modifier": "Regular modifier text color",
     "mrc.config.modifiers.category.styling.group.colors.option.text_color.regular_modifier.description": "The text color of regular modifiers if \"Override colors\" is enabled.",
 
     "mrc.config.modifiers.category.styling.group.colors.option.shadow_color.eternal_modifier": "Eternal modifier shadow color",
@@ -267,11 +267,11 @@
     "mrc.config.modifiers.category.styling.group.icons": "Icons",
     "mrc.config.modifiers.category.styling.group.icons.description": "Configure the icons of this HUD element",
 
-    "mrc.config.modifiers.category.styling.group.icons.option.use_custom": "Use custom modifier icons (By DigbyMaximus)",
-    "mrc.config.modifiers.category.styling.group.icons.option.use_custom.description": "Use the custom modifier icons made by DigbyMaximus",
+    "mrc.config.modifiers.category.styling.group.icons.option.use_custom_modifier_icons": "Use custom modifier icons (By DigbyMaximus)",
+    "mrc.config.modifiers.category.styling.group.icons.option.use_custom_modifier_icons.description": "Use the custom modifier icons made by DigbyMaximus",
 
-    "mrc.config.modifiers.category.styling.group.icons.option.use_2d_heads": "Use 2d Heads",
-    "mrc.config.modifiers.category.styling.group.icons.option.use_2d_heads.description": "Use 2d heads instead of 3d",
+    "mrc.config.modifiers.category.styling.group.icons.option.use_2d_head_icons": "Use 2d Head Icons",
+    "mrc.config.modifiers.category.styling.group.icons.option.use_2d_head_icons.description": "Use 2d heads instead of 3d",
 
     "mrc.config.mace_chance.category.misc": "Miscellaneous",
 
@@ -437,6 +437,7 @@
     "mrc.modifier.keep_sprinting": "Keep Sprinting",
     "mrc.modifier.honey_burst": "Honey Burst",
     "mrc.modifier.banned_key": "Banned Key",
+    "mrc.modifier.sheriff": "Sheriff",
     "mrc.modifier.unknown": "Unknown Modifier",
     "mrc.modifier.mystery": "Mystery!",
 
