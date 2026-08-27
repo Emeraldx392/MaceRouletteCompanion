@@ -62,5 +62,5 @@ object ModifiersConfig {
             ).group(
                     OptionGroup.createBuilder().name(Component.translatable("mrc.config.modifiers.category.styling.group.icons")).description(OptionDescription.of(Component.translatable("mrc.config.modifiers.category.styling.group.icons.description"))).option(iconBooleanOption(NAME, modifiersUseCustomModifierIcons.asBinding(), "use_custom_modifier_icons")).option(iconBooleanOption(NAME, modifiersUse2dHeadIcons.asBinding(), "use_2d_head_icons")).build()
                 ).build()
-        ).save(Config::saveToFile).build().generateScreen(parent)
+        ).save(Config::saveToFileAndRefreshRendering).build().generateScreen(parent)
 }

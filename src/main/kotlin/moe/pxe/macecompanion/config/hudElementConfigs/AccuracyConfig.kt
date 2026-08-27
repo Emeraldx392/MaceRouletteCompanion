@@ -46,7 +46,7 @@ object AccuracyConfig {
                         }
                         .build())
                 .build())
-        .save(Config::saveToFile)
+        .save(Config::saveToFileAndRefreshRendering)
         .build()
         .generateScreen(parent)
 }

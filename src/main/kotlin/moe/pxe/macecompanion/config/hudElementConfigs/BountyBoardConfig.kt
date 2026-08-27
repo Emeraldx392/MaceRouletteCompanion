@@ -45,5 +45,5 @@ object BountyBoardConfig {
                 it.option(textColorPlayer)
                 it.option(numberColor)
             }.build()).build()
-        ).save(Config::saveToFile).build().generateScreen(parent)
+        ).save(Config::saveToFileAndRefreshRendering).build().generateScreen(parent)
 }
