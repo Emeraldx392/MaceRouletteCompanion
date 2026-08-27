@@ -59,6 +59,8 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val hudYMargin by register<Int>(10, INT)
     val hudScale by register<Float>(1f, FLOAT)
 
+    val displayNewRoundInActionbar by register<Boolean>(true, BOOL)
+
     val useAccentColors by register<Boolean>(false, BOOL)
     val accentColorNumber by register<Int>(1, INT)
     val mainAccentColor by register<Color>(Color(CommonColors.WHITE), RGB_COLOR_CODEC)

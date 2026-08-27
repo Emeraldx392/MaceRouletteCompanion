@@ -75,6 +75,8 @@
     "mrc.config.category.roundhud.group.hudtransforms.option.hudYMargin.description": "The HUD's distance from the top/bottom edge of the screen in GUI-space pixels.",
     "mrc.config.category.roundhud.group.hudtransforms.option.hudScale": "Scale",
     "mrc.config.category.roundhud.group.hudtransforms.option.hudScale.description": "The HUD's multiplied scale.",
+    "mrc.config.category.roundhud.group.hudtransforms.option.displayNewRoundInActionbar": "Display new round messages in actionbar",
+    "mrc.config.category.roundhud.group.hudtransforms.option.displayNewRoundInActionbar.description": "Toggles whether the new round or next game messgaes should be displayed on the actionbar instead.",
 
     "mrc.config.category.roundhud.group.hudstyle": "Styling",
     "mrc.config.category.roundhud.group.hudstyle.description": "Style configuration (color, opacity, background) for the Round Info HUD.",

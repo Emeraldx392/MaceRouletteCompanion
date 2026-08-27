@@ -223,6 +223,12 @@ object ConfigMenu {
                             .step(0.05f)
                         }
                         .build())
+                    .option(Option.createBuilder<Boolean>()
+                        .name(Component.translatable("mrc.config.category.roundhud.group.hudtransforms.option.displayNewRoundInActionbar"))
+                        .description(OptionDescription.of(Component.translatable("mrc.config.category.roundhud.group.hudtransforms.option.displayNewRoundInActionbar.description")))
+                        .binding(Config.displayNewRoundInActionbar.asBinding())
+                        .controller(TickBoxControllerBuilder::create)
+                        .build())
                     .build())
                 .group(OptionGroup.createBuilder()
                     .name(Component.translatable("mrc.config.category.roundhud.group.hudstyle"))

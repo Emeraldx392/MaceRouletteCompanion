@@ -1,5 +1,7 @@
 package moe.pxe.macecompanion.mixin;
 
+import dev.isxander.yacl3.config.v3.KotlinExtsKt;
+import moe.pxe.macecompanion.config.Config;
 import moe.pxe.macecompanion.stateManagers.PlotManager;
 import moe.pxe.macecompanion.util.TextUtils;
 import net.minecraft.client.Minecraft;
@@ -27,7 +29,7 @@ public class ScoreboardMixin {
 
     @Inject(method = "displayScoreboardSidebar", at = @At("HEAD"), cancellable = true)
     private void getAndHideSidebar(final GuiGraphics graphics, final Objective objective, CallbackInfo ci) {
-        if (PlotManager.INSTANCE.getOnMaceRoulette()) {
+        if (PlotManager.INSTANCE.getOnMaceRoulette() && KotlinExtsKt.getValue(Config.INSTANCE.getDisplayNewRoundInActionbar())) {
             Scoreboard scoreboard = objective.getScoreboard();
             Collection<ScoreHolder> scoreHolders = scoreboard.getTrackedPlayers();
             AtomicInteger timeLeft = new AtomicInteger(-1);
