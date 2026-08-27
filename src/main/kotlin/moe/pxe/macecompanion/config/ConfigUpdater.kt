@@ -1,7 +1,6 @@
 package moe.pxe.macecompanion.config
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonParser
+import com.google.gson.*
 import moe.pxe.macecompanion.MaceCompanion.Companion.LOGGER
 import net.fabricmc.loader.api.FabricLoader
 import java.nio.file.Files
@@ -15,8 +14,8 @@ object ConfigUpdater {
         try {
             val jsonString = Files.readString(configFile)
             val jsonObject = JsonParser.parseString(jsonString).asJsonObject
-            return if (!jsonObject.has("configVersion")) "0.3.3"
-            else jsonObject.get("configVersion").asString
+            return if (jsonObject.has("configVersion")) jsonObject.get("configVersion").asString
+            else "null"
         } catch (e: Exception) {
             e.printStackTrace()
             return "null"
@@ -32,6 +31,16 @@ object ConfigUpdater {
             val prettyJson = GSON.toJson(jsonObject)
             Files.writeString(configFile, prettyJson)
 
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun removeEntry(configFile: Path, entry: String) {
+        try {
+            val jsonString = Files.readString(configFile)
+            val jsonObject = JsonParser.parseString(jsonString).asJsonObject
+            if (jsonObject.has(entry)) jsonObject.remove(entry)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -85,31 +94,34 @@ object ConfigUpdater {
         }
     }
 
-    fun update033to034(configFile: Path) {
+    fun updateConfig(configFile: Path) {
         try {
-            LOGGER.info("Updating MRC Config from 0.3.3 to 0.3.4")
+            LOGGER.info("Updating MRC Config...")
 
+            removeEntry(configFile, "useFlint")
+            updateBooleanConfigEntry(configFile, "useAccentColor", "useAccentColors")
+            updateStringConfigEntry(configFile, "accentColor", "mainAccentColor")
+            updateBooleanConfigEntry(configFile, "chanceUseColor", "maceChanceOverrideColors")
+            updateBooleanConfigEntry(configFile, "showPlayerJoinToasts", "showPlayerToasts")
+            removeEntry(configFile, "showMysteryModifiers")
+            updateBooleanConfigEntry(configFile, "showModifierChargerToasts", "showConsumableToasts")
+            updateStringConfigEntry(configFile, "hudLocation", "leftHudLocation")
+            updateStringConfigEntry(configFile, "hudElements", "leftHudElements")
             updateBooleanConfigEntry(configFile, "overrideRoundColors", "roundNumberOverrideColors")
             updateStringConfigEntry(configFile, "roundNumberColor", "roundNumberNumberColor")
             updateStringConfigEntry(configFile, "roundTextColor", "roundNumberTextColor")
-
             updateBooleanConfigEntry(configFile, "overridePlayerCountColors", "playersAliveOverrideColors")
             updateStringConfigEntry(configFile, "alivePlayersColor", "playersAliveNumberColorAlive")
             updateStringConfigEntry(configFile, "totalPlayersColor", "playersAliveNumberColorTotal")
             updateStringConfigEntry(configFile, "playerCountTextColor", "playersAliveTextColor")
-
             updateBooleanConfigEntry(configFile, "overrideAccuracyColors", "accuracyOverrideColors")
             updateStringConfigEntry(configFile, "accuracyColor", "accuracyNumberColor")
-
             updateBooleanConfigEntry(configFile, "hideEliminationsWhenEliminated", "eliminationsHideWhenEliminated")
             updateBooleanConfigEntry(configFile, "overrideEliminationsColors", "eliminationsOverrideColors")
-
             updateBooleanConfigEntry(configFile, "hideStarFragmentsWhenEliminated", "starFragmentsHideWhenEliminated")
             updateBooleanConfigEntry(configFile, "overrideStarFragmentsColors", "starFragmentsOverrideColors")
-
             updateBooleanConfigEntry(configFile, "overridePlaytimeColors", "playtimeOverrideColors")
             updateStringConfigEntry(configFile, "playtimeColor", "playtimeNumberColor")
-
             updateIntConfigEntry(configFile, "boosterListMax", "modifiersMaxBoosters")
             updateBooleanConfigEntry(configFile, "overrideModifiersColors", "modifiersOverrideColors")
             updateStringConfigEntry(configFile, "normalModifierTextColor", "modifiersTextColorRegularModifier")
@@ -119,21 +131,15 @@ object ConfigUpdater {
             updateStringConfigEntry(configFile, "mysteryModifierTextColor", "modifiersTextColorMysteryModifier")
             updateBooleanConfigEntry(configFile, "customModifierIcons", "modifiersUseCustomModifierIcons")
             updateBooleanConfigEntry(configFile, "use2dHeads", "modifiersUse2dHeadIcons")
-
             updateBooleanConfigEntry(configFile, "hideMaceChanceWhenEliminated", "maceChanceHideWhenEliminated")
             updateBooleanConfigEntry(configFile, "overrideMaceChanceColors", "maceChanceOverrideColors")
-
             updateBooleanConfigEntry(configFile, "overrideBountyBoardColors", "bountyBoardOverrideColors")
             updateStringConfigEntry(configFile, "bountyBoardPlayerColor", "bountyBoardTextColorPlayer")
-
             updateBooleanConfigEntry(configFile, "overrideFpsColors", "fpsOverrideColors")
-
             updateBooleanConfigEntry(configFile, "overridePingColors", "pingOverrideColors")
-
             updateBooleanConfigEntry(configFile, "overrideTpsColors", "tpsOverrideColors")
 
-
-            setConfigVersion(configFile, "0.3.4")
+            setConfigVersion(configFile, "0.3.5")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -142,11 +148,7 @@ object ConfigUpdater {
     fun updateConfig() {
         val configFile = FabricLoader.getInstance().configDir.resolve("mrc.json")
         if (!Files.exists(configFile)) return
-        val version = getConfigVersion(configFile)
-        when (version) {
-            "0.3.3" -> update033to034(configFile)
-            "null" -> return
-        }
+        updateConfig(configFile)
     }
 
 }

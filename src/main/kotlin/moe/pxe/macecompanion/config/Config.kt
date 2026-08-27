@@ -16,11 +16,11 @@ import java.awt.Color
 
 object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir.resolve("mrc.json")) {
 
-    override fun saveToFile() {
+    fun saveToFileAndRefreshRendering(){
         rightHudElements.value.forEach { it.refreshRendering() }
         leftHudElements.value.forEach { it.refreshRendering() }
         Modifiers.entries.forEach { it.refreshTranslatable() }
-        super.saveToFile()
+        saveToFile()
     }
 
     val RGB_COLOR_CODEC = object : PrimitiveCodec<Color> {
