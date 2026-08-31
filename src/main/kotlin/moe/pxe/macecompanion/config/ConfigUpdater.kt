@@ -148,7 +148,8 @@ object ConfigUpdater {
     fun updateConfig() {
         val configFile = FabricLoader.getInstance().configDir.resolve("mrc.json")
         if (!Files.exists(configFile)) return
-        updateConfig(configFile)
+        val version = getConfigVersion(configFile)
+        if(version != "0.3.5") updateConfig(configFile)
     }
 
 }

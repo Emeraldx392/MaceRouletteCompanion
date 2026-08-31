@@ -1,5 +1,6 @@
 package moe.pxe.macecompanion.mixin;
 
+import com.google.gson.JsonElement;
 import dev.isxander.yacl3.config.v3.KotlinExtsKt;
 import moe.pxe.macecompanion.config.Config;
 import moe.pxe.macecompanion.stateManagers.PlotManager;
@@ -33,22 +34,33 @@ public class ScoreboardMixin {
             Scoreboard scoreboard = objective.getScoreboard();
             Collection<ScoreHolder> scoreHolders = scoreboard.getTrackedPlayers();
             AtomicInteger timeLeft = new AtomicInteger(-1);
+            AtomicInteger mainColor = new AtomicInteger(-1);
+            AtomicInteger timeColor = new AtomicInteger(-1);
             StringBuilder type = new StringBuilder();
             scoreHolders.forEach(scoreHolder -> {
                 String scoreboardName = scoreHolder.getScoreboardName();
                 PlayerTeam team = scoreboard.getPlayersTeam(scoreboardName);
                 if (team != null) {
-                    String prefix = team.getPlayerPrefix().getString();
-                    String suffix = team.getPlayerSuffix().getString();
-                    String fullLine = prefix + suffix;
+                    String fullLine = team.getPlayerPrefix().getString();
+                    JsonElement prefixJson = TextUtils.INSTANCE.messageToJson(team.getPlayerPrefix());
+                    Integer parsedTimeColor = TextUtils.INSTANCE.findTextColorInJson(prefixJson, "0:");
+                    if (parsedTimeColor != null) timeColor.set(parsedTimeColor);
                     Matcher timeMatcher = timePattern.matcher(fullLine);
                     if (timeMatcher.find()) timeLeft.set(Integer.parseInt(timeMatcher.group(1)));
-                    if (fullLine.contains("ʀᴏᴜɴᴅ")) type.append("Round");
-                    if (fullLine.contains("ɢᴀᴍᴇ")) type.append("Game");
+                    if (fullLine.contains("Round")){
+                        type.append("Round");
+                        Integer parsedMainColor = TextUtils.INSTANCE.findTextColorInJson(prefixJson, "Round");
+                        if (parsedMainColor != null) mainColor.set(parsedMainColor);
+                    }
+                    if (fullLine.contains("Game")) {
+                        type.append("Game");
+                        Integer parsedMainColor = TextUtils.INSTANCE.findTextColorInJson(prefixJson, "Game");
+                        if (parsedMainColor != null) mainColor.set(parsedMainColor);
+                    }
                 }
             });
             LocalPlayer player = Minecraft.getInstance().player;
-            Component text = TextUtils.INSTANCE.getNewRoundOrGameText(type.toString(), timeLeft.get());
+            Component text = TextUtils.INSTANCE.getNewRoundOrGameText(type.toString(), timeLeft.get(), mainColor.get(), timeColor.get());
             if (!text.equals(Component.empty()) && player != null) player.sendOverlayMessage(text);
             ci.cancel();
         }
