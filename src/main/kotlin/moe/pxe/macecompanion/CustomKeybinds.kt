@@ -20,6 +20,12 @@ object CustomKeybinds {
         private set
     lateinit var openEventsKeyBinding: KeyMapping
         private set
+    lateinit var openStarRoadKeyBinding: KeyMapping
+        private set
+    lateinit var openMidasMondayKeyBinding: KeyMapping
+        private set
+    lateinit var openLeaderboardKeyBinding: KeyMapping
+        private set
     lateinit var openModOptionsKeyBinding: KeyMapping
         private set
     lateinit var toggleHudKeyBinding: KeyMapping
@@ -53,6 +59,30 @@ object CustomKeybinds {
         openEventsKeyBinding = KeyBindingHelper.registerKeyBinding(
             KeyMapping(
                 "key.macecompanion.open_events",
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
+                maceRouletteCategory
+            )
+        )
+        openStarRoadKeyBinding = KeyBindingHelper.registerKeyBinding(
+            KeyMapping(
+                "key.macecompanion.open_star_road",
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
+                maceRouletteCategory
+            )
+        )
+        openMidasMondayKeyBinding = KeyBindingHelper.registerKeyBinding(
+            KeyMapping(
+                "key.macecompanion.open_midas_monday",
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
+                maceRouletteCategory
+            )
+        )
+        openLeaderboardKeyBinding = KeyBindingHelper.registerKeyBinding(
+            KeyMapping(
+                "key.macecompanion.open_leaderboard",
                 InputConstants.Type.KEYSYM,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory

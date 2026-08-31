@@ -1,14 +1,13 @@
 package moe.pxe.macecompanion.stateManagers
 
 import com.mojang.authlib.GameProfile
-import com.mojang.serialization.JsonOps
 import moe.pxe.macecompanion.enums.Modifiers
 import moe.pxe.macecompanion.stateManagers.RoundManager.updateMaceChance
 import moe.pxe.macecompanion.util.PlayerProfile.getPlayerProfile
+import moe.pxe.macecompanion.util.TextUtils.messageToJsonString
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.network.chat.HoverEvent
 import kotlin.text.Regex
 
@@ -36,13 +35,6 @@ object ModifierManager {
         modifiers.clear()
         eternalModifier = null
         modifierBoosters.clear()
-    }
-
-    fun messageToJsonString(message: Component): String {
-        return ComponentSerialization.CODEC
-            .encodeStart(client.level!!.registryAccess().createSerializationContext(JsonOps.INSTANCE), message)
-            .getOrThrow()
-            .toString()
     }
 
     fun getHover(text: Component): String? {

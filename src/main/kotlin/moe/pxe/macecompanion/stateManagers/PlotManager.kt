@@ -4,7 +4,6 @@ import moe.pxe.macecompanion.stateManagers.EliminationManager.playersTotal
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.tps
 import moe.pxe.macecompanion.util.SendMessage
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
-import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.Minecraft
 object PlotManager {
@@ -47,6 +46,8 @@ object PlotManager {
     }
     fun registerServerAndPlotListeners() {
         ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
+            plotId = null
+            plotHandle = null
             onDiamondfire = isOnDiamondfire()
             tps = -1f
             BountyManager.resetBountyData()
@@ -62,19 +63,9 @@ object PlotManager {
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
             onDiamondfire = false
             onMaceRoulette = false
+            plotId = null
+            plotHandle = null
             isStatless = false
-        }
-        ClientSendMessageEvents.ALLOW_CHAT.register { message ->
-            if (onDiamondfire && message.contains("/play") || message.startsWith("/join $plotHandle") || message.startsWith("/join $plotId")) {
-                BountyManager.resetBountyData()
-                EliminationManager.resetEliminationData()
-                EventManager.resetEventData()
-                StarFragmentManager.resetStarFragmentData()
-                ConsumableManager.resetConsumableData()
-                ShowdownManager.resetShowdownData()
-                AccuracyManager.resetAccuracyData()
-            }
-            true
         }
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
             val text = message.string
@@ -89,7 +80,7 @@ object PlotManager {
                 plotHandle = it[2]?.value
 
                 onMaceRoulette = plotHandles.contains(plotHandle) || plotIds.contains(plotId)
-                isStatless = (plotId == 25000002 && plotHandle == "statless")
+                isStatless = (plotId == 25000031 || plotHandle == "statless")
                 findPlayerCommandRegex.find(text)?.groups?.let {
                     val totalPlayersFound = it[1]?.value?.toIntOrNull() ?: -1
                     playersTotal = totalPlayersFound
