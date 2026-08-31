@@ -20,6 +20,12 @@ object CustomKeybinds {
         private set
     lateinit var openEventsKeyBinding: KeyMapping
         private set
+    lateinit var openStarRoadKeyBinding: KeyMapping
+        private set
+    lateinit var openMidasMondayKeyBinding: KeyMapping
+        private set
+    lateinit var openLeaderboardKeyBinding: KeyMapping
+        private set
     lateinit var openModOptionsKeyBinding: KeyMapping
         private set
     lateinit var toggleHudKeyBinding: KeyMapping
@@ -53,6 +59,30 @@ object CustomKeybinds {
         openEventsKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_events",
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
+                maceRouletteCategory
+            )
+        )
+        openStarRoadKeyBinding = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.macecompanion.open_star_road",
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
+                maceRouletteCategory
+            )
+        )
+        openMidasMondayKeyBinding = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.macecompanion.open_midas_monday",
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.value,
+                maceRouletteCategory
+            )
+        )
+        openLeaderboardKeyBinding = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.macecompanion.open_leaderboard",
                 InputConstants.Type.KEYSYM,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
@@ -100,6 +130,15 @@ object CustomKeybinds {
             }
             while (openEventsKeyBinding.consumeClick()) {
                 if(PlotManager.onMaceRoulette) SendMessage.sendMessage("@events")
+            }
+            while (openStarRoadKeyBinding.consumeClick()) {
+                if(PlotManager.onMaceRoulette) SendMessage.sendMessage("@starroad")
+            }
+            while (openMidasMondayKeyBinding.consumeClick()) {
+                if(PlotManager.onMaceRoulette) SendMessage.sendMessage("@midas")
+            }
+            while (openLeaderboardKeyBinding.consumeClick()) {
+                if(PlotManager.onMaceRoulette) SendMessage.sendMessage("@lb")
             }
             while (openModOptionsKeyBinding.consumeClick()) {
                 if (client.screen == null) {

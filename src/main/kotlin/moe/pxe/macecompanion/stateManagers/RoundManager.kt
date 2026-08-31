@@ -14,6 +14,8 @@ import moe.pxe.macecompanion.stateManagers.ModifierManager.modifierBoosters
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiersToCheck
 import moe.pxe.macecompanion.stateManagers.ModifierManager.mysteryAmount
+import moe.pxe.macecompanion.stateManagers.PlotManager.plotHandle
+import moe.pxe.macecompanion.stateManagers.PlotManager.plotId
 import moe.pxe.macecompanion.stateManagers.PlotManager.requestPlotId
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
 import moe.pxe.macecompanion.util.TextUtils.hideNewRoundOrGameTextMessage
@@ -34,7 +36,7 @@ object RoundManager {
     var playtime: TimeMark? = null
     var maceChance = -1f
 
-    val chatRoundNumberRegex = Regex(""" +Round (\d+) +""")
+    val chatRoundNumberRegex = Regex("""\s+Round (\d+) \((\d+)👤\)\s+""")
     val titleRoundNumberRegex = Regex("""ʀᴏᴜɴᴅ (\d+)""")
     val chatLeaderboardHeaderRegex = Regex("""\s+‌‌ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ:""")
 
@@ -76,7 +78,7 @@ object RoundManager {
         mysteryAmount = 0
         maceChance = 100f / playersAlive
         hideNewRoundOrGameTextMessage = false
-        if(playersTotal == -1) requestPlotId()
+        if(plotId == null || plotHandle == null || playersTotal < 2) requestPlotId()
     }
 
     fun registerRoundListeners() {
@@ -86,8 +88,11 @@ object RoundManager {
             if (overlay) return@register true
             if (!PlotManager.onMaceRoulette) return@register true
 
-            chatRoundNumberRegex.matchEntire(text)?.groups[1]?.let {
-                setRoundNumber(it.value.toInt())
+            chatRoundNumberRegex.matchEntire(text)?.groups?.let {
+                val roundNumber = it[1]?.value?.toInt() ?: 0
+                val playersCurrentlyAlive = it[2]?.value?.toInt() ?: 0
+                setRoundNumber(roundNumber)
+                playersAlive = playersCurrentlyAlive
             }
             chatLeaderboardHeaderRegex.matchEntire(message.string)?.let {
                 gameOngoing = false
