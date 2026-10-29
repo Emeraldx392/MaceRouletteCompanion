@@ -6,7 +6,7 @@ import moe.pxe.macecompanion.stateManagers.BountyManager.bounties
 import moe.pxe.macecompanion.stateManagers.RoundManager.round
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.calculateStarFragments
 import moe.pxe.macecompanion.util.PlayerInventory.getPlayerSlotItemStack
-import moe.pxe.macecompanion.util.PlayerProfile.getPlayerProfile
+import moe.pxe.macecompanion.util.PlayerProfile.getOnlinePlayerProfile
 import moe.pxe.macecompanion.util.SubtitleCallback
 import moe.pxe.macecompanion.util.TitleCallback
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
@@ -83,7 +83,7 @@ object EliminationManager {
                     calculateStarFragments()
                 }
                 if (!eliminated) chatEarlyLeaveRegex.matchEntire(text)?.groups[1]?.let {
-                    val playerThatLeft = getPlayerProfile(it.value)
+                    val playerThatLeft = getOnlinePlayerProfile(it.value)
                     if (bounties.contains(playerThatLeft)) bounties.remove(playerThatLeft)
                 }
             }

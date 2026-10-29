@@ -10,7 +10,6 @@ import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.enums.BetConditions
 import moe.pxe.macecompanion.enums.HudElements
 import moe.pxe.macecompanion.enums.HudLocation
-import moe.pxe.macecompanion.enums.Modifiers
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.util.CommonColors
 import java.awt.Color
@@ -20,7 +19,6 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     fun saveToFileAndRefreshRendering(){
         rightHudElements.value.forEach { it.refreshRendering() }
         leftHudElements.value.forEach { it.refreshRendering() }
-        Modifiers.entries.forEach { it.refreshTranslatable() }
         saveToFile()
     }
 

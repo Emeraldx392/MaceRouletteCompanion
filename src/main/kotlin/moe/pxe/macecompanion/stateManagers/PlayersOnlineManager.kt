@@ -3,13 +3,14 @@ package moe.pxe.macecompanion.stateManagers
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.CustomToasts
 import moe.pxe.macecompanion.config.Config
+import moe.pxe.macecompanion.util.TextUtils.findTextColorInJson
+import moe.pxe.macecompanion.util.TextUtils.messageToJson
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
 
 object PlayersOnlineManager {
     val chatJoinRegex = Regex("""\+ (.+)""")
     val chatJoinDFnNormalRegex = Regex("""(.+) joined\.""")
-    val chatJoinDFnSpecialRegex = Regex("""\[.+](.+) joined!""")
     val chatLeaveRegex = Regex("""(.+) left\.""")
 
     val client = Minecraft.getInstance()
@@ -22,9 +23,8 @@ object PlayersOnlineManager {
 
             val containsPlus = text.startsWith("+")
             val containsDot = text.endsWith(".")
-            val containsExclamation = text.endsWith("!")
 
-            if (!containsPlus && !containsDot && !containsExclamation) return@register true
+            if (!containsPlus && !containsDot) return@register true
 
             val shouldHide = Config.hidePlayerJoinedLeftMessages.value
             val showToasts = Config.showPlayerToasts.value
@@ -33,7 +33,11 @@ object PlayersOnlineManager {
                 chatJoinRegex.matchEntire(text)?.groups?.let { match ->
                     if (showToasts) {
                         val playerName = match[1]?.value.toString()
-                        client.execute { CustomToasts.sendPlayerJoinedToast(playerName) }
+                        client.execute {
+                            val json = messageToJson(message)
+                            val color = findTextColorInJson(json, "+")
+                            CustomToasts.sendPlayerJoinedToast(playerName, color)
+                        }
                     }
                     if (shouldHide) return@register false
                 }
@@ -41,16 +45,6 @@ object PlayersOnlineManager {
 
             chatJoinDFnNormalRegex.matchEntire(text)?.let {
                 if (shouldHide) return@register false
-            }
-
-            if (containsExclamation) {
-                chatJoinDFnSpecialRegex.matchEntire(text)?.groups?.let { match ->
-                    if (showToasts) {
-                        val playerName = match[1]?.value.toString()
-                        client.execute { CustomToasts.sendPlayerJoinedToast(playerName) }
-                    }
-                    if (shouldHide) return@register false
-                }
             }
 
             chatLeaveRegex.matchEntire(text)?.groups?.let { match ->

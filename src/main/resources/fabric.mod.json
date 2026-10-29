@@ -8,7 +8,8 @@
   "contact": {
     "homepage": "https://modrinth.com/mod/macecompanion",
     "issues": "https://github.com/Emeraldx392/MaceRouletteCompanion/issues",
-    "sources": "https://github.com/Emeraldx392/MaceRouletteCompanion"
+    "sources": "https://github.com/Emeraldx392/MaceRouletteCompanion",
+    "discord": "https://discord.gg/RmW78YNjsW"
   },
   "license": "LGPL-3.0",
   "icon": "assets/macecompanion/icon.png",
@@ -37,7 +38,8 @@
       "links": {
         "modmenu.modrinth": "https://modrinth.com/mod/macecompanion",
         "modmenu.github_releases": "https://github.com/Emeraldx392/MaceRouletteCompanion/releases",
-        "mrc.modmenu.authors_website": "https://pxe.moe"
+        "mrc.modmenu.authors_website": "https://pxe.moe",
+        "mrc.modmenu.discord_server": "https://discord.gg/RmW78YNjsW"
       }
     }
   }

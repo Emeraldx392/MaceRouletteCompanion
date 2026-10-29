@@ -3,7 +3,7 @@ package moe.pxe.macecompanion.stateManagers
 import com.mojang.authlib.GameProfile
 import moe.pxe.macecompanion.CustomToasts
 import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminated
-import moe.pxe.macecompanion.util.PlayerProfile.getPlayerProfile
+import moe.pxe.macecompanion.util.PlayerProfile.getOnlinePlayerProfile
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
 import java.util.concurrent.CompletableFuture
@@ -56,7 +56,7 @@ object BountyManager {
                     val bountyPlacer = it[1]?.value
                     val bountyAmount = it[2]?.value?.toIntOrNull() ?: -1
                     val bountyReceiver = it[3]?.value
-                    if (!eliminated) getPlayerProfile(bountyReceiver)?.let { profile ->
+                    if (!eliminated) getOnlinePlayerProfile(bountyReceiver)?.let { profile ->
                         bounties[profile] = bountyAmount
                     }
                     if (bountyReceiver == client.user.name) CustomToasts.sendPlacedBountyToast(bountyAmount, bountyPlacer)
@@ -64,7 +64,7 @@ object BountyManager {
                 selfPlacedBountyRegex.matchEntire(text)?.groups?.let {
                     val bountyPlacer = it[1]?.value
                     val bountyAmount = it[2]?.value?.toIntOrNull() ?: -1
-                    if (!eliminated) getPlayerProfile(bountyPlacer)?.let { profile ->
+                    if (!eliminated) getOnlinePlayerProfile(bountyPlacer)?.let { profile ->
                         bounties[profile] = bountyAmount
                     }
                     if (bountyPlacer == client.user.name) CustomToasts.sendSelfPlacedBountyToast(bountyAmount)
@@ -73,7 +73,7 @@ object BountyManager {
                     val bountyPlacer = it[1]?.value
                     val bountyAmount = it[2]?.value?.toIntOrNull() ?: -1
                     val bountyReceiver = it[3]?.value
-                    if (!eliminated) getPlayerProfile(bountyReceiver)?.let { profile ->
+                    if (!eliminated) getOnlinePlayerProfile(bountyReceiver)?.let { profile ->
                         bounties[profile] = bountyAmount
                     }
                     if (bountyReceiver == client.user.name) CustomToasts.sendRaisedBountyToast(bountyAmount, bountyPlacer)
@@ -81,7 +81,7 @@ object BountyManager {
                 selfRaisedBountyRegex.matchEntire(text)?.groups?.let {
                     val bountyPlacer = it[1]?.value
                     val bountyAmount = it[2]?.value?.toIntOrNull() ?: -1
-                    if (!eliminated) getPlayerProfile(bountyPlacer)?.let { profile ->
+                    if (!eliminated) getOnlinePlayerProfile(bountyPlacer)?.let { profile ->
                         bounties[profile] = bountyAmount
                     }
                     if (bountyPlacer == client.user.name) CustomToasts.sendSelfRaisedBountyToast(bountyAmount)
@@ -91,7 +91,7 @@ object BountyManager {
                     val bountyAmount = it[2]?.value?.toIntOrNull() ?: -1
                     val playerWithBounty = it[3]?.value
                     if (!eliminated) {
-                        val playerWithBountyProfile = getPlayerProfile(playerWithBounty)
+                        val playerWithBountyProfile = getOnlinePlayerProfile(playerWithBounty)
                         bounties.remove(playerWithBountyProfile)
                     }
                     if (bountyReceiver == client.user.name) CustomToasts.sendRewardedBountyToast(bountyAmount, playerWithBounty)
@@ -100,7 +100,7 @@ object BountyManager {
                     val bountyReceiver = it[1]?.value
                     val bountyAmount = it[2]?.value?.toIntOrNull() ?: -1
                     if (!eliminated) {
-                        val receiverProfile = getPlayerProfile(bountyReceiver)
+                        val receiverProfile = getOnlinePlayerProfile(bountyReceiver)
                         bounties.remove(receiverProfile)
                     }
                     if (bountyReceiver == client.user.name) CustomToasts.sendCashedInBountyToast(bountyAmount)

@@ -1,9 +1,13 @@
 package moe.pxe.macecompanion.stateManagers
 
 import com.mojang.authlib.GameProfile
-import moe.pxe.macecompanion.enums.Modifiers
+import moe.pxe.macecompanion.dataClasses.Modifier
+import moe.pxe.macecompanion.dataClasses.ModifierInstance
+import moe.pxe.macecompanion.resourceLoaders.ModifierResourceLoader
+import moe.pxe.macecompanion.resourceLoaders.ModifierResourceLoader.getMystery
+import moe.pxe.macecompanion.resourceLoaders.ModifierResourceLoader.getUnknown
 import moe.pxe.macecompanion.stateManagers.RoundManager.updateMaceChance
-import moe.pxe.macecompanion.util.PlayerProfile.getPlayerProfile
+import moe.pxe.macecompanion.util.PlayerProfile.getOnlinePlayerProfile
 import moe.pxe.macecompanion.util.TextUtils.messageToJsonString
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
@@ -14,10 +18,7 @@ import kotlin.text.Regex
 
 object ModifierManager {
     var checkingModifiers = false
-    var mysteryAmount = 0
-    var modifiers = mutableMapOf<Modifiers, Boolean>()
-    var eternalModifier: Modifiers? = null
-    var modifierBoosters = mutableMapOf<Modifiers, MutableList<GameProfile>>()
+    var modifiers = mutableListOf<ModifierInstance>()
 
     val chatModifierHeaderRegex = Regex("""⏵(.+)ᴍᴏᴅɪꜰɪᴇʀ:""")
     val chatModifierItemRegex = Regex("""\s+◇ .+""")
@@ -32,10 +33,13 @@ object ModifierManager {
 
     fun resetModifierData() {
         checkingModifiers = false
-        mysteryAmount = 0
-        modifiers.clear()
-        eternalModifier = null
-        modifierBoosters.clear()
+        modifiers = mutableListOf()
+    }
+
+    fun isModifierPresentFromId(id: String): Boolean {
+        if(modifiers.isEmpty()) return false
+        modifiers.find { instance -> instance.modifier.id == id }?.let { return true }
+        return false
     }
 
     fun getHover(text: Component, textToSkip: String): String {
@@ -48,7 +52,7 @@ object ModifierManager {
         }
         for (sibling in text.siblings) {
             val found = getHover(sibling, textToSkip)
-            if(found.contains(textToSkip)) return "null"
+            if (found.contains(textToSkip)) return "null"
             if (found != "null") return found
         }
         return "null"
@@ -64,16 +68,17 @@ object ModifierManager {
         return (jsonString.contains(ETERNAL_MODIFIER_TEXTURE))
     }
 
-    fun getModifierFromMessage(message: Component): Modifiers {
+    fun isModifierMidasFromMessage(message: Component): Boolean {
         val jsonString = messageToJsonString(message)
-        if (jsonString.contains(MYSTERY_MODIFIER_TEXTURE)){
-            mysteryAmount++
-            return Modifiers.MYSTERY
-        }
-        Modifiers.entries.forEach { modifier ->
-            if (jsonString.contains(modifier.matchName)) return modifier
-        }
-        return Modifiers.UNKNOWN
+        return (jsonString.contains("#FFE") && jsonString.contains("#FFC42D"))
+    }
+
+    fun getModifierFromMessage(message: Component): Modifier {
+        val jsonString = messageToJsonString(message)
+        if (jsonString.contains(MYSTERY_MODIFIER_TEXTURE)) return getMystery()
+        val text = message.string
+        ModifierResourceLoader.getAll().values.sortedBy { -it.matchString.length }.find { modifier -> text.contains(modifier.matchString) }?.let { return it }
+        return getUnknown()
     }
 
     fun registerModifierListeners() {
@@ -100,18 +105,17 @@ object ModifierManager {
 
                     if (isReallyBoosted || isBoosted || isMod) {
                         val modifier = getModifierFromMessage(message)
-                        if (isModifierEternalFromMessage(message)) eternalModifier = modifier
-                        modifiers[modifier] = isModifierChargedFromMessage(message)
                         val playerNames = when {
                             isReallyBoosted -> {
-                                val hoverString = getHover(message, modifier.matchName).replace("§r", "")
+                                val hoverString = getHover(message, modifier.matchString).replace("§r", "")
                                 hoverString.split(", ")
                             }
-
                             isBoosted -> boostedMatch.groups[1]?.value?.split(", ")
                             else -> null
                         }
-                        if (playerNames != null) modifierBoosters[modifier] = playerNames.mapNotNull { getPlayerProfile(it) }.toMutableList()
+                        val modifierBoosters: List<GameProfile> = playerNames?.mapNotNull { getOnlinePlayerProfile(it) }?.toMutableList() ?: listOf()
+                        val instance = ModifierInstance(modifier = modifier, isCharged = isModifierChargedFromMessage(message), isEternal = isModifierEternalFromMessage(message), isMidas = isModifierMidasFromMessage(message), boosters = modifierBoosters)
+                        modifiers.addLast(instance)
                         updateMaceChance()
                     } else checkingModifiers = false
                 }

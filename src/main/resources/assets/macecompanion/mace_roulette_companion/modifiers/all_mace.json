@@ -1,0 +1,13 @@
+{
+  "id": "all_mace",
+  "match_string": "All Mace",
+  "item": {
+    "id": "minecraft:mace",
+    "count": 99,
+    "max_stack_size": 99,
+    "use_cooldown": {
+      "seconds": 0.1,
+      "cooldown_group": "macecompanion:modifier_icon"
+    }
+  }
+}

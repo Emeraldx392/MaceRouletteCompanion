@@ -1,0 +1,5 @@
+{
+  "id": "mace_drop",
+  "match_string": "Mace Drop",
+  "item": "minecraft:barrel"
+}

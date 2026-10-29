@@ -2,7 +2,7 @@ package moe.pxe.macecompanion.stateManagers
 
 import moe.pxe.macecompanion.AutoGG
 import moe.pxe.macecompanion.AutoGL
-import moe.pxe.macecompanion.enums.Modifiers
+import moe.pxe.macecompanion.enums.achievements.AchievementResetConditions
 import moe.pxe.macecompanion.resourceLoaders.AchievementResourceLoader.forceStopRendering
 import moe.pxe.macecompanion.stateManagers.AccuracyManager.resetAccuracyData
 import moe.pxe.macecompanion.stateManagers.AchievementManager.clearTriggersForResetCondition
@@ -12,11 +12,9 @@ import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminated
 import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminations
 import moe.pxe.macecompanion.stateManagers.EliminationManager.playersAlive
 import moe.pxe.macecompanion.stateManagers.EliminationManager.playersTotal
-import moe.pxe.macecompanion.stateManagers.ModifierManager.eternalModifier
-import moe.pxe.macecompanion.stateManagers.ModifierManager.modifierBoosters
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
 import moe.pxe.macecompanion.stateManagers.ModifierManager.checkingModifiers
-import moe.pxe.macecompanion.stateManagers.ModifierManager.mysteryAmount
+import moe.pxe.macecompanion.stateManagers.ModifierManager.isModifierPresentFromId
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.askForTPS
 import moe.pxe.macecompanion.stateManagers.PlotManager.plotHandle
 import moe.pxe.macecompanion.stateManagers.PlotManager.plotId
@@ -53,10 +51,10 @@ object RoundManager {
 
     fun updateMaceChance() {
         maceChance = when {
-            Modifiers.VICTIM in modifiers -> (100f * (playersAlive - 1)) / playersAlive
-            Modifiers.DOUBLE in modifiers -> 200f / playersAlive
-            Modifiers.TRIPLE in modifiers -> 300f / playersAlive
-            Modifiers.QUADRUPLE in modifiers -> 400f / playersAlive
+            isModifierPresentFromId("victim_mace") -> (100f * (playersAlive - 1)) / playersAlive
+            isModifierPresentFromId("double_mace") -> 200f / playersAlive
+            isModifierPresentFromId("triple_mace") -> 300f / playersAlive
+            isModifierPresentFromId("quadruple_mace") -> 400f / playersAlive
             else -> 100f / playersAlive
         }
     }
@@ -72,21 +70,18 @@ object RoundManager {
             AutoGL.sendGlMessage()
             BountyManager.getBountyData()
             timesDealtDamage = 0
-            clearTriggersForResetCondition("game")
+            clearTriggersForResetCondition(AchievementResetConditions.GAME)
             forceStopRendering = false
         }
         round = number
         gameOngoing = true
         modifiers.clear()
-        modifierBoosters.clear()
-        eternalModifier = null
-        checkingModifiers = true
-        mysteryAmount = 0
         maceChance = 100f / playersAlive
+        checkingModifiers = true
         hideNewRoundOrGameTextMessage = false
         if(number % 5 == 0) askForTPS()
         if(plotId == null || plotHandle == null || playersTotal < 2) requestPlotId()
-        clearTriggersForResetCondition("round")
+        clearTriggersForResetCondition(AchievementResetConditions.ROUND)
     }
 
     fun registerRoundListeners() {

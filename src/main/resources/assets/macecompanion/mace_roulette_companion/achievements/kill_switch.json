@@ -1,5 +1,6 @@
 {
   "id": "kill_switch",
+  "match_string": "Kill Switch",
   "on_item_model": "macecompanion:achievements/kill_switch_on",
   "off_item_model": "macecompanion:achievements/kill_switch_off",
   "loss_triggers": {

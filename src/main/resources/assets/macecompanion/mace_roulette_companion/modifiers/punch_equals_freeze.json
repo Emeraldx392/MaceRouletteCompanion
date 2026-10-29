@@ -1,0 +1,5 @@
+{
+  "id": "punch_equals_freeze",
+  "match_string": "Punch = Freeze",
+  "item": "minecraft:snowball"
+}

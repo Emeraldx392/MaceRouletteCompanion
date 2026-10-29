@@ -2,24 +2,48 @@ package moe.pxe.macecompanion
 
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.config.Config
-import moe.pxe.macecompanion.util.PlayerProfile.getPlayerProfile
+import moe.pxe.macecompanion.dataClasses.Event
+import moe.pxe.macecompanion.util.PlayerProfile.getOnlinePlayerProfile
+import moe.pxe.macecompanion.util.PlayerProfile.player2dHeadTextComponent
+import moe.pxe.macecompanion.util.TextUtils.createGradientText
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.components.toasts.FriendToast
 import net.minecraft.client.gui.components.toasts.SystemToast
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
+import net.minecraft.util.CommonColors
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.component.ResolvableProfile
+import java.util.*
 
 object CustomToasts {
-    val toastManager = Minecraft.getInstance().gui.toastManager()
+    val client: Minecraft = Minecraft.getInstance()
+    val toastManager = client.gui.toastManager()
 
     //Generic toast
     fun sendCustomToast(title: Component, description: Component) {
         SystemToast.add(toastManager, SystemToast.SystemToastId.PERIODIC_NOTIFICATION, title, description)
     }
 
+    //Generic player toast
+    fun sendCustomPlayerToast(uuid: UUID, message: Component) {
+        val skinProfile: ResolvableProfile = ResolvableProfile.createUnresolved(uuid)
+        FriendToast.add(toastManager, client.font, skinProfile, message)
+    }
+
+    fun sendCustomItemStackToast(itemStack: ItemStack, title: Component, description: Component?) {
+        toastManager.addToast(CustomItemStackToast(itemStack, title, description))
+    }
+
     //Event toast
-    fun sendNewEventToast(newEventType: String, newEventDuration: Int, newEventStarter: String) {
+    fun sendNewEventToast(newEvent: Event, newEventDuration: Int, newEventStarter: String) {
         if (!Config.showNewEventToasts.value) return
-        val description = Component.literal("$newEventType: ${newEventDuration}h (by $newEventStarter)")
-        sendCustomToast(Component.literal("New Event Started!"), description)
+        val eventId = createGradientText(Component.translatable("mrc.event.${newEvent.id}"), newEvent.colors).run { newEvent.shadowColor?.let { withStyle(Style.EMPTY.withShadowColor(it)) } ?: this }
+        val description = Component.translatable("mrc.toast.new_event.description", eventId, Component.literal(newEventDuration.toString()).withColor(CommonColors.WHITE))
+        val eventStarter = Component.translatable("mrc.toast.new_event.starter", getOnlinePlayerProfile(newEventStarter)?.let{player2dHeadTextComponent(it).copy().withColor(CommonColors.WHITE).append(" ")} ?: "", Component.literal(newEventStarter).withColor(CommonColors.WHITE)).withStyle(ChatFormatting.GRAY)
+        val title = Component.translatable("mrc.toast.new_event.title", eventStarter).withColor(0x0F9FF)
+        sendCustomItemStackToast(newEvent.createItemStack(), title, description)
     }
 
     //Consumable toasts
@@ -90,19 +114,27 @@ object CustomToasts {
     }
 
     //Player Toasts
-    fun sendPlayerJoinedToast(player: String) {
-        val playerProfile = getPlayerProfile(player) ?: return
-        val hasProfileName = Config.playerStrings.value.contains(playerProfile.name)
-        val hasProfileUuid = Config.playerStrings.value.contains(playerProfile.id.toString())
+    fun sendPlayerJoinedToast(player: String, color: Int?) {
+        val playerProfile = getOnlinePlayerProfile(player) ?: return
+        val configValues = Config.playerStrings.get()
+
+        val hasProfileName = configValues.contains(playerProfile.name)
+        val hasProfileUuid = configValues.mapNotNull { runCatching { UUID.fromString(it) }.getOrNull() }.contains(playerProfile.id)
+
         if (!hasProfileName && !hasProfileUuid) return
-        sendCustomToast(Component.literal("Player Joined!"), Component.literal("${playerProfile.name} joined the game!"))
+
+        sendCustomPlayerToast(playerProfile.id, Component.translatable("mrc.toast.player_joined", Component.literal(player).withColor(color?: CommonColors.YELLOW)))
     }
 
     fun sendPlayerLeftToast(player: String) {
-        val playerProfile = getPlayerProfile(player) ?: return
-        val hasProfileName = Config.playerStrings.value.contains(playerProfile.name)
-        val hasProfileUuid = Config.playerStrings.value.contains(playerProfile.id.toString())
+        val playerProfile = getOnlinePlayerProfile(player) ?: return
+        val configValues = Config.playerStrings.get()
+
+        val hasProfileName = configValues.contains(playerProfile.name)
+        val hasProfileUuid = configValues.mapNotNull { runCatching { UUID.fromString(it) }.getOrNull() }.contains(playerProfile.id)
+
         if (!hasProfileName && !hasProfileUuid) return
-        sendCustomToast(Component.literal("Player Left"), Component.literal("${playerProfile.name} left."))
+
+        sendCustomPlayerToast(playerProfile.id, Component.translatable("mrc.toast.player_left", Component.literal(playerProfile.name).withStyle(ChatFormatting.GRAY)))
     }
 }

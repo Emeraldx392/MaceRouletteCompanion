@@ -1,0 +1,12 @@
+{
+  "id": "sheriff",
+  "match_string": "Sheriff",
+  "item": {
+    "id": "minecraft:crossbow",
+    "charged_projectiles": [
+      {
+        "id": "firework_rocket"
+      }
+    ]
+  }
+}

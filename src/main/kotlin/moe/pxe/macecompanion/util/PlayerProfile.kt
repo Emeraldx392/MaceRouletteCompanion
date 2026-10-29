@@ -23,9 +23,13 @@ object PlayerProfile {
 
     val client: Minecraft = Minecraft.getInstance()
 
-    fun getPlayerProfile(player: String?): GameProfile? {
+    fun getOnlinePlayerProfile(player: String?): GameProfile? {
         if (player == null) return null
         return client.connection?.getPlayerInfo(player)?.profile ?: resolvePlayerFromRawName(player)
+    }
+
+    fun getOnlinePlayerProfile(uuid: UUID): GameProfile? {
+        return client.connection?.getPlayerInfo(uuid)?.profile
     }
 
     fun resolvePlayerFromRawName(rawName: String?): GameProfile? {
@@ -40,7 +44,6 @@ object PlayerProfile {
 
     fun headFromProperty(property: Property): ItemStack {
         val profile = GameProfile(UUID.randomUUID(), "", PropertyMap(ImmutableMultimap.of("textures", property)))
-//        profile.properties.put("textures", property)
         return headFromProfile(profile)
     }
 

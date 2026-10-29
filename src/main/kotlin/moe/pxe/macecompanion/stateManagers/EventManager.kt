@@ -1,6 +1,8 @@
 package moe.pxe.macecompanion.stateManagers
 
 import moe.pxe.macecompanion.CustomToasts
+import moe.pxe.macecompanion.dataClasses.Event
+import moe.pxe.macecompanion.resourceLoaders.EventResourceLoader
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import java.util.concurrent.CompletableFuture
 
@@ -8,7 +10,7 @@ object EventManager {
     var doubleXp = false
     var newEvent = false
     var newEventStarter = ""
-    var newEventType = ""
+    var newEventType: Event? = null
 
     val newEventRegex = Regex("""⏵ New Event Started! \(by (.+)\)""")
     val newEventTypeRegex = Regex("""\s+⏵ Type: (.+)""")
@@ -18,7 +20,7 @@ object EventManager {
         doubleXp = false
         newEvent = false
         newEventStarter = ""
-        newEventType = ""
+        newEventType = null
     }
 
     fun registerEventListeners() {
@@ -35,16 +37,16 @@ object EventManager {
                     newEventStarter = it.value
                 }
                 newEventTypeRegex.matchEntire(text)?.groups[1]?.let {
-                    newEventType = it.value
-                    if (newEventType == "Double XP") doubleXp = true
+                    newEventType = EventResourceLoader.getEventFromMatchString(it.value)
+                    if (newEventType?.id == "double_xp") doubleXp = true
                 }
                 newEventDurationRegex.matchEntire(text)?.groups[1]?.let {
                     val eventDuration = it.value.toInt()
                     if (newEvent) {
-                        CustomToasts.sendNewEventToast(newEventType, eventDuration, newEventStarter)
+                        newEventType?.let { CustomToasts.sendNewEventToast(it, eventDuration, newEventStarter) }
                         newEvent = false
                         newEventStarter = ""
-                        newEventType = ""
+                        newEventType = null
                     }
                 }
             }

@@ -1,0 +1,12 @@
+{
+  "id": "double_mace",
+  "match_string": "Double Mace",
+  "item": {
+    "id": "minecraft:mace",
+    "count": 2,
+    "use_cooldown": {
+      "seconds": 0.1,
+      "cooldown_group": "macecompanion:modifier_icon"
+    }
+  }
+}

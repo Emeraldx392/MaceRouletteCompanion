@@ -1,0 +1,5 @@
+{
+  "id": "banned_key",
+  "match_string": "Banned Key",
+  "item": "minecraft:trial_key"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "fast_time",
+  "match_string": "Fast Time",
+  "item": {
+    "id": "minecraft:clock",
+    "damage": 1,
+    "max_damage": 1000
+  }
+}

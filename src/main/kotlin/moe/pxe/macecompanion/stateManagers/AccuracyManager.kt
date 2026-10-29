@@ -1,8 +1,8 @@
 package moe.pxe.macecompanion.stateManagers
 
-import moe.pxe.macecompanion.stateManagers.AchievementManager.addRequirement
+import moe.pxe.macecompanion.enums.achievements.AchievementResetConditions
 import moe.pxe.macecompanion.stateManagers.AchievementManager.clearTriggersForResetCondition
-import moe.pxe.macecompanion.stateManagers.AchievementManager.removeRequirement
+import moe.pxe.macecompanion.stateManagers.AchievementManager.updateAllAchievements
 import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminated
 import moe.pxe.macecompanion.stateManagers.RoundManager.round
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -26,13 +26,14 @@ object AccuracyManager {
             hasMace = (!eliminated && (client.player?.inventory?.hasAnyOf(setOf(Items.MACE)) ?: false))
             hasWindCharge = (!eliminated && (client.player?.inventory?.hasAnyOf(setOf(Items.WIND_CHARGE)) ?: false))
             if (hasMace) {
-                addRequirement("mace")
                 lastRoundWithMace = round
                 if (!(maceAttempts[round] ?: false) && !hasWindCharge) maceAttempts[round] = false
-                if(!hadMaceLastTick) clearTriggersForResetCondition("mace")
-            }else removeRequirement("mace")
-            if(hasMace != hadMaceLastTick) hadMaceLastTick = hasMace
-
+                if(!hadMaceLastTick) clearTriggersForResetCondition(AchievementResetConditions.MACE)
+            }
+            if(hasMace != hadMaceLastTick){
+                updateAllAchievements()
+                hadMaceLastTick = hasMace
+            }
         })
     }
 }

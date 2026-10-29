@@ -1,0 +1,5 @@
+{
+  "id": "move_equals_grow",
+  "match_string": "Move = Grow",
+  "item": "minecraft:chainmail_boots"
+}

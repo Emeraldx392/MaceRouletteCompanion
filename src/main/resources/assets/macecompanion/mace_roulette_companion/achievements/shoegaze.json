@@ -1,5 +1,6 @@
 {
   "id": "shoegaze",
+  "match_string": "Shoegaze",
   "on_item_model": "macecompanion:achievements/shoegaze_on",
   "off_item_model": "macecompanion:achievements/shoegaze_off",
   "loss_triggers": "look_above_horizon",

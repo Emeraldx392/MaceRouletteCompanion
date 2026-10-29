@@ -1,0 +1,12 @@
+{
+  "id": "overcharged",
+  "match_string": "Overcharged",
+  "item": {
+    "id": "minecraft:cyan_candle",
+    "item_model": "macecompanion:events/overcharged"
+  },
+  "color": [
+    "#0786FF",
+    "#FFE100"
+  ]
+}

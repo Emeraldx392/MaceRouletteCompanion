@@ -2,10 +2,13 @@ package moe.pxe.macecompanion.stateManagers
 
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.config.Config
-import moe.pxe.macecompanion.dataClasses.MRAchievement
-import moe.pxe.macecompanion.enums.AchievementLostTriggers
-import moe.pxe.macecompanion.enums.AchievementLostTriggers.*
+import moe.pxe.macecompanion.dataClasses.Achievement
+import moe.pxe.macecompanion.enums.achievements.AchievementLostTriggers
+import moe.pxe.macecompanion.enums.achievements.AchievementLostTriggers.*
+import moe.pxe.macecompanion.enums.achievements.AchievementResetConditions
+import moe.pxe.macecompanion.enums.achievements.AchievementResetConditions.*
 import moe.pxe.macecompanion.resourceLoaders.AchievementResourceLoader
+import moe.pxe.macecompanion.resourceLoaders.AchievementResourceLoader.getAchievementFromMatchString
 import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminated
 import moe.pxe.macecompanion.stateManagers.PlotManager.isStatless
 import moe.pxe.macecompanion.stateManagers.PlotManager.onMaceRoulette
@@ -24,11 +27,10 @@ object AchievementManager {
 
     val player = Minecraft.getInstance().player
 
-    var possibleAchievements: MutableList<MRAchievement> = mutableListOf()
-    var achievementLostTriggers: MutableMap<String, MutableMap<AchievementLostTriggers, Int>> = mutableMapOf(
-        "round" to mutableMapOf(), "game" to mutableMapOf(), "mace" to mutableMapOf()
+    var possibleAchievements: MutableList<Achievement> = mutableListOf()
+    var achievementLostTriggers: MutableMap<AchievementResetConditions, MutableMap<AchievementLostTriggers, Int>> = mutableMapOf(
+        ROUND to mutableMapOf(), GAME to mutableMapOf(), MACE to mutableMapOf()
     )
-    var requirements: MutableList<String> = mutableListOf()
 
     fun updateAllAchievements() {
         possibleAchievements.clear()
@@ -36,26 +38,16 @@ object AchievementManager {
         possibleAchievements = allAch.filter { achievement -> achievement.lossTriggers.all { trigger -> getAmountTriggered(achievement.resetCondition, trigger.key) < trigger.value } && hasRequirement(achievement) }.toMutableList()
     }
 
-    fun getAmountTriggered(resetCondition: String, achievementLostTrigger: AchievementLostTriggers): Int {
+    fun getAmountTriggered(resetCondition: AchievementResetConditions, achievementLostTrigger: AchievementLostTriggers): Int {
         return achievementLostTriggers[resetCondition]?.get(achievementLostTrigger) ?: 0
     }
 
-    fun hasRequirement(ach: MRAchievement): Boolean {
-        return ach.requirement == null || requirements.contains(ach.requirement)
-    }
-
-    fun addRequirement(reqirement: String) {
-        if(!requirements.contains(reqirement)) requirements.addLast(reqirement)
-        updateAllAchievements()
-    }
-
-    fun removeRequirement(reqirement: String) {
-        if(requirements.contains(reqirement)) requirements.remove(reqirement)
-        updateAllAchievements()
+    fun hasRequirement(ach: Achievement): Boolean {
+        return ach.requirement == null || ach.requirement.get()
     }
 
     fun addAchievementLostTrigger(achievementLostTrigger: AchievementLostTriggers) {
-        listOf("game", "round", "mace").forEach { resetCondition ->
+        AchievementResetConditions.entries.forEach { resetCondition ->
             val innerMap = achievementLostTriggers.getOrPut(resetCondition) { mutableMapOf() }
             innerMap[achievementLostTrigger] = (innerMap[achievementLostTrigger] ?: 0) + 1
         }
@@ -65,12 +57,12 @@ object AchievementManager {
     fun clearAllTriggers() {
         achievementLostTriggers.clear()
         achievementLostTriggers = mutableMapOf(
-            "round" to mutableMapOf(), "game" to mutableMapOf(), "mace" to mutableMapOf()
+            ROUND to mutableMapOf(), GAME to mutableMapOf(), MACE to mutableMapOf()
         )
         updateAllAchievements()
     }
 
-    fun clearTriggersForResetCondition(resetCondition: String) {
+    fun clearTriggersForResetCondition(resetCondition: AchievementResetConditions) {
         achievementLostTriggers[resetCondition] = mutableMapOf()
         updateAllAchievements()
     }
@@ -126,7 +118,7 @@ object AchievementManager {
                 achievementRegex.find(text)?.groups?.let {
                     val playerName = it[1]?.value ?: "null"
                     val rawName = it[2]?.value ?: "null"
-                    val achId = rawName.lowercase().replace(" ", "_").replace(",", "")
+                    val achId = getAchievementFromMatchString(rawName)?.id ?: "null"
                     if(playerName == clientPlayerName){
                         synchronized(Config.areAchievementsShown) {
                             if (Config.areAchievementsShown.value[achId] != null) {

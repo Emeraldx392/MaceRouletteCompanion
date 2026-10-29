@@ -1,0 +1,10 @@
+{
+  "id": "wind_burst_mace",
+  "match_string": "Wind Burst Mace",
+  "item": {
+    "id": "minecraft:enchanted_book",
+    "stored_enchantments": {
+      "minecraft:wind_burst": 1
+    }
+  }
+}

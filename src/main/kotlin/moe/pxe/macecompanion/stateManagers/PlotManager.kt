@@ -61,7 +61,7 @@ object PlotManager {
                 widget is Button && widget.message == Component.translatable("gui.advancements")
             } as? Button
             if (targetButton != null) {
-                val newButton = Button.builder(Component.literal("MRC Settings")) { _ ->
+                val newButton = Button.builder(Component.translatable("mrc.button.settings")) { _ ->
                     val configScreen = ConfigMenu.generateScreen(null)
                     client.gui.setScreen(configScreen)
                 }.bounds(targetButton.x, targetButton.y, targetButton.width, targetButton.height).build()

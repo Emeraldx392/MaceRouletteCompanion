@@ -13,7 +13,7 @@ import kotlin.math.roundToInt
 import kotlin.time.TimeMark
 
 object TimeManager {
-    val timeRegex = Regex("""» Daytime has been set to .+""")
+    val timeRegex = Regex("""⏵ Time set to .+""")
 
     var playtime: TimeMark? = null
     var hideDayTimeMessage = false
@@ -60,7 +60,7 @@ object TimeManager {
             val text = message.string
 
             if (overlay) return@register true
-            if(!text.startsWith("»")) return@register true
+            if(!text.startsWith("⏵")) return@register true
 
             timeRegex.matchEntire(text)?.let{
                 if(hideDayTimeMessage){

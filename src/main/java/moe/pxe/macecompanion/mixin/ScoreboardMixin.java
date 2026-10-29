@@ -43,18 +43,18 @@ public class ScoreboardMixin {
                 if (team != null) {
                     String fullLine = team.getPlayerPrefix().getString();
                     JsonElement prefixJson = TextUtils.INSTANCE.messageToJson(team.getPlayerPrefix());
-                    Integer parsedTimeColor = TextUtils.INSTANCE.findTextColorInJson(prefixJson, "0:");
+                    Integer parsedTimeColor = TextUtils.INSTANCE.findTextColorInJson(prefixJson, "0:", null);
                     if (parsedTimeColor != null) timeColor.set(parsedTimeColor);
                     Matcher timeMatcher = timePattern.matcher(fullLine);
                     if (timeMatcher.find()) timeLeft.set(Integer.parseInt(timeMatcher.group(1)));
                     if (fullLine.contains("Round")){
                         type.append("Round");
-                        Integer parsedMainColor = TextUtils.INSTANCE.findTextColorInJson(prefixJson, "Round");
+                        Integer parsedMainColor = TextUtils.INSTANCE.findTextColorInJson(prefixJson, "Round", null);
                         if (parsedMainColor != null) mainColor.set(parsedMainColor);
                     }
                     if (fullLine.contains("Game")) {
                         type.append("Game");
-                        Integer parsedMainColor = TextUtils.INSTANCE.findTextColorInJson(prefixJson, "Game");
+                        Integer parsedMainColor = TextUtils.INSTANCE.findTextColorInJson(prefixJson, "Game", null);
                         if (parsedMainColor != null) mainColor.set(parsedMainColor);
                     }
                 }

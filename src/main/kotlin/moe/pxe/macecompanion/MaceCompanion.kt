@@ -6,6 +6,7 @@ import moe.pxe.macecompanion.config.ConfigUpdater
 import moe.pxe.macecompanion.stateManagers.AccuracyManager
 import moe.pxe.macecompanion.stateManagers.AchievementManager
 import moe.pxe.macecompanion.stateManagers.BountyManager
+import moe.pxe.macecompanion.stateManagers.CommandManager
 import moe.pxe.macecompanion.stateManagers.ConsumableManager
 import moe.pxe.macecompanion.stateManagers.EliminationManager
 import moe.pxe.macecompanion.stateManagers.EventManager
@@ -28,7 +29,7 @@ class MaceCompanion : ModInitializer {
     companion object {
         const val MOD_ID = "macecompanion"
         val LOGGER = LoggerFactory.getLogger(MOD_ID)!!
-        const val DEBUG_MODE = false
+        const val DEBUG_MODE = true
     }
     override fun onInitialize() {
         LOGGER.info("Initializing Mace Roulette Companion...")
@@ -53,6 +54,7 @@ class MaceCompanion : ModInitializer {
         RoundManager.registerRoundListeners()
         ModifierManager.registerModifierListeners()
         AchievementManager.registerAchievementListeners()
+        CommandManager.registerCommands()
         TimeManager.registerTimeListeners()
         ResourcePackManager.registerResourcePackListeners()
         SendMessage.registerTickListener()

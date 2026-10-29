@@ -155,15 +155,15 @@ object CustomKeybinds {
                 val newValue = !Config.useAutoGL.value
                 Config.useAutoGL.set(newValue)
                 Config.saveToFile()
-                if(newValue) client.player?.sendSystemMessage(Component.literal("Auto GL enabled!").withColor(CommonColors.GREEN))
-                if(!newValue) client.player?.sendSystemMessage(Component.literal("Auto GL disabled!").withColor(CommonColors.RED))
+                if(newValue) client.player?.sendSystemMessage(Component.translatable("mrc.message.auto_gl_enabled").withColor(CommonColors.GREEN))
+                if(!newValue) client.player?.sendSystemMessage(Component.translatable("mrc.message.auto_gl_disabled").withColor(CommonColors.RED))
             }
             while (toggleAutoGGKeyBinding.consumeClick()) {
                 val newValue = !Config.useAutoGG.value
                 Config.useAutoGG.set(newValue)
                 Config.saveToFile()
-                if(newValue) client.player?.sendSystemMessage(Component.literal("Auto GG enabled!").withColor(CommonColors.GREEN))
-                if(!newValue) client.player?.sendSystemMessage(Component.literal("Auto GG disabled!").withColor(CommonColors.RED))
+                if(newValue) client.player?.sendSystemMessage(Component.translatable("mrc.message.auto_gg_enabled").withColor(CommonColors.GREEN))
+                if(!newValue) client.player?.sendSystemMessage(Component.translatable("mrc.message.auto_gg_disabled").withColor(CommonColors.RED))
             }
         }
     }

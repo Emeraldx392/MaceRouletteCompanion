@@ -1,0 +1,10 @@
+{
+  "id": "mystery",
+  "match_string": "Mystery!",
+  "item": {
+    "id": "minecraft:light_gray_candle",
+    "enchantment_glint_override": true
+  },
+  "color": "#D2B5FF",
+  "italic": true
+}

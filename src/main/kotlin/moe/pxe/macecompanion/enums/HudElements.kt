@@ -10,7 +10,6 @@ import moe.pxe.macecompanion.config.Config.getAccentColor
 import moe.pxe.macecompanion.config.Config.maceChanceHideWhenEliminated
 import moe.pxe.macecompanion.config.Config.modifiersMaxBoosters
 import moe.pxe.macecompanion.config.Config.modifiersUse2dHeadIcons
-import moe.pxe.macecompanion.config.Config.modifiersUseCustomModifierIcons
 import moe.pxe.macecompanion.config.Config.starFragmentsHideWhenEliminated
 import moe.pxe.macecompanion.config.controllers.ConfigurableEnum
 import moe.pxe.macecompanion.config.hudElementConfigs.AccuracyConfig
@@ -26,6 +25,7 @@ import moe.pxe.macecompanion.config.hudElementConfigs.PlaytimeConfig
 import moe.pxe.macecompanion.config.hudElementConfigs.RoundNumberConfig
 import moe.pxe.macecompanion.config.hudElementConfigs.StarFrgamentsConfig
 import moe.pxe.macecompanion.config.hudElementConfigs.TpsConfig
+import moe.pxe.macecompanion.dataClasses.ModifierInstance
 import moe.pxe.macecompanion.resourceLoaders.AchievementResourceLoader
 import moe.pxe.macecompanion.resourceLoaders.AchievementResourceLoader.forceStopRendering
 import moe.pxe.macecompanion.stateManagers.AccuracyManager.maceAttempts
@@ -35,10 +35,7 @@ import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminated
 import moe.pxe.macecompanion.stateManagers.EliminationManager.eliminations
 import moe.pxe.macecompanion.stateManagers.EliminationManager.playersAlive
 import moe.pxe.macecompanion.stateManagers.EliminationManager.playersTotal
-import moe.pxe.macecompanion.stateManagers.ModifierManager.eternalModifier
-import moe.pxe.macecompanion.stateManagers.ModifierManager.modifierBoosters
 import moe.pxe.macecompanion.stateManagers.ModifierManager.modifiers
-import moe.pxe.macecompanion.stateManagers.ModifierManager.mysteryAmount
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.fps
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.ping
 import moe.pxe.macecompanion.stateManagers.PerformanceStatsManager.tps
@@ -294,14 +291,14 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
         override fun generateConfig(parent: Screen): Screen? = PlaytimeConfig.generateConfig(parent)
     },
     MODIFIERS {
-        private var cachedModifiers = mutableMapOf<Modifiers, Boolean>()
+        private var cachedModifiers = mutableListOf<ModifierInstance>()
         private var cachedHeaderText: Component? = null
         private var cachedHeaderTextWidth: Int = 0
         private var cachedUse2dHeads: Boolean? = null
-        private var cachedModifierIcons = mutableMapOf<Modifiers, ItemStack>()
-        private var cachedRightModifierTexts = mutableMapOf<Modifiers, Component>()
-        private var cachedLeftModifierTexts = mutableMapOf<Modifiers, Component>()
-        private var cachedModifierTextWidths = mutableMapOf<Modifiers, Int>()
+        private var cachedModifierIcons = mutableMapOf<ModifierInstance, ItemStack>()
+        private var cachedRightModifierTexts = mutableMapOf<ModifierInstance, Component>()
+        private var cachedLeftModifierTexts = mutableMapOf<ModifierInstance, Component>()
+        private var cachedModifierTextWidths = mutableMapOf<ModifierInstance, Int>()
 
         override fun refreshRendering() {
             cachedHeaderText = null
@@ -328,33 +325,31 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             context.text(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
             val use2dHeads = modifiersUse2dHeadIcons.value
-            val modifiersChanged = (cachedModifiers != modifiers)
-            if (modifiersChanged) cachedModifiers = modifiers.toMutableMap()
-            modifiers.forEach { (modifier, isCharged) ->
+            val currentModifiers = ArrayList(modifiers)
+            val modifiersChanged = (cachedModifiers != currentModifiers)
+            if (modifiersChanged) cachedModifiers = currentModifiers.toMutableList()
+            currentModifiers.forEach { instance ->
                 var xPos = if (rightAligned) -16 else 0
-                if (modifiersChanged || cachedModifierIcons[modifier] == null) {
-                    val baseIcon = if (!modifiersUseCustomModifierIcons.value) modifier.icon else modifier.customIcon
-                    cachedModifierIcons[modifier] = baseIcon.copy().apply {
-                        if (modifier == Modifiers.MYSTERY) count = mysteryAmount
-                    }
+                if (modifiersChanged || cachedModifierIcons[instance] == null) {
+                    val baseIcon = instance.modifier.createItemStack()
+                    cachedModifierIcons[instance] = baseIcon.copy()
                 }
-                val icon = cachedModifierIcons[modifier]!!
+                val icon = cachedModifierIcons[instance]!!
                 context.item(icon, xPos, yPos)
                 context.itemDecorations(textRenderer, icon, xPos, yPos)
-                val isEternal = eternalModifier == modifier
-                if (modifiersChanged || (rightAligned && cachedRightModifierTexts[modifier] == null) || (!rightAligned && cachedLeftModifierTexts[modifier] == null) || cachedUse2dHeads != use2dHeads) {
+                if (modifiersChanged || (rightAligned && cachedRightModifierTexts[instance] == null) || (!rightAligned && cachedLeftModifierTexts[instance] == null) || cachedUse2dHeads != use2dHeads) {
                     cachedUse2dHeads = use2dHeads
-                    val finalText = buildModifierTextWith2dBoosters(modifier, isEternal, isCharged, rightAligned, use2dHeads, modifierBoosters[modifier])
-                    if (rightAligned) cachedRightModifierTexts[modifier] = finalText
-                    else cachedLeftModifierTexts[modifier] = finalText
-                    cachedModifierTextWidths[modifier] = textRenderer.width(finalText)
+                    val finalText = buildModifierTextWith2dBoosters(instance.modifier, instance.isEternal, instance.isCharged, instance.isMidas, rightAligned, use2dHeads, instance.boosters)
+                    if (rightAligned) cachedRightModifierTexts[instance] = finalText
+                    else cachedLeftModifierTexts[instance] = finalText
+                    cachedModifierTextWidths[instance] = textRenderer.width(finalText)
                 }
-                val text = if (rightAligned) cachedRightModifierTexts[modifier]!! else cachedLeftModifierTexts[modifier]!!
-                val width = cachedModifierTextWidths[modifier] ?: 0
+                val text = if (rightAligned) cachedRightModifierTexts[instance]!! else cachedLeftModifierTexts[instance]!!
+                val width = cachedModifierTextWidths[instance] ?: 0
                 xPos = if (rightAligned) -22 - width else 22
                 context.text(textRenderer, text, xPos, yPos + 4, -1)
 
-                if (!use2dHeads) modifierBoosters[modifier]?.let { playerList ->
+                if (!use2dHeads) instance.boosters.let { playerList ->
                     val maxBoosters = modifiersMaxBoosters.value
                     val visibleBoosters = playerList.take(maxBoosters)
                     val bonusBoostersAmount = playerList.size - maxBoosters

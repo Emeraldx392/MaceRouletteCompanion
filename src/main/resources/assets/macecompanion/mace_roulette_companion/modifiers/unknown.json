@@ -1,0 +1,14 @@
+{
+  "id": "unknown",
+  "match_string": "\uE024",
+  "item": {
+    "id": "minecraft:mace",
+    "item_model": "macecompanion:glitched_mace",
+    "use_cooldown": {
+      "seconds": 0.1,
+      "cooldown_group": "macecompanion:modifier_icon"
+    }
+  },
+  "color": "#FF5555",
+  "bold": true
+}

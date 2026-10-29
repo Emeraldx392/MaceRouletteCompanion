@@ -1,0 +1,14 @@
+{
+  "id": "lunge",
+  "match_string": "Lunge",
+  "item": {
+    "id": "minecraft:copper_spear",
+    "use_cooldown": {
+      "seconds": 0.1,
+      "cooldown_group": "macecompanion:modifier_icon"
+    },
+    "enchantments": {
+      "minecraft:lunge": 2
+    }
+  }
+}

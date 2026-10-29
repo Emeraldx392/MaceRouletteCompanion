@@ -1,0 +1,5 @@
+{
+  "id": "sticky_floor",
+  "match_string": "Sticky Floor",
+  "item": "minecraft:honey_block"
+}

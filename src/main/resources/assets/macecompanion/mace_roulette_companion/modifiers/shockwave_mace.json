@@ -1,0 +1,11 @@
+{
+  "id": "shockwave_mace",
+  "match_string": "Shockwave Mace",
+  "item": {
+    "id": "minecraft:heart_of_the_sea",
+    "use_cooldown": {
+      "seconds": 0.1,
+      "cooldown_group": "macecompanion:modifier_icon"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "quadruple_mace",
+  "match_string": "Quadruple Mace",
+  "item": {
+    "id": "minecraft:mace",
+    "count": 4,
+    "use_cooldown": {
+      "seconds": 0.1,
+      "cooldown_group": "macecompanion:modifier_icon"
+    }
+  }
+}

@@ -1,8 +1,9 @@
 {
   "id": "nice_and_cheesy",
+  "match_string": "Nice and Cheesy",
   "on_item_model": "macecompanion:achievements/nice_and_cheesy_on",
   "off_item_model": "macecompanion:achievements/nice_and_cheesy_off",
   "loss_triggers": ["walk_forward", "walk_backwards", "walk_left", "walk_right", "jump", "crouch"],
   "reset_condition": "mace",
-  "requirement": "mace"
+  "requirement": "has_mace"
 }

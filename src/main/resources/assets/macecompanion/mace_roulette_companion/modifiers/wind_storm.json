@@ -1,0 +1,11 @@
+{
+  "id": "wind_storm",
+  "match_string": "Wind Storm",
+  "item": {
+    "id": "minecraft:wind_charge",
+    "use_cooldown": {
+      "seconds": 0.1,
+      "cooldown_group": "macecompanion:modifier_icon"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 package moe.pxe.macecompanion.mixin;
 
-import moe.pxe.macecompanion.enums.AchievementLostTriggers;
+import moe.pxe.macecompanion.enums.achievements.AchievementLostTriggers;
 import moe.pxe.macecompanion.stateManagers.AchievementManager;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
