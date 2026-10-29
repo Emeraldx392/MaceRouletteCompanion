@@ -43,7 +43,7 @@ object CustomKeybinds {
         openProfileKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_profile",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
@@ -51,7 +51,7 @@ object CustomKeybinds {
         openCosmeticsKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_cosmetics",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
@@ -59,7 +59,7 @@ object CustomKeybinds {
         openEventsKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_events",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
@@ -67,7 +67,7 @@ object CustomKeybinds {
         openStarRoadKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_star_road",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
@@ -75,7 +75,7 @@ object CustomKeybinds {
         openMidasMondayKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_midas_monday",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
@@ -83,7 +83,7 @@ object CustomKeybinds {
         openLeaderboardKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_leaderboard",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
@@ -91,7 +91,7 @@ object CustomKeybinds {
         openModOptionsKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.open_mod_options",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
@@ -99,7 +99,7 @@ object CustomKeybinds {
         toggleHudKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.toggle_hud",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
@@ -107,7 +107,7 @@ object CustomKeybinds {
         toggleAutoGLKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.toggle_auto_gl",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
@@ -115,7 +115,7 @@ object CustomKeybinds {
         toggleAutoGGKeyBinding = KeyMappingHelper.registerKeyMapping(
             KeyMapping(
                 "key.macecompanion.toggle_auto_gg",
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 InputConstants.UNKNOWN.value,
                 maceRouletteCategory
             )
