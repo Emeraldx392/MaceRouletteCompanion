@@ -70,7 +70,7 @@ object ModifierManager {
 
     fun isModifierMidasFromMessage(message: Component): Boolean {
         val jsonString = messageToJsonString(message)
-        return (jsonString.contains("#FFE") && jsonString.contains("#FFC42D"))
+        return (jsonString.contains("#FFE684") || jsonString.contains("#FFDF73")) && jsonString.contains("#FFC42D")
     }
 
     fun getModifierFromMessage(message: Component): Modifier {
