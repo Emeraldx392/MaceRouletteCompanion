@@ -461,6 +461,11 @@
     "mrc.modifier.spookwave_mace": "Spookwave Mace",
     "mrc.modifier.worm_warfare": "Worm Warfare",
     "mrc.modifier.costume_party": "Costume Party",
+    "mrc.modifier.ad_burst": "Ad Burst",
+    "mrc.modifier.falling_cores": "Falling Cores",
+    "mrc.modifier.no_air_drag": "No Air Drag",
+    "mrc.modifier.dive": "Dive",
+    "mrc.modifier.splitting_map": "Splitting Map",
     "mrc.modifier.unknown": "Unknown Modifier",
     "mrc.modifier.mystery": "Mystery!",
 
