@@ -6,8 +6,6 @@
   "client": [
     "DealtDamageMixin",
     "ScoreboardMixin",
-    "SubtitlePacketMixin",
-    "TitlePacketMixin",
     "SoundMixin"
   ],
   "injectors": {

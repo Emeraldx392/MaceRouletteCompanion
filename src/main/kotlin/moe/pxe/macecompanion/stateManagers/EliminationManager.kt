@@ -7,13 +7,8 @@ import moe.pxe.macecompanion.stateManagers.RoundManager.round
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.calculateStarFragments
 import moe.pxe.macecompanion.util.PlayerInventory.getPlayerSlotItemStack
 import moe.pxe.macecompanion.util.PlayerProfile.getOnlinePlayerProfile
-import moe.pxe.macecompanion.util.SubtitleCallback
-import moe.pxe.macecompanion.util.TitleCallback
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
-import net.minecraft.world.InteractionResult
 import net.minecraft.world.item.Items
 import java.util.concurrent.CompletableFuture
 import kotlin.collections.set
@@ -89,30 +84,22 @@ object EliminationManager {
             }
             return@register
         }
-        TitleCallback.EVENT.register(
-            object : TitleCallback {
-                override fun setTitleText(packet: ClientboundSetTitleTextPacket): InteractionResult {
-                    if (!PlotManager.onMaceRoulette) return InteractionResult.PASS
-                    titleEliminatedRegex.matchEntire(packet.text.string)?.let {
-                        eliminated = true
-                        bounties.clear()
-                    }
-                    return InteractionResult.PASS
+        ClientReceiveMessageEvents.TITLE.register { message ->
+            if (!PlotManager.onMaceRoulette) return@register
+            titleEliminatedRegex.matchEntire(message.string)?.let {
+                eliminated = true
+                bounties.clear()
+            }
+            return@register
+        }
+        ClientReceiveMessageEvents.SUBTITLE.register { message ->
+            if (!PlotManager.onMaceRoulette) return@register
+            titlePlayersAliveRegex.matchEntire(message.string)?.let { playersAliveMatch ->
+                playersAliveMatch.groups[1]?.let {
+                    playersAlive = it.value.toIntOrNull() ?: -1
                 }
             }
-        )
-        SubtitleCallback.EVENT.register(
-            object : SubtitleCallback {
-                override fun setSubtitleText(packet: ClientboundSetSubtitleTextPacket): InteractionResult {
-                    if (!PlotManager.onMaceRoulette) return InteractionResult.PASS
-                    titlePlayersAliveRegex.matchEntire(packet.text.string)?.let { playersAliveMatch ->
-                        playersAliveMatch.groups[1]?.let {
-                            playersAlive = it.value.toIntOrNull() ?: -1
-                        }
-                    }
-                    return InteractionResult.PASS
-                }
-            }
-        )
+            return@register
+        }
     }
 }

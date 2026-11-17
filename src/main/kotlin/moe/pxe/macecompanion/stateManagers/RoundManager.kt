@@ -22,13 +22,10 @@ import moe.pxe.macecompanion.stateManagers.PlotManager.requestPlotId
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
 import moe.pxe.macecompanion.stateManagers.TimeManager.playtime
 import moe.pxe.macecompanion.util.TextUtils.hideNewRoundOrGameTextMessage
-import moe.pxe.macecompanion.util.TitleCallback
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
-import net.minecraft.world.InteractionResult
 import java.util.concurrent.CompletableFuture
 import kotlin.time.TimeSource
 
@@ -106,19 +103,15 @@ object RoundManager {
 
             return@register
         }
-        TitleCallback.EVENT.register(
-            object : TitleCallback {
-                override fun setTitleText(packet: ClientboundSetTitleTextPacket): InteractionResult {
-                    if (!PlotManager.onMaceRoulette) return InteractionResult.PASS
-                    titleRoundNumberRegex.matchEntire(packet.text.string)?.let { roundNumberMatch ->
-                        roundNumberMatch.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
-                        hideNewRoundOrGameTextMessage = true
-                        if (!eliminated) Minecraft.getInstance().player?.sendOverlayMessage(Component.empty())
-                        roundColor = packet.text.siblings[0].style
-                    }
-                    return InteractionResult.PASS
-                }
+        ClientReceiveMessageEvents.TITLE.register { message ->
+            if (!PlotManager.onMaceRoulette) return@register
+            titleRoundNumberRegex.matchEntire(message.string)?.let { roundNumberMatch ->
+                roundNumberMatch.groups[1]?.let { setRoundNumber(it.value.toIntOrNull() ?: -1) }
+                hideNewRoundOrGameTextMessage = true
+                if (!eliminated) Minecraft.getInstance().player?.sendOverlayMessage(Component.empty())
+                roundColor = message.siblings[0].style
             }
-        )
+            return@register
+        }
     }
 }
