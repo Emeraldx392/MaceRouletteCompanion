@@ -513,6 +513,9 @@
     "mrc.toast.new_event.title": "New event started! %s",
     "mrc.toast.new_event.starter": "(By %s%s)",
     "mrc.toast.new_event.description": "%s: %sh",
+    "mrc.toast.modifier_charger.name": "Modifier Charger",
+    "mrc.toast.modifier_charger.title": "%s used a %s on %s!",
+    "mrc.toast.modifier_charger.description": "It will be charged for the next %s appearances",
 
     "mrc.button.settings": "MRC Settings",
 

@@ -61,7 +61,7 @@ public class ScoreboardMixin {
             });
             LocalPlayer player = Minecraft.getInstance().player;
             Component text = TextUtils.INSTANCE.getNewRoundOrGameText(type.toString(), timeLeft.get(), mainColor.get(), timeColor.get());
-            if (!text.equals(Component.empty()) && player != null) player.sendOverlayMessage(text);
+            if (!text.equals(Component.empty()) && player != null && timeLeft.get() != -1) player.sendOverlayMessage(text);
             ci.cancel();
         }
     }

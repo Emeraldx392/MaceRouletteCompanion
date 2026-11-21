@@ -11,7 +11,7 @@ object ConsumableManager {
     var eternalElectorPlayer: String? = null
     var eternalElectorModifier: String? = null
 
-    val modifierChargerRegex = Regex("""⏵ (.+) used a Modifier Charger on (.+)!\n\s+◇ It will be charged for its next (\d+) appearances!""")
+    val modifierChargerRegex = Regex("""⏵ (.+) used a Modifier Charger on (.+)!\n.+◇ It will be charged for its next (\d+) appearances!""")
     val chaosDustChaosRegex = Regex("""⏵ (.+) activated Chaos!\n\s+◇ The next round will have five modifiers!""")
     val chaosDustMayhemRegex = Regex("""⏵ (.+) activated Mayhem!\n\s+◇ The next round will have seven modifiers!""")
     val chaosDustDoomsdayRegex = Regex("""⏵ (.+) activated Doomsday!\n\s+◇ The next round will have ten modifiers!""")
@@ -33,9 +33,9 @@ object ConsumableManager {
             CompletableFuture.runAsync {
             modifierChargerRegex.matchEntire(text)?.groups?.let {
                 val player = it[1]?.value.toString()
-                val modifier = getModifierFromMessage(message).getTranslatable().string
-                val queueLength = it[3]?.value?.toIntOrNull() ?: 0
-                sendModifierChargerToast(modifier, queueLength, player)
+                val modifier = getModifierFromMessage(message)
+                val appearences = it[3]?.value?.toIntOrNull() ?: 0
+                sendModifierChargerToast(modifier, appearences, player)
             }
             chaosDustChaosRegex.matchEntire(text)?.groups?.let {
                 val player = it[1]?.value.toString()

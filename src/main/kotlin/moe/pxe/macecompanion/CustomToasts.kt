@@ -3,6 +3,8 @@ package moe.pxe.macecompanion
 import dev.isxander.yacl3.config.v3.value
 import moe.pxe.macecompanion.config.Config
 import moe.pxe.macecompanion.dataClasses.Event
+import moe.pxe.macecompanion.dataClasses.Modifier
+import moe.pxe.macecompanion.dataClasses.ModifierInstance
 import moe.pxe.macecompanion.util.PlayerProfile.getOnlinePlayerProfile
 import moe.pxe.macecompanion.util.PlayerProfile.player2dHeadTextComponent
 import moe.pxe.macecompanion.util.TextUtils.createGradientText
@@ -10,10 +12,12 @@ import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.toasts.FriendToast
 import net.minecraft.client.gui.components.toasts.SystemToast
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.util.CommonColors
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import net.minecraft.world.item.component.ResolvableProfile
 import java.util.*
 
@@ -47,13 +51,12 @@ object CustomToasts {
     }
 
     //Consumable toasts
-    fun sendModifierChargerToast(modifier: String, queueLength: Int, player: String) {
+    fun sendModifierChargerToast(modifier: Modifier, appearences: Int, player: String) {
         if (!Config.showConsumableToasts.value) return
-        val client: Minecraft = Minecraft.getInstance()
-        var playerName = player
-        if (player == client.user.name) playerName = "You"
-        val description = Component.literal("$modifier will be charged for the next $queueLength appearances")
-        sendCustomToast(Component.literal("$playerName used a Modifier Charger!"), description)
+        ModifierInstance(modifier, isCharged = true).buildRawModifierText()
+        val title = Component.translatable("mrc.toast.modifier_charger.title", player2dHeadTextComponent(getOnlinePlayerProfile(player)).copy().append(" ").append(Component.literal(player)).withColor(0xA0F9FF), Component.translatable("mrc.toast.modifier_charger.name").withColor(CommonColors.WHITE), ModifierInstance(modifier, isCharged = true).buildRawModifierText()).withStyle(ChatFormatting.GRAY)
+        val description = Component.translatable("mrc.toast.modifier_charger.description", appearences).withStyle(ChatFormatting.GRAY)
+        sendCustomItemStackToast(Items.TIPPED_ARROW.defaultInstance.apply { remove(DataComponents.POTION_CONTENTS) }, title, description)
     }
 
     fun sendChaosDustToast(player: String, amount: Int) {

@@ -48,7 +48,6 @@ import moe.pxe.macecompanion.stateManagers.RoundManager.roundColor
 import moe.pxe.macecompanion.stateManagers.StarFragmentManager.starFragments
 import moe.pxe.macecompanion.stateManagers.TimeManager.playtime
 import moe.pxe.macecompanion.util.PlayerProfile.headFromProfile
-import moe.pxe.macecompanion.util.TextUtils.buildModifierTextWith2dBoosters
 import moe.pxe.macecompanion.util.TextUtils.getStarFragmentIcon
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
@@ -206,8 +205,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 cachedTextWidth = textRenderer.width(finalText)
             }
             val text = cachedText!!
-            var xPos = if (rightAligned) -cachedTextWidth else 0
-            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
+            val xPos = if (rightAligned) -cachedTextWidth else 0
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
@@ -238,8 +237,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 cachedTextWidth = textRenderer.width(finalText)
             }
             val text = cachedText!!
-            var xPos = if (rightAligned) -cachedTextWidth else 0
-            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
+            val xPos = if (rightAligned) -cachedTextWidth else 0
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
@@ -321,7 +320,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
             val headerText = cachedHeaderText!!
             var yPos = if (bottomAligned) -yOffset - 12 - (modifiers.size * 20) else yOffset
-            var xPos = if (rightAligned) -cachedHeaderTextWidth else 0
+            val xPos = if (rightAligned) -cachedHeaderTextWidth else 0
             context.text(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
             val use2dHeads = modifiersUse2dHeadIcons.value
@@ -339,7 +338,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 context.itemDecorations(textRenderer, icon, xPos, yPos)
                 if (modifiersChanged || (rightAligned && cachedRightModifierTexts[instance] == null) || (!rightAligned && cachedLeftModifierTexts[instance] == null) || cachedUse2dHeads != use2dHeads) {
                     cachedUse2dHeads = use2dHeads
-                    val finalText = buildModifierTextWith2dBoosters(instance.modifier, instance.isEternal, instance.isCharged, instance.isMidas, rightAligned, use2dHeads, instance.boosters)
+                    val finalText = instance.buildModifierText(rightAligned, use2dHeads)
                     if (rightAligned) cachedRightModifierTexts[instance] = finalText
                     else cachedLeftModifierTexts[instance] = finalText
                     cachedModifierTextWidths[instance] = textRenderer.width(finalText)
@@ -404,8 +403,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 cachedTextWidth = textRenderer.width(finalText)
             }
             val text = cachedText!!
-            var xPos = if (rightAligned) -cachedTextWidth else 0
-            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
+            val xPos = if (rightAligned) -cachedTextWidth else 0
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
@@ -440,7 +439,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             val headerText = cachedHeaderText!!
             val sortedBounties = bounties.entries.sortedByDescending { it.value }.associate { it.key to it.value }
             var yPos = if (bottomAligned) -yOffset - 12 - (sortedBounties.size * 20) else yOffset
-            var xPos = if (rightAligned) -cachedHeaderTextWidth else 0
+            val xPos = if (rightAligned) -cachedHeaderTextWidth else 0
             context.text(textRenderer, headerText, xPos, yPos, -1)
             yPos += 12
             var index = 1
@@ -498,8 +497,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 cachedTextWidth = textRenderer.width(finalText)
             }
             val text = cachedText!!
-            var xPos = if (rightAligned) -cachedTextWidth else 0
-            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
+            val xPos = if (rightAligned) -cachedTextWidth else 0
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
@@ -528,8 +527,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 cachedTextWidth = textRenderer.width(finalText)
             }
             val text = cachedText!!
-            var xPos = if (rightAligned) -cachedTextWidth else 0
-            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
+            val xPos = if (rightAligned) -cachedTextWidth else 0
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
@@ -558,8 +557,8 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
                 cachedTextWidth = textRenderer.width(finalText)
             }
             val text = cachedText!!
-            var xPos = if (rightAligned) -cachedTextWidth else 0
-            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
+            val xPos = if (rightAligned) -cachedTextWidth else 0
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
             context.text(textRenderer, text, xPos, yPos, -1)
             return 12
         }
@@ -574,7 +573,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
             if(forceStopRendering) return 0
             if (isStatless) return 0
 
-            var yPos = if (bottomAligned) -yOffset - 12 else yOffset
+            val yPos = if (bottomAligned) -yOffset - 12 else yOffset
             var xPos = if (rightAligned) -16 else 0
 
             val ach = AchievementResourceLoader.getAll().values

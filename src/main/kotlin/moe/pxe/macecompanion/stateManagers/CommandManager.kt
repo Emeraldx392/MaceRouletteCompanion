@@ -52,10 +52,40 @@ object CommandManager {
         }
         if (DEBUG_MODE) ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             dispatcher.register(
+                ClientCommands.literal("charge").then(
+                    ClientCommands.argument("id", StringArgumentType.string()).suggests { _, builder ->
+                        val modifierList = ModifierResourceLoader.getAllIdStrings()
+                        SharedSuggestionProvider.suggest(modifierList, builder)
+                    }.then(
+                        ClientCommands.argument("appearences", IntegerArgumentType.integer(1)).then(ClientCommands.argument("player", StringArgumentType.string()).suggests { _, builder ->
+                            val playerList: List<String> = client.connection?.onlinePlayers?.map { it.profile.name }?.filter { name -> !name.contains("§") }?.filter { name -> name.isNotBlank() }
+                                ?: emptyList()
+                            SharedSuggestionProvider.suggest(playerList, builder)
+                        }.executes { context ->
+                            val id = StringArgumentType.getString(context, "id")
+                            val appearences = IntegerArgumentType.getInteger(context, "appearences")
+                            val player = StringArgumentType.getString(context, "player")
+
+                            val modifier = ModifierResourceLoader.getModifierFromId(id)
+                            if (modifier != null) {
+                                CustomToasts.sendModifierChargerToast(modifier, appearences, player)
+                                context.source.sendFeedback(Component.literal("Modifier charger toast created!").withStyle(ChatFormatting.GRAY))
+                                1
+                            } else {
+                                context.source.sendFeedback(Component.literal("Modifier $id doesn't exist").withColor(CommonColors.RED))
+                                0
+                            }
+                        })
+                    )
+                )
+            )
+        }
+        if (DEBUG_MODE) ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
+            dispatcher.register(
                 ClientCommands.literal("modifier").then(
                     ClientCommands.argument("id", StringArgumentType.string()).suggests { _, builder ->
-                        val eventList = ModifierResourceLoader.getAllIdStrings()
-                        SharedSuggestionProvider.suggest(eventList, builder)
+                        val modifierList = ModifierResourceLoader.getAllIdStrings()
+                        SharedSuggestionProvider.suggest(modifierList, builder)
                     }.then(
                         ClientCommands.argument("charged", BoolArgumentType.bool()).then(
                                 ClientCommands.argument("eternal", BoolArgumentType.bool()).then(

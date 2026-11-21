@@ -25,8 +25,10 @@ object EliminationManager {
     val chatBlowUpRegex = Regex("""⏵ (.+) blew up! \((\d+) remain\)""")
     val chatVoidDeathRegex = Regex("""⏵ (.+) fell into the void! \((\d+) remain\)""")
     val chatVoidEliminationRegex = Regex("""⏵ (.+) was thrown into the void by .+! \((\d+) remain\)""")
+    val chatArrestedEliminationRegex = Regex("""⏵ (.+) was arrested by .+! \((\d+) remain\)""")
     val chatSpikeDeathRegex = Regex("""⏵ (.+) fell on a spike! \((\d+) remain\)""")
     val chatLightningDeathRegex = Regex("""⏵ (.+) was caught in the lightning! \((\d+) remain\)""")
+    val chatCoreDeathRegex = Regex("""⏵ (.+) was crushed by a falling core! \((\d+) remain\)""")
     val chatElimCounterRegex = Regex("""\s+◇ \+\d+🪓, total (\d+)🪓""")
 
     val titlePlayersAliveRegex = Regex("""(\d+) ᴀʟɪᴠᴇ""")
@@ -66,6 +68,8 @@ object EliminationManager {
                     else if (text.contains("blew")) chatBlowUpRegex.matchEntire(text)
                     else if (text.contains("spike")) chatSpikeDeathRegex.matchEntire(text)
                     else if (text.contains("lightning")) chatLightningDeathRegex.matchEntire(text)
+                    else if (text.contains("core")) chatCoreDeathRegex.matchEntire(text)
+                    else if (text.contains("arrested")) chatArrestedEliminationRegex.matchEntire(text)
                     else if (text.contains("thrown")) chatVoidEliminationRegex.matchEntire(text)
                     else chatVoidDeathRegex.matchEntire(text)
                 eliminationMatch?.groups?.let {

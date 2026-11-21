@@ -2,20 +2,14 @@ package moe.pxe.macecompanion.util
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import com.mojang.authlib.GameProfile
 import com.mojang.serialization.JsonOps
-import dev.isxander.yacl3.config.v3.value
-import moe.pxe.macecompanion.config.Config.getAccentColor
-import moe.pxe.macecompanion.config.Config.modifiersMaxBoosters
-import moe.pxe.macecompanion.dataClasses.Modifier
 import moe.pxe.macecompanion.stateManagers.ModifierManager.client
-import moe.pxe.macecompanion.util.PlayerProfile.player2dHeadTextComponentList
+import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.TextColor
-import net.minecraft.util.CommonColors
 import java.util.Optional
 
 object TextUtils {
@@ -35,40 +29,6 @@ object TextUtils {
         json.addProperty("atlas", "minecraft:particles")
         json.addProperty("sprite", "spark_2")
         return ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
-    }
-
-    fun buildModifierText(modifier: Modifier, eternal: Boolean, charged: Boolean, midas: Boolean, rightAligned: Boolean): Component {
-        if(!charged && !eternal && midas) return createGradientText(modifier.getTranslatable().copy(), listOf(0xFFC42D, 0xFFE684, 0xFFC42D)).withStyle { it.withShadowColor(-10076138) }
-
-        val chargedStyle = Style.EMPTY.withColor(getAccentColor("modifiers", "text_color.charged_modifier", 0x0786FF))
-        val eternalStyle = Style.EMPTY.withColor(getAccentColor("modifiers", "text_color.eternal_modifier", CommonColors.WHITE)).withShadowColor(getAccentColor("modifiers", "shadow_color.eternal_modifier", -10071549))
-        val textStyle = if (charged) chargedStyle else if (eternal) eternalStyle else modifier.getTranslatable().copy().style
-
-        val eternalText = Component.literal("∞").setStyle(eternalStyle)
-        val chargedText = Component.literal("⚡").setStyle(chargedStyle)
-
-        val extraText = when {
-            eternal && charged -> if (rightAligned) Component.empty().append(eternalText).append(chargedText).append(" ") else Component.literal(" ").append(chargedText).append(eternalText)
-            eternal && !charged -> if (rightAligned) Component.empty().append(eternalText).append(" ") else Component.literal(" ").append(eternalText)
-            !eternal && charged -> if (rightAligned) Component.empty().append(chargedText).append(" ") else Component.literal(" ").append(chargedText)
-            else -> Component.empty()
-        }
-
-        val baseText = modifier.getTranslatable().copy().setStyle(textStyle)
-
-        val modifierText =
-            if (!rightAligned) Component.empty().append(baseText).append(extraText)
-            else Component.empty().append(extraText).append(baseText)
-
-        return modifierText
-    }
-
-    fun buildModifierTextWith2dBoosters(modifier: Modifier, eternal: Boolean, charged: Boolean, midas: Boolean, rightAligned: Boolean, use2dHeads: Boolean, boosters: List<GameProfile>): Component {
-        val startingText = buildModifierText(modifier, eternal, charged, midas, rightAligned)
-        if (!use2dHeads || boosters.isEmpty()) return startingText
-        val boosterText = player2dHeadTextComponentList(boosters, modifiersMaxBoosters.value, rightAligned)
-        return if (rightAligned) Component.empty().append(boosterText).append(startingText)
-        else Component.empty().append(startingText).append(boosterText)
     }
 
     fun messageToJsonString(message: Component): String {
@@ -178,7 +138,7 @@ object TextUtils {
             "Game" -> Component.literal("Game starting").withColor(mainColor)
             else -> return Component.empty()
         }
-        val inText = Component.literal(" in ").withColor(CommonColors.GRAY)
+        val inText = Component.literal(" in ").withStyle(ChatFormatting.GRAY)
         val timeLeft = Component.literal(time.toString()).withColor(timeColor)
         val secondText = firstText.append(inText)
         return secondText.append(timeLeft)

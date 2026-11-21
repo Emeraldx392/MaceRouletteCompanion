@@ -1,6 +1,7 @@
 package moe.pxe.macecompanion.util
 
 import com.google.common.collect.ImmutableMultimap
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
@@ -55,7 +56,22 @@ object PlayerProfile {
         return head
     }
 
-    fun player2dHeadTextComponent(profile: GameProfile): Component {
+    fun custom2dHeadTextComponent(texture: String): Component {
+        val json = JsonObject()
+        val player = JsonObject()
+        val properyArray = JsonArray()
+        val properties = JsonObject()
+        properties.addProperty("name", "textures")
+        properties.addProperty("value", texture)
+        properyArray.add(properties)
+        player.add("properties", properyArray)
+        json.add("player", player)
+        val textComponent = ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
+        return textComponent
+    }
+
+    fun player2dHeadTextComponent(profile: GameProfile?): Component {
+        if(profile == null) return Component.empty()
         val json = JsonObject()
         json.addProperty("player", profile.name)
         val playerComponent = ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
@@ -78,9 +94,9 @@ object PlayerProfile {
         return Component.empty().apply {
             if (rightAligned) {
                 extraText?.let { append(it).append(" ") }
-                append(headsComponent).append("  ")
+                append(headsComponent).append(" ")
             } else {
-                append("  ").append(headsComponent)
+                append(" ").append(headsComponent)
                 extraText?.let { append(" ").append(it) }
             }
         }
