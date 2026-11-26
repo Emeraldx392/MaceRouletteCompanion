@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "blocks",
+  "item": {
+    "id": "minecraft:cherry_planks",
+    "item_model": "macecompanion:modifiers/blocks"
+  }
+}

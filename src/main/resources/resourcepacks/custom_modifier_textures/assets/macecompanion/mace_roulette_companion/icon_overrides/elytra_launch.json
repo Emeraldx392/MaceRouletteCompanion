@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "elytra_launch",
+  "item": {
+    "id": "minecraft:elytra",
+    "item_model": "macecompanion:modifiers/elytra_launch"
+  }
+}

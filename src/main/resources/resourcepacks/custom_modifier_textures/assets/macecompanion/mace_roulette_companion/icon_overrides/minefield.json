@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "minefield",
+  "item": {
+    "id": "minecraft:mangrove_pressure_plate",
+    "item_model": "macecompanion:modifiers/minefield"
+  }
+}

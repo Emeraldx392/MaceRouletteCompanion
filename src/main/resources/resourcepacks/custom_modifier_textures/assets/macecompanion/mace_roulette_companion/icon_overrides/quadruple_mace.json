@@ -1,0 +1,12 @@
+{
+  "type": "modifier",
+  "id": "quadruple_mace",
+  "item": {
+    "id": "minecraft:mace",
+    "use_cooldown": {
+      "seconds": 0.1,
+      "cooldown_group": "macecompanion:modifier_icon"
+    },
+    "item_model": "macecompanion:modifiers/quadruple_mace"
+  }
+}

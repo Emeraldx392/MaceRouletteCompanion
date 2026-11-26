@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "umbrella",
+  "item": {
+    "id": "minecraft:crimson_fungus",
+    "item_model": "macecompanion:modifiers/umbrella"
+  }
+}

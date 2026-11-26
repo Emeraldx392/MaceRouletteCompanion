@@ -466,6 +466,7 @@
     "mrc.modifier.no_air_drag": "No Air Drag",
     "mrc.modifier.dive": "Dive",
     "mrc.modifier.splitting_map": "Splitting Map",
+    "mrc.modifier.grid_floor": "Grid Floor",
     "mrc.modifier.unknown": "Unknown Modifier",
     "mrc.modifier.mystery": "Mystery!",
 
@@ -511,8 +512,9 @@
     "mrc.toast.player_joined": "%s joined!",
     "mrc.toast.player_left": "%s left",
     "mrc.toast.new_event.title": "New event started! %s",
-    "mrc.toast.new_event.starter": "(By %s%s)",
-    "mrc.toast.new_event.description": "%s: %sh",
+    "mrc.toast.new_event.starter": "(by %s%s)",
+    "mrc.toast.new_event.time": "%sh",
+    "mrc.toast.new_event.description": "%s: %s",
     "mrc.toast.modifier_charger.name": "Modifier Charger",
     "mrc.toast.modifier_charger.title": "%s used a %s on %s!",
     "mrc.toast.modifier_charger.description": "It will be charged for the next %s appearances",
@@ -538,6 +540,8 @@
 
     "mrc.modmenu.authors_website": "Original Author's Website",
     "mrc.modmenu.discord_server": "Discord Server",
+
+    "mrc.resourcepack.custom_modifier_textures": "Custom Modifier Textures",
 
     "yacl.configurable.configure": "Configure..."
 }

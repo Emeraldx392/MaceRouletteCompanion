@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "victim_mace",
+  "item": {
+    "id": "minecraft:spectral_arrow",
+    "item_model": "macecompanion:modifiers/victim_mace"
+  }
+}

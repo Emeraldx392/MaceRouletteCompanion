@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "caged",
+  "item": {
+    "id": "minecraft:oxidized_copper_bars",
+    "item_model": "macecompanion:modifiers/caged"
+  }
+}

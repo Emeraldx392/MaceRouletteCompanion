@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "spikes",
+  "item": {
+    "id": "minecraft:pointed_dripstone",
+    "item_model": "macecompanion:modifiers/spikes"
+  }
+}

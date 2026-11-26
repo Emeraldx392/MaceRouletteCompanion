@@ -4,7 +4,7 @@
   "package": "moe.pxe.macecompanion.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
-    "DealtDamageMixin",
+    "PacketListenerMixin",
     "ScoreboardMixin",
     "SoundMixin"
   ],

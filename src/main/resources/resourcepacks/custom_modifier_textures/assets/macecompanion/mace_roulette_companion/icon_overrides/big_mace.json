@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "big_mace",
+  "item": {
+    "id": "minecraft:stone",
+    "item_model": "macecompanion:modifiers/big_mace"
+  }
+}

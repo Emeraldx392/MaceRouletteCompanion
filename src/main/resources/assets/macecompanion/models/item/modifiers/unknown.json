@@ -1,6 +1,11 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "item/handheld",
   "textures": {
     "layer0": "macecompanion:item/modifiers/unknown"
-  }
+  },
+    "display": {
+        "gui": {
+            "scale": [ 1.5, 1.5, 1 ]
+        }
+    }
 }

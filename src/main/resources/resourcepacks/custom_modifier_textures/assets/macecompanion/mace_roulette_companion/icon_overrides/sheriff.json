@@ -1,0 +1,13 @@
+{
+  "type": "modifier",
+  "id": "sheriff",
+  "item": {
+    "id": "minecraft:crossbow",
+    "charged_projectiles": [
+      {
+        "id": "firework_rocket"
+      }
+    ],
+    "item_model": "macecompanion:modifiers/sheriff"
+  }
+}

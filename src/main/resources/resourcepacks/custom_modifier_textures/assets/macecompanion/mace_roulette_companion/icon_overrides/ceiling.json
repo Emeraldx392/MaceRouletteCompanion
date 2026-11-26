@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "ceiling",
+  "item": {
+    "id": "minecraft:oxidized_copper_trapdoor",
+    "item_model": "macecompanion:modifiers/ceiling"
+  }
+}

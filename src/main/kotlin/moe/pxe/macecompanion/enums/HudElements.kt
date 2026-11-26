@@ -52,13 +52,11 @@ import moe.pxe.macecompanion.util.TextUtils.getStarFragmentIcon
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.Screen
-import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.util.CommonColors
 import net.minecraft.util.StringRepresentable
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
 import kotlin.math.roundToInt
 import kotlin.time.DurationUnit
 
@@ -580,9 +578,7 @@ enum class HudElements : NameableEnum, StringRepresentable, ConfigurableEnum {
 
             ach.forEach { achievement ->
                 if (AchievementResourceLoader.getAllIdStrings().contains(achievement.id) && areAchievementsShown.value[achievement.id] ?: false) {
-                    val itemStack = Items.ITEM_FRAME.defaultInstance.apply {
-                        if (possibleAchievements.contains(achievement)) set(DataComponents.ITEM_MODEL, achievement.onItemModel) else set(DataComponents.ITEM_MODEL, achievement.offItemModel)
-                    }
+                    val itemStack = if (possibleAchievements.contains(achievement)) achievement.createOnItemStack() else achievement.createOffItemStack()
                     context.item(itemStack, xPos, yPos)
                     xPos += if (rightAligned) -16 else 16
                 }

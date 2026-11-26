@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
-import java.util.concurrent.CompletableFuture
 import kotlin.text.Regex
 
 object ModifierManager {
@@ -93,7 +92,6 @@ object ModifierManager {
 
             if (!hasTriangle && !hasRotatedSquare) return@register
 
-            CompletableFuture.runAsync {
                 if (checkingModifiers) {
                     val reallyBoostedMatch = chatModifierReallyBoostedRegex.matchEntire(text)
                     val boostedMatch = if (reallyBoostedMatch == null) chatModifierBoostedRegex.matchEntire(text) else null
@@ -122,7 +120,6 @@ object ModifierManager {
                 if (hasTriangle) chatModifierHeaderRegex.matchEntire(text)?.groups[1]?.let {
                     checkingModifiers = true
                 }
-            }
             return@register
         }
     }

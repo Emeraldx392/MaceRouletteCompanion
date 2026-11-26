@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "sweeper",
+  "item": {
+    "id": "minecraft:compass",
+    "item_model": "macecompanion:modifiers/sweeper"
+  }
+}

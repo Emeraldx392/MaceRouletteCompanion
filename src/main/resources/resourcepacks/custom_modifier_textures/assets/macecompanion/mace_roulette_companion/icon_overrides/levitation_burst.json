@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "levitation_burst",
+  "item": {
+    "id": "minecraft:allay_spawn_egg",
+    "item_model": "macecompanion:modifiers/levitation_burst"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "pickaxe",
+  "item": {
+    "id": "minecraft:stone_pickaxe",
+    "item_model": "macecompanion:modifiers/pickaxe"
+  }
+}

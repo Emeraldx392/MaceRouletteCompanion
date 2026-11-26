@@ -141,7 +141,6 @@ object Config : JsonFileCodecConfig<Config>(FabricLoader.getInstance().configDir
     val modifiersTextColorMysteryModifier by register<Color>(Color(0xD2B5FF), RGB_COLOR_CODEC)
 
     //Modifiers - Styling - Icons
-    val modifiersUseCustomModifierIcons by register<Boolean>(false, BOOL)
     val modifiersUse2dHeadIcons by register<Boolean>(false, BOOL)
 
     //Mace Chance - Misc

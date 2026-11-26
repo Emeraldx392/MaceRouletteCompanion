@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "fishing_rod",
+  "item": {
+    "id": "minecraft:fishing_rod",
+    "item_model": "macecompanion:modifiers/fishing_rod"
+  }
+}

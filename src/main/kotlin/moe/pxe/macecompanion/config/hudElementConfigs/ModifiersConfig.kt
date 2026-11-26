@@ -13,7 +13,6 @@ import moe.pxe.macecompanion.config.Config.modifiersTextColorEternalModifier
 import moe.pxe.macecompanion.config.Config.modifiersTextColorMysteryModifier
 import moe.pxe.macecompanion.config.Config.modifiersTextColorRegularModifier
 import moe.pxe.macecompanion.config.Config.modifiersUse2dHeadIcons
-import moe.pxe.macecompanion.config.Config.modifiersUseCustomModifierIcons
 import moe.pxe.macecompanion.util.OptionUtils.addColorOptionDependency
 import moe.pxe.macecompanion.util.OptionUtils.iconBooleanOption
 import moe.pxe.macecompanion.util.OptionUtils.overrideColorOption
@@ -60,7 +59,7 @@ object ModifiersConfig {
                     it.option(textColorMysteryModifier)
                 }.build()
             ).group(
-                    OptionGroup.createBuilder().name(Component.translatable("mrc.config.modifiers.category.styling.group.icons")).description(OptionDescription.of(Component.translatable("mrc.config.modifiers.category.styling.group.icons.description"))).option(iconBooleanOption(NAME, modifiersUseCustomModifierIcons.asBinding(), "use_custom_modifier_icons")).option(iconBooleanOption(NAME, modifiersUse2dHeadIcons.asBinding(), "use_2d_head_icons")).build()
+                    OptionGroup.createBuilder().name(Component.translatable("mrc.config.modifiers.category.styling.group.icons")).description(OptionDescription.of(Component.translatable("mrc.config.modifiers.category.styling.group.icons.description"))).option(iconBooleanOption(NAME, modifiersUse2dHeadIcons.asBinding(), "use_2d_head_icons")).build()
                 ).build()
         ).save(Config::saveToFileAndRefreshRendering).build().generateScreen(parent)
 }

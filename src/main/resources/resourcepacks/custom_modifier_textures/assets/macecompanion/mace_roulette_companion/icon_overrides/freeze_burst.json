@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "freeze_burst",
+  "item": {
+    "id": "minecraft:powder_snow_bucket",
+    "item_model": "macecompanion:modifiers/freeze_burst"
+  }
+}

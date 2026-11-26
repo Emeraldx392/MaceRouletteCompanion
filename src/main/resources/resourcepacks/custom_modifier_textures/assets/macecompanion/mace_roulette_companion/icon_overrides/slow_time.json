@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "slow_time",
+  "item": {
+    "id": "minecraft:clock",
+    "item_model": "macecompanion:modifiers/slow_time"
+  }
+}

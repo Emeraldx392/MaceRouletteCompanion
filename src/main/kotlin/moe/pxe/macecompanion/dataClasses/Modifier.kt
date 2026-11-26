@@ -2,6 +2,7 @@ package moe.pxe.macecompanion.dataClasses
 
 import com.google.gson.JsonElement
 import moe.pxe.macecompanion.config.Config.getAccentColor
+import moe.pxe.macecompanion.resourceLoaders.IconOverridesResourceLoader.getModifierFromId
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.util.CommonColors
@@ -16,6 +17,8 @@ data class Modifier(
     val itemStack: ItemStackMaker
 ) {
     fun createItemStack(): ItemStack {
+        val iconOverride: IconOverride? = getModifierFromId(id)
+        if(iconOverride != null) return iconOverride.createItemStack()
         return itemStack.createItemStack()
     }
 

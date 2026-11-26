@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "no_jumping",
+  "item": {
+    "id": "minecraft:rabbit_foot",
+    "item_model": "macecompanion:modifiers/no_jumping"
+  }
+}

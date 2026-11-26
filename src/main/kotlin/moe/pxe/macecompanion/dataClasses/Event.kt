@@ -1,5 +1,6 @@
 package moe.pxe.macecompanion.dataClasses
 
+import moe.pxe.macecompanion.resourceLoaders.IconOverridesResourceLoader.getEventFromId
 import net.minecraft.network.chat.TextColor
 import net.minecraft.world.item.ItemStack
 
@@ -11,6 +12,8 @@ data class Event(
     val itemStack: ItemStackMaker
 ) {
     fun createItemStack(): ItemStack {
+        val iconOverride: IconOverride? = getEventFromId(id)
+        if(iconOverride != null) return iconOverride.createItemStack()
         return itemStack.createItemStack()
     }
 

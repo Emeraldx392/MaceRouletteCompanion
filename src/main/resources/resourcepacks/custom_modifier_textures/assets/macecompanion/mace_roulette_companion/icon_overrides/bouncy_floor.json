@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "bouncy_floor",
+  "item": {
+    "id": "minecraft:slime_block",
+    "item_model": "macecompanion:modifiers/bouncy_floor"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "soul_floor",
+  "item": {
+    "id": "minecraft:soul_sand",
+    "item_model": "macecompanion:modifiers/soul_floor"
+  }
+}

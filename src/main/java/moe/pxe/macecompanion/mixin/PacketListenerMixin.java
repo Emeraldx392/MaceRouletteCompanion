@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPacketListener.class)
-public class DealtDamageMixin {
+public class PacketListenerMixin {
 
     @Inject(method = "handleDamageEvent", at = @At("HEAD"))
     private void onEntityDamagedPacket(ClientboundDamageEventPacket packet, CallbackInfo ci) {

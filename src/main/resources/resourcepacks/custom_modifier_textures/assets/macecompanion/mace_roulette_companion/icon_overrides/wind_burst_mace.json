@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "wind_burst_mace",
+  "item": {
+    "id": "minecraft:breeze_rod",
+    "item_model": "macecompanion:modifiers/wind_burst_mace"
+  }
+}

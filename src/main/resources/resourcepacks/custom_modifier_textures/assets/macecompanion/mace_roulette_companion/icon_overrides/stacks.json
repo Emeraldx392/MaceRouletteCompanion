@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "stacks",
+  "item": {
+    "id": "minecraft:netherite_upgrade_smithing_template",
+    "item_model": "macecompanion:modifiers/stacks"
+  }
+}

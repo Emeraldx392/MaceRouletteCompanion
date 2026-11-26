@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "mystery",
+  "item": {
+    "id": "minecraft:light_gray_candle",
+    "item_model": "macecompanion:modifiers/mystery"
+  }
+}

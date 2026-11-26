@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "honey_burst",
+  "item": {
+    "id": "minecraft:honey_block",
+    "item_model": "macecompanion:modifiers/honey_burst"
+  }
+}

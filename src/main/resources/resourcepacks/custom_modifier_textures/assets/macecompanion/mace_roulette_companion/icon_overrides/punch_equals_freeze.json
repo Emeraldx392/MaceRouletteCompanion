@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "punch_equals_freeze",
+  "item": {
+    "id": "minecraft:snowball",
+    "item_model": "macecompanion:modifiers/punch_equals_freeze"
+  }
+}

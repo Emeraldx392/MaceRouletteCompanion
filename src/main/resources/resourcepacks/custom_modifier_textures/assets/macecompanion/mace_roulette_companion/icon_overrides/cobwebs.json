@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "cobwebs",
+  "item": {
+    "id": "minecraft:cobweb",
+    "item_model": "macecompanion:modifiers/cobwebs"
+  }
+}

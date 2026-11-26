@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "steal_the_totem",
+  "item": {
+    "id": "minecraft:totem_of_undying",
+    "item_model": "macecompanion:modifiers/steal_the_totem"
+  }
+}

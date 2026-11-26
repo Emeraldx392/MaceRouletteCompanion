@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "mace_drop",
+  "item": {
+    "id": "minecraft:barrel",
+    "item_model": "macecompanion:modifiers/mace_drop"
+  }
+}

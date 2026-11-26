@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "fragile_floor",
+  "item": {
+    "id": "minecraft:glass",
+    "item_model": "macecompanion:modifiers/fragile_floor"
+  }
+}

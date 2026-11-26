@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "rewind",
+  "item": {
+    "id": "minecraft:purple_harness",
+    "item_model": "macecompanion:modifiers/rewind"
+  }
+}

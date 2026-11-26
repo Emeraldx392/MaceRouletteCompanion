@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "tiny_mace",
+  "item": {
+    "id": "minecraft:stone_button",
+    "item_model": "macecompanion:modifiers/tiny_mace"
+  }
+}

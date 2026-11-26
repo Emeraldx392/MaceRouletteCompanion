@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "random_size",
+  "item": {
+    "id": "minecraft:player_head",
+    "item_model": "macecompanion:modifiers/random_size"
+  }
+}

@@ -3,6 +3,7 @@ package moe.pxe.macecompanion.stateManagers
 import moe.pxe.macecompanion.CustomToasts.sendChaosDustToast
 import moe.pxe.macecompanion.CustomToasts.sendEternalElectorToast
 import moe.pxe.macecompanion.CustomToasts.sendModifierChargerToast
+import moe.pxe.macecompanion.MaceCompanion.Companion.DEBUG_MODE
 import moe.pxe.macecompanion.stateManagers.ModifierManager.getModifierFromMessage
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import java.util.concurrent.CompletableFuture
@@ -16,7 +17,7 @@ object ConsumableManager {
     val chaosDustMayhemRegex = Regex("""⏵ (.+) activated Mayhem!\n\s+◇ The next round will have seven modifiers!""")
     val chaosDustDoomsdayRegex = Regex("""⏵ (.+) activated Doomsday!\n\s+◇ The next round will have ten modifiers!""")
     val eternalElectorRegex = Regex("""⏵ (.+) used a Eternal Elector for (.+)!""")
-    val eternalElectorPositionRegex = Regex("""\s+◇ It has been queued at position #(\d+)!""")
+    val eternalElectorPositionRegex = Regex("""◇ It has been queued at position #(\d+)!""")
 
     fun resetConsumableData(){
         eternalElectorModifier = null
@@ -25,10 +26,11 @@ object ConsumableManager {
 
     fun registerConsumableListeners() {
         ClientReceiveMessageEvents.GAME.register { message, overlay ->
-            val text = message.string
+            val text = message.string.trim()
 
             if (overlay) return@register
             if (!text.startsWith("⏵") && !text.contains("#")) return@register
+            if (!PlotManager.onMaceRoulette && !DEBUG_MODE) return@register
 
             CompletableFuture.runAsync {
             modifierChargerRegex.matchEntire(text)?.groups?.let {

@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "miss_equals_die",
+  "item": {
+    "id": "minecraft:player_head",
+    "item_model": "macecompanion:modifiers/miss_equals_die"
+  }
+}

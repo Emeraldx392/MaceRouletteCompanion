@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "glow_in_the_dark",
+  "item": {
+    "id": "minecraft:enderman_spawn_egg",
+    "item_model": "macecompanion:modifiers/glow_in_the_dark"
+  }
+}

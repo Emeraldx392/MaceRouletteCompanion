@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "lightning_mace",
+  "item": {
+    "id": "minecraft:lightning_rod",
+    "item_model": "macecompanion:modifiers/lightning_mace"
+  }
+}

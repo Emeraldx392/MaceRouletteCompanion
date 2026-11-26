@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "team_paint",
+  "item": {
+    "id": "minecraft:brush",
+    "item_model": "macecompanion:modifiers/team_paint"
+  }
+}

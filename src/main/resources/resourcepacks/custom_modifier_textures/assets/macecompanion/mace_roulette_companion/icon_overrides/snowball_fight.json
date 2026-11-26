@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "snowball_fight",
+  "item": {
+    "id": "minecraft:powder_snow_bucket",
+    "item_model": "macecompanion:modifiers/snowball_fight"
+  }
+}

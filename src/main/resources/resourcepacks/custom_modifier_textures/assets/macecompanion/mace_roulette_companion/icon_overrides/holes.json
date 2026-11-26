@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "holes",
+  "item": {
+    "id": "minecraft:frogspawn",
+    "item_model": "macecompanion:modifiers/holes"
+  }
+}

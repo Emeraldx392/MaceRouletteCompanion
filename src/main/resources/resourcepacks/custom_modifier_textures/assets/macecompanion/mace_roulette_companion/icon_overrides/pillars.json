@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "pillars",
+  "item": {
+    "id": "minecraft:polished_basalt",
+    "item_model": "macecompanion:modifiers/pillars"
+  }
+}

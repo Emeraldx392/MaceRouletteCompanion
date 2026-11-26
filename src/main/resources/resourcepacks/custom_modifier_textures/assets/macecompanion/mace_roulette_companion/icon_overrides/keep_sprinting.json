@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "keep_sprinting",
+  "item": {
+    "id": "minecraft:copper_boots",
+    "item_model": "macecompanion:modifiers/keep_sprinting"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "pinata",
+  "item": {
+    "id": "minecraft:horse_spawn_egg",
+    "item_model": "macecompanion:modifiers/pinata"
+  }
+}

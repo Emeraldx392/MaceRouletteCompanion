@@ -3,9 +3,28 @@ package moe.pxe.macecompanion.dataClasses
 import moe.pxe.macecompanion.enums.achievements.AchievementLostTriggers
 import moe.pxe.macecompanion.enums.achievements.AchievementRequirements
 import moe.pxe.macecompanion.enums.achievements.AchievementResetConditions
+import moe.pxe.macecompanion.resourceLoaders.IconOverridesResourceLoader.getOffAchievementFromId
+import moe.pxe.macecompanion.resourceLoaders.IconOverridesResourceLoader.getOnAchievementFromId
+import net.minecraft.core.component.DataComponents
 import net.minecraft.resources.Identifier
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 
 data class Achievement(val id: String, val matchString: String, val onItemModel: Identifier, val offItemModel: Identifier, val lossTriggers: Map<AchievementLostTriggers, Int>, val resetCondition: AchievementResetConditions, val requirement: AchievementRequirements? = null) {
+    fun createOnItemStack(): ItemStack {
+        val iconOverride: IconOverride? = getOnAchievementFromId(id)
+        if(iconOverride != null) return iconOverride.createItemStack()
+        return Items.ITEM_FRAME.defaultInstance.apply {
+            set(DataComponents.ITEM_MODEL, onItemModel)
+        }
+    }
+    fun createOffItemStack(): ItemStack {
+        val iconOverride: IconOverride? = getOffAchievementFromId(id)
+        if(iconOverride != null) return iconOverride.createItemStack()
+        return Items.ITEM_FRAME.defaultInstance.apply {
+            set(DataComponents.ITEM_MODEL, offItemModel)
+        }
+    }
     companion object {
         fun fromJson(json: com.google.gson.JsonElement): Achievement {
             val obj = json.asJsonObject

@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "banned_key",
+  "item": {
+    "id": "minecraft:trial_key",
+    "item_model": "macecompanion:modifiers/banned_key"
+  }
+}

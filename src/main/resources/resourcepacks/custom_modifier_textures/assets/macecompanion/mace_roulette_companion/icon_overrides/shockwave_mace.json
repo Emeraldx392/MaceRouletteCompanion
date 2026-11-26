@@ -1,0 +1,12 @@
+{
+  "type": "modifier",
+  "id": "shockwave_mace",
+  "item": {
+    "id": "minecraft:heart_of_the_sea",
+    "use_cooldown": {
+      "seconds": 0.1,
+      "cooldown_group": "macecompanion:modifier_icon"
+    },
+    "item_model": "macecompanion:modifiers/shockwave_mace"
+  }
+}

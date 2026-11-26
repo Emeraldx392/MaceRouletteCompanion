@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "magnetic_burst",
+  "item": {
+    "id": "minecraft:iron_nautilus_armor",
+    "item_model": "macecompanion:modifiers/magnetic_burst"
+  }
+}

@@ -57,6 +57,7 @@ class MaceCompanion : ModInitializer {
         CommandManager.registerCommands()
         TimeManager.registerTimeListeners()
         ResourcePackManager.registerResourcePackListeners()
+        ResourcePackManager.registerDefaultResourcePacks()
         SendMessage.registerTickListener()
         HideGLGG.registerListener()
         RoundInfoHud.registerListener()

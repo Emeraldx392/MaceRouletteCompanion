@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "donut_map",
+  "item": {
+    "id": "minecraft:music_disc_strad",
+    "item_model": "macecompanion:modifiers/donut_map"
+  }
+}

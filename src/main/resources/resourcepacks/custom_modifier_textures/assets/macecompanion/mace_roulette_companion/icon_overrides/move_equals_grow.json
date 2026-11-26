@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "move_equals_grow",
+  "item": {
+    "id": "minecraft:chainmail_boots",
+    "item_model": "macecompanion:modifiers/move_equals_grow"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "mirror",
+  "item": {
+    "id": "minecraft:white_banner",
+    "item_model": "macecompanion:modifiers/mirror"
+  }
+}

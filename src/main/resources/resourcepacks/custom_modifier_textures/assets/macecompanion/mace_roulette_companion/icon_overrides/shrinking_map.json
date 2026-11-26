@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "shrinking_map",
+  "item": {
+    "id": "minecraft:music_disc_11",
+    "item_model": "macecompanion:modifiers/shrinking_map"
+  }
+}

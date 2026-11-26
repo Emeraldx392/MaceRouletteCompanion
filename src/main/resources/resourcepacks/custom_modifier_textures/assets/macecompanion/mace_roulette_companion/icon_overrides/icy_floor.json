@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "icy_floor",
+  "item": {
+    "id": "minecraft:ice",
+    "item_model": "macecompanion:modifiers/icy_floor"
+  }
+}

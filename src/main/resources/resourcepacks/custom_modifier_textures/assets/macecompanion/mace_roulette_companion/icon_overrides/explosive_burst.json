@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "explosive_burst",
+  "item": {
+    "id": "minecraft:tnt_minecart",
+    "item_model": "macecompanion:modifiers/explosive_burst"
+  }
+}

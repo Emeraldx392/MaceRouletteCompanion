@@ -3,7 +3,7 @@
   "match_string": "\uE024",
   "item": {
     "id": "minecraft:mace",
-    "item_model": "macecompanion:glitched_mace",
+    "item_model": "macecompanion:modifiers/unknown",
     "use_cooldown": {
       "seconds": 0.1,
       "cooldown_group": "macecompanion:modifier_icon"

@@ -1,0 +1,8 @@
+{
+  "type": "modifier",
+  "id": "square_map",
+  "item": {
+    "id": "minecraft:stone_pressure_plate",
+    "item_model": "macecompanion:modifiers/square_map"
+  }
+}

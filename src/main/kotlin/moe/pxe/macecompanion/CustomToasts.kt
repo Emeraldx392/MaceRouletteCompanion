@@ -44,9 +44,9 @@ object CustomToasts {
     fun sendNewEventToast(newEvent: Event, newEventDuration: Int, newEventStarter: String) {
         if (!Config.showNewEventToasts.value) return
         val eventId = createGradientText(Component.translatable("mrc.event.${newEvent.id}"), newEvent.colors).run { newEvent.shadowColor?.let { withStyle(Style.EMPTY.withShadowColor(it)) } ?: this }
-        val description = Component.translatable("mrc.toast.new_event.description", eventId, Component.literal(newEventDuration.toString()).withColor(CommonColors.WHITE))
+        val description = Component.translatable("mrc.toast.new_event.description", eventId, Component.translatable("mrc.toast.new_event.time", newEventDuration.toString()).withColor(CommonColors.WHITE)).withStyle(ChatFormatting.GRAY)
         val eventStarter = Component.translatable("mrc.toast.new_event.starter", getOnlinePlayerProfile(newEventStarter)?.let{player2dHeadTextComponent(it).copy().withColor(CommonColors.WHITE).append(" ")} ?: "", Component.literal(newEventStarter).withColor(CommonColors.WHITE)).withStyle(ChatFormatting.GRAY)
-        val title = Component.translatable("mrc.toast.new_event.title", eventStarter).withColor(0x0F9FF)
+        val title = Component.translatable("mrc.toast.new_event.title", eventStarter).withColor(0xA0F9FF)
         sendCustomItemStackToast(newEvent.createItemStack(), title, description)
     }
 
